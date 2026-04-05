@@ -1,0 +1,179 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <title>Farmie | Precision Agriculture</title>
+    <meta
+      name="description"
+      content="A smart web application built for data-driven precision and efficiency."
+    />
+    <meta name="author" content="Kareem R.A" />
+
+    <meta property="og:title" content="Farmie Application" />
+    <meta
+      property="og:description"
+      content="Clean logic. Beautiful interfaces."
+    />
+    <meta property="og:type" content="website" />
+
+    <!-- Favicons -->
+    <link rel="icon" href="/assets/farmie-web.png" type="image/svg+xml" />
+    <link
+      rel="apple-touch-icon"
+      sizes="180x180"
+      href="/assets/farmie-apple.png"
+    />
+
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Poppins:wght@600;700;800&display=swap"
+      rel="stylesheet"
+    />
+
+    <link
+      rel="stylesheet"
+      href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css"
+      crossorigin="anonymous"
+      referrerpolicy="no-referrer"
+    />
+
+    <link rel="stylesheet" href="src/css/style.css" />
+    <script defer type="module" src="src/js/controller.js"></script>
+  </head>
+
+  <body>
+    <div class="toast-container"></div>
+
+    <div class="app-container">
+      <!-- HEADER AND LOGO -->
+      <header class="header">
+        <h1 class="header__logo">
+          <img
+            src="imgs/farmie-logo.jpg"
+            alt="Farmie logo"
+            class="header__logo-image"
+          />
+        </h1>
+      </header>
+
+      <!-- FAB BUTTON -->
+      <button class="fab fab--pulsing" aria-label="plan new crop">
+        <i class="fa-solid fa-plus"></i>
+      </button>
+
+      <!-- BOTTOM NAVIGATION ICONS-->
+      <nav class="bottom-nav">
+        <button
+          class="bottom-nav__item bottom-nav__item--active"
+          aria-label="My Crops"
+        >
+          <i class="fa-solid fa-seedling bottom-nav__icon"></i
+          ><span class="bottom-nav__label">Crops</span>
+        </button>
+
+        <button class="bottom-nav__item" aria-label="My Crops">
+          <i class="fa-solid fa-flask bottom-nav__icon"></i
+          ><span class="bottom-nav__label">Soil</span>
+        </button>
+
+        <button class="bottom-nav__item" aria-label="My Crops">
+          <i class="fa-solid fa-camera bottom-nav__icon"></i
+          ><span class="bottom-nav__label">Scan</span>
+        </button>
+
+        <button class="bottom-nav__item" aria-label="My Crops">
+          <i class="fa-solid fa-shop bottom-nav__icon"></i
+          ><span class="bottom-nav__label">Market</span>
+        </button>
+      </nav>
+
+      <!-- WELCOME MESSAGE DASHBOARD -->
+      <main class="view-dashboard">
+        <section class="empty-state">
+          <img
+            src="imgs/nature.svg"
+            alt="Cloudy sky over a farm"
+            class="empty-state__img"
+          />
+
+          <h2 class="empty-state__title">Welcome to Farmie</h2>
+
+          <p class="empty-state__text">
+            Your field is currently empty. Select a crop to get a detailed,
+            5-day planting plan. Tap the <i class="fa-solid fa-plus"></i> button
+            below to begin.
+          </p>
+        </section>
+
+        <section class="error-state error-state--hidden">
+          <i class="fa-solid fa-wifi error-state__icon"></i>
+
+          <p class="error-state__text">
+            Couldn't load farm record. Check your connection and try again.
+          </p>
+
+          <button class="error-state__retry">Retry</button>
+        </section>
+      </main>
+
+      <!-- PLAN NEW CROP -->
+      <div class="modal modal--hidden">
+        <div class="modal__header">
+          <button class="modal__back-btn" aria-label="Go back">
+            <i class="fa-solid fa-arrow-left"></i>
+          </button>
+
+          <h2 class="modal__title">Plan New Crop</h2>
+        </div>
+
+        <form class="modal__form">
+          <div class="form-group">
+            <label class="form-label" for="crop">
+              What do you want to plant</label
+            >
+
+            <div class="input-wrapper">
+              <input
+                type="text"
+                id="crop"
+                class="form-input"
+                list="cropSuggestions"
+                placeholder="Enter a crop"
+                autocomplete="off"
+              />
+              <datalist id="cropSuggestions">
+                <option value="Maize"></option>
+                <option value="Cassava"></option>
+                <option value="Rice"></option>
+                <option value="Tomatoes"></option>
+                <option value="Pepper"></option>
+              </datalist>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="location" class="form-label">Farm Location</label>
+            <div class="input-wrapper">
+              <i class="fa-solid fa-location-dot input-icon"></i>
+              <input
+                type="text"
+                id="location"
+                class="form-input"
+                placeholder="Enter the city your farm is located"
+              />
+            </div>
+          </div>
+
+          <button class="btn-primary btn-primary--centered">
+            Generate Plan
+          </button>
+        </form>
+      </div>
+
+      <section class="results-container results-container--hidden"></section>
+    </div>
+  </body>
+</html>

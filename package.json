@@ -1,0 +1,31 @@
+{
+  "name": "farmie",
+  "version": "1.0.0",
+  "description": "",
+  "scripts": {
+    "start": "parcel index.html",
+    "build": "parcel build index.html",
+    "lint:js": "eslint src/",
+    "lint:css": "stylelint \"src/**/*.css\"",
+    "fix:js": "eslint src/ --fix",
+    "fix:css": "stylelint \"src/**/*.css\" --fix",
+    "fix": "npm run fix:js && npm run fix:css",
+    "format": "prettier --write src/ index.html",
+    "check": "npm run lint:js && npm run lint:css"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "type": "commonjs",
+  "dependencies": {
+    "parcel": "^2.16.4"
+  },
+  "devDependencies": {
+    "eslint": "^8.57.1",
+    "eslint-config-prettier": "^10.1.8",
+    "eslint-plugin-prettier": "^5.5.5",
+    "prettier": "^3.8.1",
+    "stylelint": "^17.6.0",
+    "stylelint-config-standard": "^40.0.0"
+  }
+}
