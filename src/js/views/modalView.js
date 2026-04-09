@@ -49,6 +49,7 @@ class ModalView {
     this._header.classList.toggle('header--hidden');
 
     this._mainView.classList.toggle('view-dashboard--hidden');
+    document.body.classList.toggle('no-scroll');
   }
 }
 

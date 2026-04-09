@@ -8,6 +8,7 @@ class ResultsView {
     const markup = this._generateMarkup();
     this._clear();
     this._parentElement.insertAdjacentHTML('afterbegin', markup);
+    this._syncAddCropButtonVisibility();
   }
 
   renderSpinner() {
@@ -52,24 +53,27 @@ class ResultsView {
   }
 
   addHandlerToggleDetails() {
-    this._parentElement.addEventListener('click', function (e) {
-      const btn = e.target.closest('.btn-toggle-details');
+    this._parentElement.addEventListener(
+      'click',
+      function (e) {
+        const btn = e.target.closest('.btn-toggle-details');
 
-      if (!btn) return;
+        if (!btn) return;
 
-      const detailsContainer = document.querySelector('.results__details');
-      const addCropBtn = document.querySelector('.btn-add-crop');
+        const detailsContainer = document.querySelector('.results__details');
+        const addCropBtn = document.querySelector('.btn-add-crop');
 
-      detailsContainer.classList.toggle('results__details--hidden');
+        detailsContainer.classList.toggle('results__details--hidden');
 
-      if (addCropBtn) {
-        addCropBtn.classList.toggle('btn-add-crop-hidden');
-      }
+        if (addCropBtn) {
+          addCropBtn.classList.toggle('btn-add-crop--hidden');
+        }
 
-      const icon = btn.querySelector('i');
-      icon.classList.toggle('fa-chevron-down');
-      icon.classList.toggle('fa-chevron-up');
-    });
+        const icon = btn.querySelector('i');
+        icon.classList.toggle('fa-chevron-down');
+        icon.classList.toggle('fa-chevron-up');
+      }.bind(this)
+    );
   }
 
   addHandlerCarousel() {
@@ -104,6 +108,7 @@ class ResultsView {
         icon.classList.remove('fa-chevron-down');
         icon.classList.add('fa-chevron-up');
       }
+      this._syncAddCropButtonVisibility();
     });
   }
 
@@ -132,6 +137,23 @@ class ResultsView {
     this._parentElement.innerHTML = '';
   }
 
+  _syncAddCropButtonVisibility() {
+    const detailsContainer =
+      this._parentElement.querySelector('.results__details');
+    const addCropBtn = this._parentElement.querySelector('.btn-add-crop');
+
+    if (!detailsContainer || !addCropBtn) return;
+    const isDetailsVisible = !detailsContainer.classList.contains(
+      'results__details--hidden'
+    );
+
+    if (isDetailsVisible) {
+      addCropBtn.classList.remove('btn-add-crop--hidden');
+    } else {
+      addCropBtn.classList.add('btn-add-crop--hidden');
+    }
+  }
+
   _generateMarkup() {
     const currentDay = this._data.dailyData[this._currentDayIndex];
 
@@ -155,7 +177,7 @@ class ResultsView {
 
       
 <button class="btn-add-crop btn-add-crop--hidden" aria-label="Add to My Crops" >
-  <i class="fas fa-plus"></i>Add to My Crops
+  </i>Add to My Crops
 </button>
     </div>
 
