@@ -15,8 +15,24 @@ export const state = {
   savedCrops: [],
 };
 
+/**
+ * Generic Deletion Utility
+ * @param {Array} collection - The state array to remove from (e.g., state.savedCrops)
+ * @param {string} id - The ID of the item to delete
+ * @param {Function} persist - The specific save function to call after deletion
+ * @returns {boolean} - True if deleted, false if not found
+ */
+const deleteItemById = function (collection, id, persist) {
+  const index = collection.findIndex((item) => item.id === id);
+  if (index === -1) return false;
+
+  collection.splice(index, 1);
+  if (persist) persist();
+  return true;
+};
+
 // Add to the top of model.js
-export const DEV_MODE = true; // Change to false for Production (5 days)
+export const DEV_MODE = false; // Change to false for Production (5 days)
 export const EXPIRY_DURATION = DEV_MODE
   ? 3 * 60 * 1000
   : 5 * 24 * 60 * 60 * 1000;
@@ -55,9 +71,14 @@ const getWeatherData = async function (location) {
 
     return weatherData;
   } catch (err) {
-    if (err.message === `Failed to fetch`) {
-      throw err;
+    // Catch "Failed to fetch" (Slow internet/CORS issues)
+    if (err.message === 'Failed to fetch') {
+      throw new Error(
+        'Connection too weak. Please check your internet and try again.'
+      );
     }
+
+    // Pass through our custom errors (Spelling, No Internet, etc.)
     throw err;
   }
 };
@@ -148,48 +169,6 @@ const generateAIPlan = async function (crop, location, weatherData) {
       )
       .join(' | ');
 
-    // const prompt = `You are an expert agronomist advising a farmer who wants to plant "${crop}" in ${location}.
-    // CRITICAL CONTEXT: The farmer HAS NOT PLANTED YET. They are using this forecast to decide EXACTLY WHICH DAY to put their seeds or seedlings into the ground.
-
-    // FIRST RULE: Verify if "${crop}" is a real, cultivatable agricultural plant.
-    // If it is NOT a real plant, return exactly: [{"error": "invalid_crop"}]
-
-    // If it IS a real plant, analyze this 5-day weather forecast: ${weatherString}.
-    // Provide a 5-day pre-planting evaluation.
-    // You MUST return ONLY a valid JSON array containing exactly 5 objects.
-    // Each object must have exactly THREE properties:
-    // 1. "advice": 2 to 3 sentences explaining exactly what will happen to the seeds/seedlings if they are planted on this specific day. Explain WHY the weather makes it good or bad, and what specific environmental risks to watch out for. DO NOT give maintenance advice for already-growing plants.
-    // 2. "verdict": A strict 2 to 4 word planting directive (e.g., "Very good to plant", "Plant with caution", "Do not plant").
-    // 3. "status": You must choose exactly one of these words based on the planting viability: "success" (great conditions for planting), "warning" (acceptable but risky/sub-optimal), or "danger" (terrible conditions, do not plant).
-
-    // Do NOT include markdown formatting, backticks, or the word 'json'. Just return the raw JSON array.`;
-
-    // const res = await fetch(
-    //   `https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash:generateContent?key=${GEMINI_API_KEY}
-    //   `,
-    //   {
-    //     method: 'POST',
-    //     headers: { 'Content-Type': 'application/json' },
-    //     body: JSON.stringify({
-    //       contents: [{ parts: [{ text: prompt }] }],
-    //     }),
-    //   }
-    // );
-
-    // if (!res.ok)
-    //   throw new Error(`Could not generate a plan. Please try again.`);
-
-    // const aiData = await res.json();
-
-    // const rawText = aiData.candidates[0].content.parts[0].text;
-    // const planArray = JSON.parse(rawText.trim());
-
-    // if (planArray[0] && planArray[0].error === `invalid_crop`) {
-    //   throw new Error(`${crop} is not valid crop. Please check your spelling.`);
-    // }
-
-    // return planArray;
-
     const res = await fetch(
       `/groq-api/openai/v1/chat/completions`, // Bypassing CORS via your Parcel proxy
       {
@@ -229,12 +208,34 @@ const generateAIPlan = async function (crop, location, weatherData) {
       throw new Error(`Could not generate a plan. Please try again.`);
 
     const aiData = await res.json();
-
-    // Groq stores the generated text in a different location than Gemini did
     const rawText = aiData.choices[0].message.content;
-    const planArray = JSON.parse(rawText.trim());
 
-    if (planArray[0] && planArray[0].error === `invalid_crop`) {
+    let planArray;
+    try {
+      // Force clean the string in case AI added extra characters
+      planArray = JSON.parse(
+        rawText.substring(rawText.indexOf('['), rawText.lastIndexOf(']') + 1)
+      );
+    } catch (parseErr) {
+      throw new Error(
+        'The AI provided an unreadable plan. Please try again in a moment.'
+      );
+    }
+
+    // Now check if the array actually contains what we expect
+    // 2. THE HEALTH CHECK (Put this here)
+    const requiredKeys = ['day', 'status', 'advice', 'recommendation'];
+    const isPlanComplete = planArray.every((dayPlan) =>
+      requiredKeys.every(
+        (key) => Object.hasOwn(dayPlan, key) && dayPlan[key] !== null
+      )
+    );
+
+    if (!isPlanComplete || planArray.length < 5) {
+      throw new Error('Plan generation was incomplete. Please try again.');
+    }
+
+    if (planArray[0].error === `invalid_crop`) {
       throw new Error(
         `${crop} is not a valid crop. Please check your spelling.`
       );
@@ -242,13 +243,14 @@ const generateAIPlan = async function (crop, location, weatherData) {
 
     return planArray;
   } catch (err) {
-    console.error(`AI error:`, err);
+    // 3. THE MASKING LOGIC (Update your catch block)
+    const userFriendlyMessage =
+      err.message.includes("reading 'advice'") ||
+      err.message.includes('undefined')
+        ? 'Something went wrong while analyzing the data. Please try again.'
+        : err.message;
 
-    if (err.message.includes('valid crop')) {
-      throw err;
-    } else {
-      throw err;
-    }
+    throw new Error(userFriendlyMessage);
   }
 };
 
@@ -304,55 +306,89 @@ const getCropImage = async function (cropName) {
 };
 
 export const addCropToDashboard = async function () {
-  // 1. Keep your existing Wikipedia image fetch
+  // 1. Fetch the crop image
   const imageUrl = await getCropImage(state.report.crop);
 
-  // 2. Setup precise timestamps for Stage A3
+  // 2. Setup precise timestamps using your Dev Mode variable
   const now = new Date();
   const expiryDate = new Date(now.getTime() + EXPIRY_DURATION);
 
-  // 3. Construct the ultimate Crop Thread Object (Merging your old data with new fields)
+  // 3. Calculate Best Days based on AI Status
+  const verdict = state.report.status || 'success';
+  let bestDaysArray = [];
+  let daysString = '';
+
+  if (verdict === 'warning' || verdict === 'danger') {
+    // Bad weather scenario
+    bestDaysArray = [];
+    daysString = `Looking at the 5-day forecast, there is no single best day for planting this crop at the moment. I'll keep monitoring the weather for you.`;
+  } else {
+    // 1. THE BULLETPROOF FILTER: Keep only the days that are marked as a 'success'
+    const goodDays = state.report.dailyData.filter(
+      (day) => day.status === 'success'
+    );
+
+    // 2. Extract just the date string (e.g., "Apr 10") from those successful days
+    bestDaysArray = goodDays.map((day) => day.date);
+
+    // 3. Format the grammar based on how many successful days actually exist
+    if (bestDaysArray.length === 0) {
+      // It's possible the overall verdict was good, but no individual day was a perfect 'success'
+      daysString = `Looking at the 5-day forecast,there is no single best day to plant this crop at the moment. I'll keep monitoring to find the absolute perfect day.`;
+    } else if (bestDaysArray.length === 1) {
+      daysString = `Based on the forecast, the absolute best day to plant this crop is ${bestDaysArray[0]}.`;
+    } else {
+      const lastDay = bestDaysArray.pop();
+      daysString = `Based on the forecast, the best days to plant are ${bestDaysArray.join(', ')} and ${lastDay}.`;
+      bestDaysArray.push(lastDay); // Put the last day back so we don't lose the data
+    }
+  }
+
+  // 4. Construct the dynamic welcome message
+  const welcomeText = `Awesome! I've set up your tracking for ${state.report.crop} in ${state.report.location}. ${daysString}`;
+
+  // 5. Construct the ultimate Crop Thread Object (The Blueprint)
   const newCropThread = {
     // --- Existing App Data ---
     id: Date.now().toString(),
     crop: state.report.crop.trim().toLowerCase(), // Sanitized
     location: state.report.location,
     dailyData: state.report.dailyData,
-    status: 'planning', // Kept your existing status name
+    status: 'planning', // App Lifecycle State
     imageUrl: imageUrl,
-    chatHistory: [], // Kept your naming (instead of 'messages')
 
-    // --- New Stage A3 Data ---
+    // --- Stage B3 Data: Chat & Interactions ---
+    soilShortcutDismissed: false,
+    chatHistory: [
+      {
+        role: 'assistant',
+        content: welcomeText,
+        timestamp: now.toISOString(),
+      },
+    ],
+
+    // --- Stage A3 Data: Core Logic & Expiry ---
     title: `${state.report.crop} in ${state.report.location}`,
-    coordinates: { lat: null, lon: null }, // Ready for Geocoding
-
-    // Timestamps
+    coordinates: { lat: null, lon: null }, // Ready for Geocoding API later
     createdAt: now.toISOString(),
     expiresAt: expiryDate.toISOString(),
     plantedAt: null,
     harvestAt: null,
-
-    // Weather & Analytics
     weatherData: { fetchedAt: null, days: [] },
-    bestDays: [],
+    bestDays: bestDaysArray, // Injects our dynamically calculated array
     plantedOnRecommendedDay: null,
-
-    // Soil Integration
     linkedSoilThreadId: null,
     soilResultsSentToAI: false,
-
-    // Expiry Logic Variables
     expiryWarningAt: null,
     expiryWarningSent: false,
   };
 
-  // 4. Save using your existing logic
+  // 6. Save using your existing logic
   state.savedCrops.unshift(newCropThread);
-  persistCrops(); // Using your exact persist function
+  persistCrops();
 
   return newCropThread;
 };
-
 export const checkExpiredThreads = function () {
   const now = new Date();
   const initialLength = state.savedCrops.length;
@@ -378,6 +414,334 @@ export const checkExpiredThreads = function () {
   }
 
   return false;
+};
+
+export const dismissSoilShortcut = function (id) {
+  // 1. Find the specific crop in the array
+  const crop = state.savedCrops.find((c) => c.id === id);
+
+  if (crop) {
+    // 2. Flip the flag
+    crop.soilShortcutDismissed = true;
+
+    // 3. Save the change to LocalStorage
+    persistCrops();
+
+    // 4. Return the updated crop so the Controller can give it back to the View
+    return crop;
+  }
+};
+
+export const addUserMessageToThread = function (id, messageText) {
+  const crop = state.savedCrops.find((c) => c.id === id);
+  if (!crop) return;
+
+  // 1. Add the user's message to the array
+  crop.chatHistory.push({
+    role: 'user', // Flags it for the white right-aligned CSS bubble!
+    content: messageText,
+    timestamp: new Date().toISOString(),
+  });
+
+  // 2. THE RULE: Automatically dismiss the soil shortcut forever!
+  crop.soilShortcutDismissed = true;
+
+  // 3. Save to LocalStorage
+  persistCrops();
+
+  return crop;
+};
+
+// --- STAGE B4: AI CHAT LOGIC ---
+
+export const getAIResponse = async function (id, userMessage) {
+  const cropThread = state.savedCrops.find((c) => c.id === id);
+  if (!cropThread) return;
+
+  // 1. SMART STATE INJECTION
+  const plantedStatus = cropThread.plantedAt
+    ? `Planted on: ${new Date(cropThread.plantedAt).toLocaleDateString()}`
+    : `Status: Not planted yet.`;
+
+  // We set the persona AND inject the hidden data here
+  const systemContext = `You are Farmie, an expert agricultural AI assistant. 
+  Answer concisely and practically.
+  
+  CURRENT CONTEXT:
+  Crop: ${cropThread.crop}
+  Location: ${cropThread.location}
+  ${plantedStatus}
+  Weather Verdict: ${state.report.status || 'unknown'}
+  `;
+
+  try {
+    // 2. THE REAL GROQ API CALL
+    const response = await fetch(
+      'https://api.groq.com/openai/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'llama-3.1-8b-instant', // You can change this to 'mixtral-8x7b-32768' or whichever Groq model you prefer!
+          messages: [
+            { role: 'system', content: systemContext },
+            // Note: If you eventually want short-term memory, we can slice the last 2 messages from cropThread.chatHistory and insert them here.
+            { role: 'user', content: userMessage },
+          ],
+          temperature: 0.7, // Keeps the AI focused but slightly creative
+        }),
+      }
+    );
+
+    if (!response.ok) throw new Error('Network error connecting to Groq');
+
+    const data = await response.json();
+    return data.choices[0].message.content;
+  } catch (err) {
+    console.error('Groq API Error:', err);
+    return "Sorry, I'm having a bit of trouble connecting to my agricultural database right now. Please try again in a second!";
+  }
+};
+
+// --- UPGRADED SCANNER ---
+export const detectCalendarActivity = function (aiText) {
+  const text = aiText.toLowerCase();
+  const keywords = [
+    'fertiliser',
+    'fertilizer',
+    'irrigation',
+    'water',
+    'pruning',
+    'pest',
+    'harvest',
+  ];
+
+  // This regex looks for common timeframes. You can expand this later!
+  const timeRegex =
+    /(today|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday|in \d+ days|next week|day \d+)/;
+
+  const foundActivity = keywords.find((word) => text.includes(word));
+  const foundTimeMatch = text.match(timeRegex);
+
+  // THE NEW RULE: We ONLY trigger if we find an activity AND a timeframe!
+  if (foundActivity && foundTimeMatch) {
+    return {
+      activity: foundActivity,
+      time: foundTimeMatch[0], // e.g., 'tomorrow'
+    };
+  }
+  return null;
+};
+
+// --- UPGRADED MESSAGE SAVER ---
+export const addAIMessageToThread = function (id, messageText) {
+  const crop = state.savedCrops.find((c) => c.id === id);
+  if (!crop) return;
+
+  let detected = null;
+  if (crop.plantedAt) {
+    detected = detectCalendarActivity(messageText);
+  }
+
+  crop.chatHistory.push({
+    role: 'assistant',
+    content: messageText,
+    timestamp: new Date().toISOString(),
+    // We now save BOTH the activity and the time (or null if the scanner rejected it)
+    proposedActivity: detected ? detected.activity : null,
+    proposedTime: detected ? detected.time : null,
+    activityPromptAnswered: false,
+  });
+
+  persistCrops();
+  return crop;
+};
+
+// --- UPGRADED CALENDAR RESOLVER ---
+// Note: We added the 'time' parameter here!
+export const resolveCalendarPrompt = function (
+  id,
+  timestamp,
+  activity,
+  time,
+  isAccepted
+) {
+  const crop = state.savedCrops.find((c) => c.id === id);
+  if (!crop) return;
+
+  // Failsafe: Create the events array if it doesn't exist yet for older crops
+  if (!crop.calendarEvents) crop.calendarEvents = [];
+
+  const targetMessage = crop.chatHistory.find(
+    (msg) => msg.timestamp === timestamp
+  );
+  if (targetMessage) targetMessage.activityPromptAnswered = true;
+
+  if (isAccepted) {
+    // 1. Save it to our brand new calendar array!
+    crop.calendarEvents.push({
+      activity: activity,
+      time: time,
+      addedAt: new Date().toISOString(),
+    });
+
+    // 2. Drop the receipt with the timeframe
+    crop.chatHistory.push({
+      role: 'proactive',
+      content: `Farmie added a reminder for ${activity} (${time}) to your calendar.`,
+      timestamp: new Date().toISOString(),
+    });
+  }
+
+  persistCrops();
+  return crop;
+};
+
+// --- STAGE B5: CONFIRM PLANTING & DYNAMIC AI HARVEST CALCULATION ---
+
+export const confirmPlanting = function (id) {
+  const crop = state.savedCrops.find((c) => c.id === id);
+  if (!crop) return;
+
+  const now = new Date();
+
+  // 1. Instantly lock in the dates and status
+  crop.plantedAt = now.toISOString();
+  crop.status = 'planted';
+  crop.expiresAt = null; // Stops the 5-day deletion timer forever
+
+  // 2. Check if they planted on a recommended day
+  const todayName = now.toLocaleDateString('en-US', { weekday: 'long' });
+  const isGoodDay =
+    crop.bestDays &&
+    crop.bestDays.some(
+      (day) => day.includes(todayName) || day.includes('today')
+    );
+  crop.plantedOnRecommendedDay = isGoodDay;
+
+  persistCrops();
+  return crop;
+};
+
+// --- NEW API CALL SPECIFICALLY FOR HARVEST CALCULATION ---
+// --- NEW API CALL (FIXED 400 ERROR & ENABLED JSON MODE) ---
+export const getHarvestDataFromAI = async function (id) {
+  const crop = state.savedCrops.find((c) => c.id === id);
+  if (!crop) return;
+
+  const plantedDate = new Date(crop.plantedAt).toLocaleDateString();
+
+  // 1. Give the AI its rules (System)
+  const systemPrompt = `You are Farmie, an expert agricultural AI. 
+  CRITICAL: You must respond in pure JSON format only.
+  JSON Format required: { "daysToHarvest": number, "message": "string" }`;
+
+  // 2. Give the AI the data (User)
+  const userPrompt = `The user just planted ${crop.crop} in ${crop.location} today (${plantedDate}).
+  Did they plant on a recommended weather day? ${crop.plantedOnRecommendedDay ? 'Yes' : 'No'}.
+
+  TASK:
+  1. Determine the average number of days it takes to harvest ${crop.crop}.
+  2. Write a congratulatory message. Include the estimated harvest timeframe in the text. 
+  3. If they planted on a BAD day (Recommended day: No), include extra care tips to help the crop survive the current weather.`;
+
+  try {
+    const response = await fetch(
+      'https://api.groq.com/openai/v1/chat/completions',
+      {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          Authorization: `Bearer ${GROQ_API_KEY}`,
+        },
+        body: JSON.stringify({
+          model: 'llama-3.1-8b-instant',
+          messages: [
+            { role: 'system', content: systemPrompt },
+            { role: 'user', content: userPrompt }, // The missing piece that fixes the 400 error!
+          ],
+          temperature: 0.3,
+          response_format: { type: 'json_object' }, // Forces Groq to output perfect JSON!
+        }),
+      }
+    );
+
+    // Advanced Error Logging: This tells us EXACTLY what Groq is mad about if it fails again
+    if (!response.ok) {
+      const errorDetails = await response.text();
+      console.error('Groq API Rejected Request:', errorDetails);
+      throw new Error(`Groq Network Error: ${response.status}`);
+    }
+
+    const data = await response.json();
+
+    // Because we used response_format: "json_object", we can just parse it directly safely
+    const aiData = JSON.parse(data.choices[0].message.content);
+
+    // --- APPLY THE AI DATA TO OUR APP ---
+
+    // 1. Calculate the Harvest Date
+    const harvestDate = new Date(
+      new Date(crop.plantedAt).getTime() +
+        aiData.daysToHarvest * 24 * 60 * 60 * 1000
+    );
+    crop.harvestAt = harvestDate.toISOString();
+
+    // 2. Build the Calendar Events
+    if (!crop.calendarEvents) crop.calendarEvents = [];
+    crop.calendarEvents.push({
+      activity: `Planted ${crop.crop}`,
+      time: plantedDate,
+      addedAt: new Date().toISOString(),
+    });
+    crop.calendarEvents.push({
+      activity: `Expected Harvest`,
+      time: harvestDate.toLocaleDateString(),
+      addedAt: new Date().toISOString(),
+    });
+
+    // 3. Save the conversational message
+    crop.chatHistory.push({
+      role: 'assistant',
+      content: aiData.message,
+      timestamp: new Date().toISOString(),
+    });
+
+    persistCrops();
+    return crop;
+  } catch (err) {
+    console.error('Harvest Calculation Error:', err);
+    // Fallback if internet drops
+    crop.chatHistory.push({
+      role: 'assistant',
+      content:
+        "Congratulations on planting! I'm having a little trouble connecting to my database to calculate the exact harvest date right now, but I have marked it as planted.",
+      timestamp: new Date().toISOString(),
+    });
+    persistCrops();
+    return crop;
+  }
+};
+
+// --- STAGE B7: DELETE CROP THREAD ---
+export const deleteCropThread = function (id) {
+  const cropToDelete = state.savedCrops.find((c) => c.id === id);
+  if (!cropToDelete) return false;
+
+  // 1. CROP-SPECIFIC LOGIC: Unlink Soil Threads
+  if (cropToDelete.linkedSoilThreadId && state.soilThreads) {
+    const linkedSoil = state.soilThreads.find(
+      (s) => s.id === cropToDelete.linkedSoilThreadId
+    );
+    if (linkedSoil) linkedSoil.linkedCropThreadId = null;
+    // Note: If you have a persistSoil() function, call it here
+  }
+
+  // 2. GENERIC LOGIC: Use the utility to erase the data
+  return deleteItemById(state.savedCrops, id, persistCrops);
 };
 
 export const loadSavedCrops = function () {

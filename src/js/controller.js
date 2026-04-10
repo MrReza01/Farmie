@@ -137,8 +137,6 @@ const controlAddCrop = async function () {
   }
 };
 
-// Inside controller.js
-
 const controlSelectCrop = function (id) {
   // 1. Find the specific crop data from your model using the ID
   const cropData = model.state.savedCrops.find((crop) => crop.id === id);
@@ -147,6 +145,115 @@ const controlSelectCrop = function (id) {
 
   // 2. Pass that specific data into the chat view!
   chatView.showChat(cropData);
+};
+
+const controlDismissShortcut = function (id) {
+  // 1. Tell the model to update the database
+  const updatedCrop = model.dismissSoilShortcut(id);
+
+  // 2. If successful, instantly re-render the chat bubbles (which makes the shortcut disappear!)
+  if (updatedCrop) {
+    chatView.renderMessages(updatedCrop);
+  }
+};
+
+// --- STAGE B4: LIVE CHAT CONTROLLER ---
+
+const controlSendMessage = async function (id, text) {
+  try {
+    // 1. Save the user's message and instantly render it on the right side
+    const updatedCrop = model.addUserMessageToThread(id, text);
+    if (updatedCrop) {
+      chatView.renderMessages(updatedCrop);
+    }
+
+    // 2. Turn on the "Farmie is typing..." bouncing dots
+    chatView.showTypingIndicator();
+
+    // 3. Send the context and the text to Groq (Awaits the real API response!)
+    const aiResponseText = await model.getAIResponse(id, text);
+
+    // 4. The response arrived! Instantly kill the bouncing dots
+    chatView.removeTypingIndicator();
+
+    // 5. Save the new AI text to the database
+    const finalCropThread = model.addAIMessageToThread(id, aiResponseText);
+
+    // 6. Re-render the chat to show the final green AI bubble!
+    if (finalCropThread) {
+      chatView.renderMessages(finalCropThread);
+    }
+  } catch (error) {
+    console.error('Chat flow failed:', error);
+    chatView.removeTypingIndicator();
+
+    // Fallback: If the internet drops, save an error message so the user isn't stuck
+    const errorThread = model.addAIMessageToThread(
+      id,
+      'I seem to have lost my connection. Please try sending that again!'
+    );
+    chatView.renderMessages(errorThread);
+  }
+};
+
+const controlCalendarPrompt = function (
+  id,
+  timestamp,
+  activity,
+  time,
+  isAccepted
+) {
+  const updatedCrop = model.resolveCalendarPrompt(
+    id,
+    timestamp,
+    activity,
+    time,
+    isAccepted
+  );
+  if (updatedCrop) {
+    chatView.renderMessages(updatedCrop); // Re-render to hide the widget!
+  }
+};
+
+// --- STAGE B5: CONTROLLER LOGIC ---
+
+const controlConfirmPlanting = async function (id) {
+  // 1. Instantly update the status to 'planted' and hide the Plant button
+  const plantedCrop = model.confirmPlanting(id);
+  if (plantedCrop) {
+    chatView.showChat(plantedCrop); // Re-renders the header instantly
+  }
+
+  // 2. Show the "Farmie is typing..." dots
+  chatView.showTypingIndicator();
+
+  // 3. Fetch the custom harvest data and message from the AI
+  const finalizedCrop = await model.getHarvestDataFromAI(id);
+
+  // 4. Remove the typing dots and render the final AI congratulatory message
+  chatView.removeTypingIndicator();
+  if (finalizedCrop) {
+    chatView.renderMessages(finalizedCrop);
+  }
+};
+
+const controlDeleteCrop = function (id) {
+  // 1. Erase from the Model/Database
+  const success = model.deleteCropThread(id);
+  if (!success) return;
+
+  // 2. Fade it out of the Dashboard UI smoothly
+  dashboardView.removeCropCard(id);
+
+  // 3. NEW: Check if we need to show the Empty State
+  // If the internal array is now empty, re-render to show the illustration
+  if (model.state.savedCrops.length === 0) {
+    dashboardView.render([]);
+  }
+
+  if (chatView._currentThreadId === id) {
+    chatView.hideChat();
+  }
 };
 
 const init = function () {
@@ -169,6 +276,12 @@ const init = function () {
   resultsView.addHandlerClose(controlCloseResults);
 
   dashboardView.addHandlerClickCrop(controlSelectCrop);
+  chatView.addHandlerDismissShortcut(controlDismissShortcut);
+  chatView.addHandlerSendMessage(controlSendMessage);
+  chatView.addHandlerCalendarPrompt(controlCalendarPrompt);
+  chatView.addHandlerConfirmPlanting(controlConfirmPlanting);
+  dashboardView.addHandlerCardMenu();
+  dashboardView.addHandlerDeleteConfirm(controlDeleteCrop);
 };
 
 init();
