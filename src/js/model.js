@@ -212,30 +212,38 @@ const generateAIPlan = async function (crop, location, weatherData) {
 
     let planArray;
     try {
-      // Force clean the string in case AI added extra characters
-      planArray = JSON.parse(
-        rawText.substring(rawText.indexOf('['), rawText.lastIndexOf(']') + 1)
-      );
+      // 1. EXTRACTION: Find the actual JSON array
+      const start = rawText.indexOf('[');
+      const end = rawText.lastIndexOf(']') + 1;
+
+      if (start === -1 || end === 0) throw new Error('No JSON array found');
+
+      planArray = JSON.parse(rawText.substring(start, end));
     } catch (parseErr) {
-      throw new Error(
-        'The AI provided an unreadable plan. Please try again in a moment.'
-      );
+      console.error('Raw AI Output:', rawText); // Log this so you can see the "why"
+      throw new Error('The AI provided an unreadable plan. Please try again.');
     }
 
-    // Now check if the array actually contains what we expect
-    // 2. THE HEALTH CHECK (Put this here)
-    const requiredKeys = ['day', 'status', 'advice', 'recommendation'];
-    const isPlanComplete = planArray.every((dayPlan) =>
-      requiredKeys.every(
-        (key) => Object.hasOwn(dayPlan, key) && dayPlan[key] !== null
-      )
-    );
+    // 2. UPDATED HEALTH CHECK: Match these to your actual prompt!
+    // Removed 'day' and 'recommendation' if the AI isn't explicitly told to send them.
+    const requiredKeys = ['status', 'advice', 'verdict'];
 
-    if (!isPlanComplete || planArray.length < 5) {
+    const isPlanComplete =
+      Array.isArray(planArray) &&
+      planArray.length >= 5 &&
+      planArray.every((dayPlan) =>
+        requiredKeys.every(
+          (key) => Object.hasOwn(dayPlan, key) && dayPlan[key] !== null
+        )
+      );
+
+    if (!isPlanComplete) {
+      console.error('Incomplete Plan Structure:', planArray);
       throw new Error('Plan generation was incomplete. Please try again.');
     }
 
-    if (planArray[0].error === `invalid_crop`) {
+    // 3. CROP VALIDATION
+    if (planArray[0] && planArray[0].error === 'invalid_crop') {
       throw new Error(
         `${crop} is not a valid crop. Please check your spelling.`
       );
@@ -243,7 +251,8 @@ const generateAIPlan = async function (crop, location, weatherData) {
 
     return planArray;
   } catch (err) {
-    // 3. THE MASKING LOGIC (Update your catch block)
+    console.error('Final Catch Block:', err);
+    // Masking logic remains the same
     const userFriendlyMessage =
       err.message.includes("reading 'advice'") ||
       err.message.includes('undefined')
@@ -627,7 +636,7 @@ export const confirmPlanting = function (id) {
 };
 
 // --- NEW API CALL SPECIFICALLY FOR HARVEST CALCULATION ---
-// --- NEW API CALL (FIXED 400 ERROR & ENABLED JSON MODE) ---
+
 export const getHarvestDataFromAI = async function (id) {
   const crop = state.savedCrops.find((c) => c.id === id);
   if (!crop) return;
@@ -743,6 +752,26 @@ export const deleteCropThread = function (id) {
   // 2. GENERIC LOGIC: Use the utility to erase the data
   return deleteItemById(state.savedCrops, id, persistCrops);
 };
+
+// --- BUMP THREAD TO TOP ---
+export const bumpCropToTop = function (id) {
+  // 1. Find where the crop currently sits
+  const index = state.savedCrops.findIndex((c) => c.id === id);
+
+  // 2. If it's already at the very top (index 0) or doesn't exist, do nothing!
+  if (index <= 0) return;
+
+  // 3. Pluck it out of the array
+  const [bumpedCrop] = state.savedCrops.splice(index, 1);
+
+  // 4. Shove it into the very front of the array
+  state.savedCrops.unshift(bumpedCrop);
+
+  // 5. Save the new order to Local Storage
+  persistCrops();
+};
+
+// ===================================== SOIL SECTION==================================
 
 export const loadSavedCrops = function () {
   const storage = localStorage.getItem('farmieCrops');

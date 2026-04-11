@@ -1,0 +1,99 @@
+/* --- SOIL SECTION SHELL --- */
+
+/* .view-soil {
+  width: 100%;
+} */
+
+.view--hidden {
+  display: none !important;
+}
+
+/* --- EMPTY STATE --- */
+.soil-empty-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  margin-top: var(--spacing-xl);
+}
+
+.soil-illustration-wrapper {
+  max-width: 28rem;
+  width: 80%;
+  margin-bottom: var(--spacing-lg);
+}
+
+.soil-illustration {
+  width: 100%;
+  height: auto;
+  display: block;
+}
+
+.soil-title {
+  font-family: var(--font-display);
+  font-size: 2.6rem;
+  font-weight: 700;
+  color: var(--color-text);
+  margin-bottom: var(--spacing-sm);
+}
+
+.soil-message {
+  font-family: var(--font-body);
+  font-size: 1.6rem;
+  color: #6c757d; /* Standard grey for description text */
+  max-width: 32rem;
+  line-height: 1.6;
+  margin-bottom: var(--spacing-xl); /* Pushes the button down */
+}
+
+/* --- START SOIL TEST BUTTON --- */
+.btn-start-soil {
+  font-family: var(--font-display);
+  background-color: var(--color-primary);
+  color: var(--color-surface);
+  border: none;
+  padding: var(--spacing-md) var(--spacing-lg);
+  font-size: 1.6rem;
+  font-weight: 600;
+  border-radius: 5rem; /* Pill shape */
+  cursor: pointer;
+  /* Shadow uses the rgb equivalent of #2d6a4f */
+  box-shadow: 0 0.4rem 1.2rem rgba(45, 106, 79, 0.2);
+  transition: all 0.2s ease;
+}
+
+.btn-start-soil:hover {
+  background-color: var(--color-accent); /* Farmie accent color on hover! */
+  transform: translateY(-0.2rem);
+  box-shadow: 0 0.6rem 1.6rem rgba(45, 106, 79, 0.3);
+}
+
+.btn-start-soil:active {
+  transform: translateY(0);
+}
+
+/* --- SOIL LIST (CARDS CONTAINER) --- */
+.soil-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-md);
+}
+
+.soil-list--hidden {
+  display: none;
+}
+
+/* --- DESKTOP GRID LAYOUT (768px+) --- */
+@media (min-width: 768px) {
+  .view-soil {
+    max-width: 72rem;
+    margin: 0 auto;
+  }
+
+  .soil-list {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: var(--spacing-lg);
+  }
+}

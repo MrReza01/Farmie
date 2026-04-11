@@ -1,0 +1,84 @@
+/* =========================================
+   1. CSS RESET
+   ========================================= */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+  margin: 0;
+  padding: 0;
+}
+
+/* =========================================
+   2. DESIGN TOKENS (Custom Properties)
+   ========================================= */
+:root {
+  /* Colors - Farmie Palette */
+  --color-primary: #2d6a4f;
+  --color-accent: #74c69d;
+  --color-text: #1b1b1b;
+  --color-background: #f8f9fa;
+  --color-surface: #fff;
+  --color-warning: #e76f51;
+  --color-success: #52b788;
+  --color-danger: #d90429;
+
+  /* Typography */
+  --font-display: 'Poppins', sans-serif;
+  --font-body: 'Inter', sans-serif;
+
+  /* Spacing */
+  --spacing-xs: 0.4rem;
+  --spacing-sm: 0.8rem;
+  --spacing-md: 1.6rem;
+  --spacing-lg: 3.2rem;
+  --spacing-xl: 6.4rem;
+}
+
+/* =========================================
+   3. BASE STYLES & TYPOGRAPHY
+   ========================================= */
+html {
+  font-size: 62.5%; /* 1rem = 10px */
+}
+
+body {
+  font-size: 1.6rem; /* Resets back to 16px */
+  font-family: var(--font-body);
+  color: var(--color-text);
+
+  /* background-color: var(--color-background); */
+  line-height: 1.5;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  font-family: var(--font-display);
+  line-height: 1.2;
+}
+
+img {
+  max-width: 100%;
+  display: block;
+}
+
+*:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 3px;
+}
+
+button {
+  font-family: inherit;
+}
+
+body.no-scroll {
+  overflow: hidden !important;
+}
+
+.hidden {
+  display: none;
+}

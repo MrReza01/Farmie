@@ -1,0 +1,886 @@
+/* --- DASHBOARD CROP LIST CONTAINER (the dashboard where all the available crops are shown) --- */
+.dashboard__crops-list {
+  display: flex;
+  flex-direction: column;
+  flex-grow: 1;
+
+  margin-bottom: auto;
+  width: calc(100% + (var(--spacing-md) * 2));
+  margin-left: calc(var(--spacing-md) * -1);
+  margin-right: calc(var(--spacing-md) * -1);
+}
+
+.crop-card {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  padding: 1.2rem var(--spacing-md);
+  background-color: rgba(0, 0, 0, 0.002);
+  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  border-radius: 0;
+}
+
+.crop-card:hover,
+.crop-card:active {
+  background-color: rgba(0, 0, 0, 0.02);
+}
+
+.crop-card__image-container {
+  width: 5.4rem;
+  height: 5.4rem;
+  border-radius: 50%;
+  overflow: hidden; /* Ensures the image doesn't break the circle */
+  flex-shrink: 0; /* Prevents the circle from squishing on small screens */
+  background-color: #e9ecef;
+  margin-left: 1rem;
+}
+
+.crop-card__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Centers and scales the Wikipedia image perfectly */
+}
+
+.crop-card__fallback-img {
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background-color: var(--color-primary);
+  color: var(--color-surface);
+  font-family: var(--font-display);
+  font-size: 2.4rem;
+  font-weight: 700;
+}
+
+/* --- THE RIGHT SIDE: CHAT DETAILS --- */
+.crop-card__content {
+  display: flex;
+  /* flex-direction: column; */
+  justify-content: space-between;
+  align-items: center; /* NEW: Forces flex items to the left */
+  text-align: left; /* NEW: Forces text to the left */
+  /* flex-grow: 1; */
+  min-width: 0;
+
+  position: relative;
+}
+
+.crop-card__info {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start; /* Keeps the status tag pinned to the left */
+
+  flex: 1; /* Forces this column to take up all available left-side space */
+  padding-right: 15rem;
+}
+
+.crop-card__title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 0.4rem 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Adds the "..." if the location is too long */
+  text-transform: capitalize;
+  width: 100%;
+}
+
+.crop-card__summary {
+  font-size: 1.4rem;
+  color: #6c757d; /* Muted gray text, exactly like WhatsApp's message preview */
+  margin: 0;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.crop-card__status {
+  font-size: 1.1rem;
+  text-transform: uppercase;
+  font-weight: 700;
+  letter-spacing: 0.5px;
+  margin-bottom: 0.2rem;
+  color: var(--color-accent);
+}
+
+.crop-card__warning-badge {
+  background-color: #ff922b;
+  color: #fff;
+  padding: 0.4rem 0.8rem;
+  border-radius: 2rem;
+  font-size: 1.1rem;
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  white-space: nowrap;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  animation: pulseWarning 2s infinite;
+
+  flex-shrink: 0;
+}
+
+/* ========================================= MENU AND DELETE ICONS =================================================== */
+.card-menu {
+  position: absolute;
+  top: 1.2rem; /* Aligns vertically with the title */
+  right: 1.6rem; /* Pushes it firmly to the right side of the card */
+}
+
+.card-menu__icon {
+  font-size: 1.8rem;
+  color: #adb5bd;
+  cursor: pointer;
+  padding: 0.5rem; /* Makes it easier to tap on mobile */
+  transition: color 0.2s;
+}
+
+.card-menu__icon:hover {
+  color: var(--color-primary);
+}
+
+.card-menu__dropdown {
+  position: absolute;
+  top: 100%;
+  right: 0;
+  background-color: var(--color-surface);
+  border: 1px solid #e9ecef;
+  border-radius: 0.8rem;
+  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+  padding: 0.5rem;
+  z-index: 20;
+  min-width: 14rem;
+
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-0.5rem);
+  transition: all 0.2s ease;
+}
+
+.card-menu__dropdown--active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0.5rem);
+}
+
+.btn-card-delete {
+  background: none;
+  border: none;
+  color: #d32f2f;
+  font-size: 1.3rem;
+  font-weight: 600;
+  padding: 0.8rem 1.2rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  width: 100%;
+  border-radius: 0.4rem;
+  transition: background-color 0.2s;
+}
+
+.btn-card-delete:hover {
+  background-color: #ffebee;
+}
+
+/* --- DROPDOWN HEADER & X BUTTON --- */
+.card-menu__dropdown-header {
+  display: flex;
+  justify-content: flex-end;
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.4rem;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.btn-close-dropdown {
+  cursor: pointer;
+  color: #adb5bd;
+  font-size: 1.4rem;
+  padding: 0.2rem 0.5rem;
+  transition: color 0.2s;
+}
+
+.btn-close-dropdown:hover {
+  color: var(--color-text);
+}
+
+@media (min-width: 768px) {
+  /* 1. When active, make the body a flex container to put App and Chat side-by-side */
+  body.split-screen-active {
+    display: flex;
+    flex-direction: row;
+    overflow: hidden; /* Stops double scrollbars */
+    margin: 0;
+    padding: 0;
+  }
+
+  /* 2. Turn your entire mobile app into the left sidebar */
+  body.split-screen-active .app-container {
+    width: 380px;
+    min-width: 380px;
+    height: 100vh;
+    border-right: 1px solid #e9ecef;
+    position: relative !important;
+    overflow: hidden !important; /* CRITICAL: Stops the container from scrolling */
+    padding-bottom: 0 !important;
+  }
+
+  body.split-screen-active .view-dashboard {
+    height: 100%;
+    overflow-y: auto !important; /* Lets the crop list scroll */
+    padding-bottom: 8rem !important; /* Ensures the last crop doesn't hide behind the nav */
+  }
+
+  /* 3. Constrain your fixed mobile nav to the sidebar width */
+  body.split-screen-active .bottom-nav {
+    position: absolute !important;
+    bottom: 0 !important;
+    left: 0 !important;
+    width: 380px;
+    z-index: 999;
+  }
+
+  /* 4. Constrain your fixed FAB to the sidebar */
+  body.split-screen-active .fab {
+    position: absolute !important;
+    bottom: 8rem !important;
+    right: 2rem !important;
+    left: auto !important; /* Overrides any previous positioning */
+    z-index: 1000;
+    right: auto;
+    left: 310px; /* 380px width - 50px fab - 20px margin */
+  }
+
+  /* 5. The Chat Shell takes over the entire right side */
+  body.split-screen-active .chat-container {
+    flex: 1;
+    height: 100vh;
+    position: static;
+    transform: none;
+    display: flex;
+    flex-direction: column;
+    background-color: var(--color-surface);
+    z-index: 10;
+  }
+}
+
+@media (min-width: 768px) {
+  /* ... your other desktop css ... */
+
+  /* 1. NEW: By default on desktop, the chat container is completely hidden */
+  .chat-container {
+    display: none;
+  }
+
+  /* 2. EXISTING: It ONLY appears when a crop is clicked and this class is added to the body */
+  body.split-screen-active .chat-container {
+    display: flex; /* This overrides the 'none' above! */
+    flex: 1;
+    height: 100vh;
+    position: static;
+    transform: none;
+    flex-direction: column;
+    background-color: var(--color-surface);
+    z-index: 10;
+  }
+}
+
+/* =======================================================
+   CHAT VIEW (the chat shell where dsicussion happens)
+   ======================================================= */
+
+.chat-container {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100dvh; /* Uses dynamic viewport height to respect mobile browser bars */
+  background-color: var(--color-background);
+  z-index: 2000;
+
+  /* Flex Architecture */
+  display: flex;
+  flex-direction: column;
+
+  /* Industry standard: Slide in from the right edge */
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+/* Mobile Active State */
+.chat-container--active {
+  transform: translateX(0); /* Snaps it perfectly over the screen */
+}
+
+/* --- 2. THREAD HEADER --- */
+.thread__header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 1.2rem 1.6rem;
+  background-color: var(--color-surface);
+  border-bottom: 1px solid #e9ecef;
+  min-height: 7.2rem;
+}
+
+.thread__header-left,
+.thread__header-right {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  flex: 1; /* Giving left and right flex:1 keeps the center column perfectly centered */
+}
+
+.thread__header-right {
+  justify-content: flex-end;
+}
+
+.thread__header-center {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  flex: 2; /* Takes up the most space in the middle */
+  text-align: center;
+}
+
+.btn-thread-back {
+  background: none;
+  border: none;
+  font-size: 2rem;
+  color: var(--color-text);
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0.5rem;
+}
+
+.btn-confirm-planting {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  background-color: #e8f5e9;
+  color: #2e7d32;
+  border: 1px solid #c8e6c9;
+  padding: 0.6rem 1.2rem;
+  border-radius: 2rem;
+  font-weight: 600;
+  font-size: 1.3rem;
+  cursor: pointer;
+}
+
+.thread__crop-title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--color-text);
+  margin: 0 0 0.2rem 0;
+  text-transform: capitalize;
+}
+
+.thread__status-tag {
+  font-size: 1.1rem;
+  font-weight: 500;
+  color: #6c757d;
+  background-color: #e9ecef;
+  padding: 0.2rem 0.8rem;
+  border-radius: 1rem;
+  text-transform: capitalize;
+}
+
+.thread__calendar-icon {
+  font-size: 2.2rem;
+  color: var(--color-primary);
+  cursor: pointer;
+}
+
+.thread__calendar-icon:hover {
+  color: var(--color-success);
+}
+
+.calendar-popup {
+  position: absolute;
+  top: 7rem;
+  right: 2rem;
+  background-color: var(--color-surface);
+  border: 1px solid #e9ecef;
+  border-radius: 1.2rem;
+  padding: 1.6rem;
+  width: 26rem;
+  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.1);
+  z-index: 100;
+
+  /* Hidden by default */
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(-1rem);
+  transition: all 0.2s;
+}
+
+.calendar-popup--active {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.calendar-popup h3 {
+  margin: 0 0 1.2rem 0;
+  font-size: 1.4rem;
+  color: var(--color-text);
+  border-bottom: 1px solid #e9ecef;
+  padding-bottom: 0.8rem;
+}
+
+.calendar-popup__item {
+  display: flex;
+  justify-content: space-between;
+  font-size: 1.3rem;
+  padding: 0.8rem 0;
+  border-bottom: 1px solid #f1f3f5;
+}
+
+.calendar-popup__item:last-child {
+  border-bottom: none;
+}
+
+/* --- 3. THREAD MESSAGES AREA --- */
+.thread__messages {
+  flex: 1;
+  padding: 2rem;
+  overflow-y: auto;
+  background-color: var(--color-background);
+  display: flex;
+  flex-direction: column;
+  gap: 1.5rem;
+}
+
+/* Message Bubble Base Styles */
+.message {
+  max-width: 85%;
+  padding: 1.2rem 1.6rem;
+  border-radius: 1.6rem;
+  font-size: 1.5rem;
+  line-height: 1.5;
+}
+
+.message--ai {
+  align-self: flex-start;
+  background-color: #e8f5e9;
+  color: var(--color-text);
+  border-bottom-left-radius: 0.4rem; /* Gives it a native chat tail */
+}
+
+.message--user {
+  align-self: flex-end;
+  background-color: var(--color-surface); /* White */
+  color: var(--color-text);
+  border: 1px solid #e9ecef;
+  border-bottom-right-radius: 0.4rem; /* Chat tail */
+}
+
+.message--proactive {
+  align-self: center;
+  background-color: transparent;
+  color: #6c757d;
+  font-style: italic;
+  font-size: 1.3rem;
+  text-align: center;
+  padding: 0.5rem 1rem;
+  max-width: 90%;
+}
+
+/* --- TYPING INDICATOR --- */
+.message--typing {
+  /* We use the same base styling as message--ai so it matches Farmie's green bubble */
+  align-self: flex-start;
+  background-color: #e8f5e9;
+  border-bottom-left-radius: 0.4rem;
+  padding: 1.6rem 2rem;
+}
+
+.typing-dots {
+  display: flex;
+  gap: 0.5rem;
+  align-items: center;
+  height: 1rem;
+}
+
+.typing-dots span {
+  width: 0.8rem;
+  height: 0.8rem;
+  background-color: #1b5e20; /* Dark green to match the text */
+  border-radius: 50%;
+  animation: typingBounce 1.4s infinite ease-in-out both;
+}
+
+/* Delay the animation for the 1st and 2nd dots to create a wave effect */
+.typing-dots span:nth-child(1) {
+  animation-delay: -0.32s;
+}
+.typing-dots span:nth-child(2) {
+  animation-delay: -0.16s;
+}
+
+@keyframes typingBounce {
+  0%,
+  80%,
+  100% {
+    transform: scale(0);
+  }
+  40% {
+    transform: scale(1);
+  }
+}
+
+/* --- CALENDAR PROMPT WIDGET --- */
+.calendar-prompt {
+  align-self: flex-start;
+  display: flex;
+  flex-direction: column;
+  background-color: #fff8e1; /* Soft, warm amber */
+  border: 1px solid #ffecb3;
+  padding: 1.2rem 1.6rem;
+  border-radius: 1.2rem;
+  max-width: 85%;
+  gap: 1.2rem;
+  margin-top: -0.5rem; /* Pulls it slightly closer to the AI bubble above it */
+}
+
+.calendar-prompt__text {
+  font-size: 1.3rem;
+  color: #5d4037;
+  font-weight: 500;
+  line-height: 1.4;
+}
+
+.calendar-prompt__actions {
+  display: flex;
+  gap: 1rem;
+}
+
+.btn-calendar-add,
+.btn-calendar-skip {
+  border: none;
+  padding: 0.6rem 1.6rem;
+  border-radius: 2rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: transform 0.1s;
+}
+
+.btn-calendar-add:active,
+.btn-calendar-skip:active {
+  transform: scale(0.95);
+}
+
+.btn-calendar-add {
+  background-color: #ffc107;
+  color: #3e2723;
+}
+
+.btn-calendar-skip {
+  background-color: transparent;
+  color: #8d6e63;
+  border: 1px solid #d7ccc8;
+}
+
+/* --- 4. THREAD INPUT AREA --- */
+.thread__input-bar {
+  display: flex;
+  align-items: flex-end; /* Keeps the send button at the bottom if the textarea grows */
+  padding: 1.6rem 2rem;
+  background-color: var(--color-surface);
+  border-top: 1px solid #e9ecef;
+  gap: 1.2rem;
+  min-height: 8rem;
+}
+
+.thread__input {
+  flex: 1;
+  padding: 1.2rem 1.6rem;
+  border: 1px solid #ced4da;
+  border-radius: 2.4rem;
+  font-size: 1.6rem;
+  font-family: inherit;
+  outline: none;
+  background-color: #f1f3f5;
+  resize: none; /* Stops the user from manually dragging the corner */
+  max-height: 12rem; /* Prevents it from covering the whole screen */
+  transition:
+    border-color 0.2s,
+    background-color 0.2s;
+}
+
+.thread__input:focus {
+  border-color: var(--color-primary);
+  background-color: var(--color-surface);
+}
+
+.thread__input:disabled {
+  background-color: #e9ecef;
+  cursor: not-allowed;
+}
+
+.btn-thread-send {
+  width: 4.8rem;
+  height: 4.8rem;
+  border-radius: 50%;
+  border: none;
+  background-color: var(--color-primary);
+  color: var(--color-surface);
+  font-size: 1.8rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  flex-shrink: 0; /* Stops the button from shrinking if the text gets long */
+  transition: transform 0.1s;
+}
+
+.btn-thread-send:active {
+  transform: scale(0.95);
+}
+
+.btn-thread-send:disabled {
+  background-color: #adb5bd;
+  cursor: not-allowed;
+}
+
+/* --- 5. DESKTOP SPLIT-SCREEN ADJUSTMENTS --- */
+@media (min-width: 768px) {
+  body.split-screen-active .btn-thread-back {
+    display: none;
+  }
+}
+
+/* ====================================================== SOIL TEST SHORTCUT ========================== */
+.soil-shortcut {
+  align-self: flex-start;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #e3f2fd; /* Soft professional blue */
+  border: 1px solid #bbdefb;
+  color: #1565c0;
+  padding: 1rem 1.6rem;
+  border-radius: 1.2rem;
+  max-width: 85%;
+  gap: 2rem;
+}
+
+.soil-shortcut__left {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  cursor: pointer; /* Prepares it to be clickable later */
+}
+
+.soil-shortcut__icon {
+  font-size: 1.6rem;
+}
+
+.soil-shortcut__text {
+  font-weight: 600;
+  font-size: 1.4rem;
+}
+
+.btn-soil-cancel {
+  background: none;
+  border: none;
+  color: #1565c0;
+  font-size: 1.6rem;
+  cursor: pointer;
+  padding: 0.5rem;
+  opacity: 0.6;
+  transition: opacity 0.2s;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.btn-soil-cancel:active {
+  opacity: 1;
+}
+
+/* ================================== CONFIRM PLANTING MODAL ========================================= */
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.6);
+  z-index: 3000;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+
+  /* Hidden by default with a smooth fade */
+  opacity: 0;
+  visibility: hidden;
+  transition: all 0.3s ease;
+}
+
+.modal-overlay--active {
+  opacity: 1;
+  visibility: visible;
+}
+
+.confirm-modal {
+  background-color: var(--color-surface);
+  width: 90%;
+  max-width: 40rem;
+  border-radius: 1.6rem;
+  padding: 2.4rem;
+  text-align: center;
+  box-shadow: 0 2rem 4rem rgba(0, 0, 0, 0.2);
+
+  /* Pop-out animation */
+  transform: scale(0.9);
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.modal-overlay--active .confirm-modal {
+  transform: scale(1);
+}
+
+.confirm-modal__icon {
+  font-size: 3.2rem;
+  color: #2e7d32;
+  background-color: #e8f5e9;
+  width: 6.4rem;
+  height: 6.4rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 1.6rem auto;
+}
+
+.confirm-modal__title {
+  font-size: 1.8rem;
+  color: var(--color-text);
+  margin-bottom: 0.8rem;
+}
+
+.confirm-modal__text {
+  font-size: 1.4rem;
+  color: #6c757d;
+  margin-bottom: 2.4rem;
+  line-height: 1.5;
+}
+
+.confirm-modal__actions {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.btn-modal-yes {
+  background-color: #2e7d32;
+  color: white;
+  border: none;
+  padding: 1.4rem;
+  border-radius: 3rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.btn-modal-no {
+  background-color: transparent;
+  color: #6c757d;
+  border: none;
+  font-size: 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 1rem;
+}
+
+/* ========================================== CONFIRM DELETE MODAL ====================================== */
+.delete-modal {
+  background-color: var(--color-surface);
+  width: 90%;
+  max-width: 40rem;
+  border-radius: 1.6rem;
+  padding: 3.2rem 2.4rem; /* More breathing room */
+  text-align: center;
+  box-shadow: 0 2rem 4rem rgba(0, 0, 0, 0.2);
+  transform: scale(0.9);
+  transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
+}
+
+.modal-overlay--active .delete-modal {
+  transform: scale(1);
+}
+
+.delete-modal__icon {
+  font-size: 3.6rem;
+  color: #d32f2f;
+  background-color: #ffebee;
+  width: 7.2rem;
+  height: 7.2rem;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin: 0 auto 2rem auto;
+}
+
+.delete-modal__title {
+  font-size: 2rem;
+  color: var(--color-text);
+  margin-bottom: 1.2rem;
+  font-weight: 700;
+}
+
+.delete-modal__text {
+  font-size: 1.4rem;
+  color: #6c757d;
+  margin-bottom: 3.2rem;
+  line-height: 1.6;
+}
+
+.delete-modal__actions {
+  display: flex;
+  gap: 1.6rem; /* Spacing between the two buttons */
+  justify-content: center;
+}
+
+/* Side-by-side button layout */
+.btn-delete-cancel,
+.btn-delete-confirm {
+  flex: 1; /* Makes them equal width */
+  padding: 1.4rem;
+  border-radius: 3rem;
+  font-size: 1.5rem;
+  font-weight: 600;
+  cursor: pointer;
+  border: none;
+  transition: background-color 0.2s;
+}
+
+.btn-delete-cancel {
+  background-color: #e9ecef;
+  color: #495057;
+}
+
+.btn-delete-cancel:hover {
+  background-color: #dee2e6;
+}
+
+.btn-delete-confirm {
+  background-color: #d32f2f;
+  color: white;
+}
+
+.btn-delete-confirm:hover {
+  background-color: #b71c1c;
+}
+/* Forces the chat container to disappear when switching to other tabs */

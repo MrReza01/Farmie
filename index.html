@@ -40,7 +40,7 @@
       referrerpolicy="no-referrer"
     />
 
-    <link rel="stylesheet" href="src/css/style.css" />
+    <link rel="stylesheet" href="src/css/main.css" />
 
     <script defer type="module" src="src/js/controller.js"></script>
   </head>
@@ -69,30 +69,30 @@
       <nav class="bottom-nav">
         <button
           class="bottom-nav__item bottom-nav__item--active"
-          aria-label="My Crops"
+          aria-label="Crops"
         >
           <i class="fa-solid fa-seedling bottom-nav__icon"></i
           ><span class="bottom-nav__label">Crops</span>
         </button>
 
-        <button class="bottom-nav__item" aria-label="My Crops">
+        <button class="bottom-nav__item" aria-label="Soil">
           <i class="fa-solid fa-flask bottom-nav__icon"></i
           ><span class="bottom-nav__label">Soil</span>
         </button>
 
-        <button class="bottom-nav__item" aria-label="My Crops">
+        <button class="bottom-nav__item" aria-label="Scan">
           <i class="fa-solid fa-camera bottom-nav__icon"></i
           ><span class="bottom-nav__label">Scan</span>
         </button>
 
-        <button class="bottom-nav__item" aria-label="My Crops">
+        <button class="bottom-nav__item" aria-label="Market">
           <i class="fa-solid fa-shop bottom-nav__icon"></i
           ><span class="bottom-nav__label">Market</span>
         </button>
       </nav>
 
-      <!-- WELCOME MESSAGE DASHBOARD -->
-      <main class="view-dashboard">
+      <!-- WELCOME MESSAGE DASHBOARD (CROP SECTION) -->
+      <main class="view view-dashboard">
         <section class="empty-state">
           <img
             src="imgs/nature.svg"
@@ -120,6 +120,29 @@
 
           <button class="error-state__retry">Retry</button>
         </section>
+      </main>
+
+      <!-- ============ (SOIL SECTION) ================= -->
+      <main class="view view-soil view--hidden">
+        <div class="soil-empty-state">
+          <div class="soil-illustration-wrapper">
+            <img
+              src="imgs/experiment.svg"
+              alt="Scientist analyzing soil test"
+              class="soil-illustration"
+            />
+          </div>
+
+          <h2 class="soil-title">Your Soil Lab</h2>
+          <p class="soil-message">
+            Track and improve your soil health. A good soil test is the
+            foundation of a great harvest.
+          </p>
+
+          <button class="btn-start-soil">Start a Soil Test</button>
+        </div>
+
+        <div class="soil-list soil-list--hidden"></div>
       </main>
 
       <!-- PLAN NEW CROP -->

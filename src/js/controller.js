@@ -5,6 +5,8 @@ import resultsView from './views/resultsView.js';
 import errorView from './views/errorView.js';
 import dashboardView from './views/dashboardView.js';
 import chatView from './views/chatView.js';
+// SOIL SECTION IMPORTS
+import navigationView from './views/navigationView.js';
 
 const controlNavigation = function (clickedBtn) {
   navView.updateActiveState(clickedBtn);
@@ -183,6 +185,12 @@ const controlSendMessage = async function (id, text) {
     if (finalCropThread) {
       chatView.renderMessages(finalCropThread);
     }
+
+    // 1. Move the data to the top of the database
+    model.bumpCropToTop(id);
+
+    // 2. Refresh the dashboard sidebar instantly to show the new order
+    dashboardView.render(model.state.savedCrops);
   } catch (error) {
     console.error('Chat flow failed:', error);
     chatView.removeTypingIndicator();
@@ -235,6 +243,12 @@ const controlConfirmPlanting = async function (id) {
   if (finalizedCrop) {
     chatView.renderMessages(finalizedCrop);
   }
+
+  // 1. Move the data to the top of the database
+  model.bumpCropToTop(id);
+
+  // 2. Refresh the dashboard sidebar instantly to show the new order
+  dashboardView.render(model.state.savedCrops);
 };
 
 const controlDeleteCrop = function (id) {
@@ -253,6 +267,61 @@ const controlDeleteCrop = function (id) {
 
   if (chatView._currentThreadId === id) {
     chatView.hideChat();
+  }
+};
+
+// =========================================================================================== SOIL SECTION (COME BACK HERE BEFORE YOU START TO WORK ON THE OTHER SECTIONS) ===================================================================================
+
+// --- VIEW SWITCHER CONTROLLER ---
+const controlViewSwitcher = function (sectionName) {
+  // 1. Hide all main views
+  document
+    .querySelectorAll('.view')
+    .forEach((view) => view.classList.add('view--hidden'));
+
+  // 2. Reset the desktop layout
+  document.body.classList.remove('split-screen-active');
+
+  // 3. THE CHAT KILL-SWITCH
+  const chatContainer = document.querySelector('.chat-container');
+  if (chatContainer) {
+    if (sectionName.includes('crop')) {
+      // If returning to crops, remove our JS lock so your normal chat code works again
+      chatContainer.style.display = '';
+    } else {
+      // If going to ANY other tab (like Soil), violently hide the chat
+      chatContainer.style.display = 'none';
+    }
+  }
+
+  // 2. The "View Dictionary": Maps aria-labels to exact HTML classes
+  const viewMap = {
+    crops: '.view-dashboard', // Assuming aria-label is "Crops"
+    soil: '.view-soil',
+    scan: '.view-scan', // Example for your 3rd icon
+    market: '.view-market', // Example for your 4rd icon
+  };
+
+  // 3. Look up the correct class and show it
+  const targetClass = viewMap[sectionName] || viewMap['crops']; // Defaults to crops if not found
+  const targetView = document.querySelector(targetClass);
+  if (targetView) targetView.classList.remove('view--hidden');
+
+  // ... inside controlViewSwitcher ...
+
+  // Add this line to see exactly what the browser thinks you clicked:
+  console.log('Current Section is:', sectionName);
+
+  // 4. Handle the FAB visibility
+  const fab = document.querySelector('.fab');
+  if (fab) {
+    if (sectionName.includes('crop')) {
+      console.log('Showing FAB');
+      fab.classList.remove('fab--hidden');
+    } else {
+      console.log('Hiding FAB');
+      fab.classList.add('fab--hidden');
+    }
   }
 };
 
@@ -282,6 +351,10 @@ const init = function () {
   chatView.addHandlerConfirmPlanting(controlConfirmPlanting);
   dashboardView.addHandlerCardMenu();
   dashboardView.addHandlerDeleteConfirm(controlDeleteCrop);
+
+  // ===================================== SOIL SECTION==================================
+
+  navigationView.addHandlerSwitchView(controlViewSwitcher);
 };
 
 init();

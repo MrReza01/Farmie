@@ -212,8 +212,15 @@ class ChatView {
   }
 
   hideChat() {
-    if (this._chatContainer)
+    if (this._chatContainer) {
       this._chatContainer.classList.remove('chat-container--active');
+    }
+
+    // 1. NEW: Remove the global split-screen class so the app knows the chat is officially closed!
+    document.body.classList.remove('split-screen-active');
+
+    // 2. EXISTING FIX: Destroy the sticky note just to be absolutely safe
+    delete document.body.dataset.restoreSplit;
   }
 
   disableSplitScreen() {
