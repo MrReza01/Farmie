@@ -13,6 +13,10 @@ export const state = {
   searchLocation: '',
   report: {},
   savedCrops: [],
+
+  // SOIL SECTION
+  soilThreads: [],
+  cropThreads: [],
 };
 
 /**
@@ -29,6 +33,18 @@ const deleteItemById = function (collection, id, persist) {
   collection.splice(index, 1);
   if (persist) persist();
   return true;
+};
+
+const persistCrops = function () {
+  localStorage.setItem('farmieCrops', JSON.stringify(state.savedCrops));
+};
+
+const generateId = function (prefix) {
+  return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).substr(2, 5)}`;
+};
+
+const persistSoilThreads = function () {
+  localStorage.setItem('farmieSoilThreads', JSON.stringify(state.soilThreads));
 };
 
 // Add to the top of model.js
@@ -294,10 +310,6 @@ export const loadCropReport = async function (cropName, location) {
     location: sanitizedLocation,
     dailyData: finalDailyData,
   };
-};
-
-const persistCrops = function () {
-  localStorage.setItem('farmieCrops', JSON.stringify(state.savedCrops));
 };
 
 const getCropImage = async function (cropName) {
@@ -772,6 +784,180 @@ export const bumpCropToTop = function (id) {
 };
 
 // ===================================== SOIL SECTION==================================
+
+// --- SOIL THREAD DATABASE METHODS ---
+
+// 1. Load threads from LocalStorage on page load
+export const loadSoilThreads = function () {
+  const storage = localStorage.getItem('farmieSoilThreads');
+  if (storage) {
+    state.soilThreads = JSON.parse(storage);
+  }
+};
+
+// 2. Create and save a brand new thread (Status: Pending)
+export const saveSoilThread = function (
+  method,
+  linkedCropThreadId = null,
+  cropThreadTitle = null
+) {
+  // Format today's date (e.g., "3 Apr 2026")
+  const dateStr = new Date().toLocaleDateString('en-GB', {
+    day: 'numeric',
+    month: 'short',
+    year: 'numeric',
+  });
+
+  // Determine the Title based on linkage rules
+  let title = '';
+  if (linkedCropThreadId && cropThreadTitle) {
+    title = cropThreadTitle; // Linked to crop
+  } else {
+    // Independent test: mapping raw method strings to nice display names
+    const methodNames = {
+      'lab-report': 'Lab Report',
+      'basic-kit': 'Basic Test Kit',
+      'diy-test': 'DIY Test',
+      questionnaire: 'Questionnaire',
+    };
+    const niceMethodName = methodNames[method] || 'Soil Test';
+    title = `${niceMethodName} — ${dateStr}`;
+  }
+
+  // Build the Thread Object perfectly matching your blueprint
+  const newThread = {
+    id: generateId('soil'),
+    title: title,
+    method: method,
+    createdAt: new Date().toISOString(),
+    linkedCropThreadId: linkedCropThreadId,
+    status: 'pending', // Always created as pending first
+    tests: [], // Empty array ready for results later
+  };
+
+  // Push to state and save to LocalStorage
+  state.soilThreads.push(newThread);
+  persistSoilThreads();
+
+  return newThread; // Return the object so the Controller can send it to the View
+};
+
+// 3. Update an existing thread (Used later when a test completes)
+export const updateSoilThread = function (id, updates) {
+  const threadIndex = state.soilThreads.findIndex((thread) => thread.id === id);
+  if (threadIndex === -1) return;
+
+  // Merge the new data (updates) into the existing thread
+  state.soilThreads[threadIndex] = {
+    ...state.soilThreads[threadIndex],
+    ...updates,
+  };
+  persistSoilThreads();
+};
+
+// ==========================================
+// MASTER SOIL AI FUNCTION (GROQ / LLAMA 3.1)
+// ==========================================
+
+export const processSoilTestResult = async function (threadId, formData) {
+  try {
+    // 1. Find the specific thread
+    const thread = state.soilThreads.find((t) => t.id === threadId);
+    if (!thread) throw new Error('Soil thread not found in database.');
+
+    // 2. Check if there is a linked crop to contextualize the prompt
+    let cropContext = '';
+    if (thread.linkedCropThreadId) {
+      const linkedCrop = state.cropThreads.find(
+        (c) => c.id === thread.linkedCropThreadId
+      );
+      if (linkedCrop) {
+        cropContext = `The farmer is specifically growing: ${linkedCrop.cropName}. Tailor the summary and amendments to this specific crop's ideal pH and nutrient needs.`;
+      }
+    }
+
+    // 3. Construct the System Prompt (Strict Rules)
+    const systemPrompt = `
+      You are an expert agronomist advising a farmer. Analyze the provided soil test data.
+      You MUST respond with strictly valid JSON matching this exact structure. Do not include markdown formatting or backticks.
+      {
+        "estimatedPh": "A number or short string, e.g., '6.5' or '6.0 - 7.0'",
+        "summary": "A 2-3 sentence professional summary of the soil condition and what it means for crop growth.",
+        "organicOption": {
+          "title": "Short title for organic amendment",
+          "description": "Specific organic amendment recommendation with estimated quantities per hectare."
+        },
+        "conventionalOption": {
+          "title": "Short title for conventional amendment",
+          "description": "Specific conventional synthetic fertilizer recommendation with NPK values and quantities per hectare."
+        }
+      }
+    `;
+
+    // 4. Construct the User Prompt (The Data)
+    let sourceNote = '';
+    if (formData.source === 'questionnaire')
+      sourceNote =
+        'Note: This data is based on visual observational estimates by a farmer with no equipment. Acknowledge this limitation gently in the summary.';
+    if (formData.source === 'basic-kit')
+      sourceNote =
+        'Note: This data comes from a basic home color-strip kit, which lacks high precision.';
+
+    const userPrompt = `
+      Data Source: ${formData.source}
+      Data Provided: ${JSON.stringify(formData)}
+      ${cropContext}
+      ${sourceNote}
+    `;
+
+    // 5. Hit your local Groq proxy
+    const response = await fetch(`/groq-api/openai/v1/chat/completions`, {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${GROQ_API_KEY}`,
+      },
+      body: JSON.stringify({
+        model: 'llama-3.1-8b-instant',
+        temperature: 0, // Keeps Llama strict
+        response_format: { type: 'json_object' }, // Forces strict JSON output
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt },
+        ],
+      }),
+    });
+
+    if (!response.ok) throw new Error('Failed to connect to the AI.');
+
+    const data = await response.json();
+
+    // 6. Extract and parse the JSON response from Llama
+    let aiText = data.choices[0].message.content;
+
+    // Safety fallback: Strip markdown if Llama disobeys the system prompt
+    aiText = aiText
+      .replace(/```json/g, '')
+      .replace(/```/g, '')
+      .trim();
+    const parsedResults = JSON.parse(aiText);
+
+    // 7. Update the thread in our database
+    thread.status = 'completed';
+    thread.results = parsedResults;
+    thread.formData = formData; // Save the raw inputs
+    thread.updatedAt = new Date().toISOString();
+
+    // 8. Save to Local Storage
+    persistSoilThreads();
+
+    // Return the updated thread so the controller can render it
+    return thread;
+  } catch (err) {
+    console.error('💥 Error processing soil test:', err);
+    throw err; // Re-throw so the controller can show an error UI
+  }
+};
 
 export const loadSavedCrops = function () {
   const storage = localStorage.getItem('farmieCrops');

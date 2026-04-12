@@ -1,0 +1,421 @@
+/* =========================================
+   STAGE C5: SOIL INPUT FLOWS (FORMS)
+   ========================================= */
+
+/* The Main Container */
+.soil-input-flow {
+  background-color: var(--color-surface, #ffffff);
+  border: 1px solid #dee2e6;
+  border-radius: 1.6rem;
+  padding: 2rem;
+  margin: 5rem 2rem 3rem 2rem;
+  width: 100%;
+}
+
+/* Header & Back Button */
+.soil-input-flow__header {
+  display: flex;
+  align-items: center;
+  gap: 1.5rem;
+  margin-bottom: 2rem;
+  padding-bottom: 1.5rem;
+  border-bottom: 1px solid #e9ecef;
+}
+
+.btn-close-flow {
+  background: none;
+  border: none;
+  font-size: 1.4rem;
+  color: #6c757d;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  font-weight: 600;
+}
+
+.soil-input-flow__title {
+  font-size: 1.8rem;
+  color: #212529;
+  margin: 0;
+}
+
+/* Form Instructions */
+.soil-form-instructions {
+  font-size: 1.4rem;
+  color: #495057;
+  margin-bottom: 2.5rem;
+  line-height: 1.5;
+  background-color: #f8f9fa;
+  padding: 1.2rem;
+  border-radius: 0.8rem;
+  border-left: 4px solid #2d6a4f; /* Lab Report Green Accent */
+}
+
+/* Reusable Form Groups */
+.form-group {
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 2rem;
+}
+
+.form-label {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: #343a40;
+  margin-bottom: 0.8rem;
+}
+
+.required-star {
+  color: var(--color-danger, #dc3545);
+}
+
+.form-hint {
+  font-size: 1.2rem;
+  color: #6c757d;
+  margin-top: 0.5rem;
+}
+
+/* Inputs & Selects */
+.form-input,
+.form-select {
+  width: 100%;
+  padding: 1.2rem;
+  font-size: 1.5rem;
+  color: #212529;
+  background-color: #ffffff;
+  border: 1px solid #ced4da;
+  border-radius: 0.8rem;
+  /* Strictly no transitions or box-shadows */
+}
+
+.form-input:focus,
+.form-select:focus {
+  outline: 2px solid #2d6a4f; /* Focus state using outline, not box-shadow */
+  outline-offset: -1px;
+}
+
+/* Submit Button */
+.btn-submit-flow {
+  width: 100%;
+  padding: 1.4rem;
+  font-size: 1.6rem;
+  font-weight: bold;
+  color: #ffffff;
+  background-color: #2d6a4f; /* Lab Report Green */
+  border: none;
+  border-radius: 1rem;
+  cursor: pointer;
+  margin-top: 1rem;
+}
+
+/* Desktop Constriction */
+@media (min-width: 768px) {
+  .soil-input-flow {
+    max-width: 600px;
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+/* Disabled state for submit buttons */
+.btn-submit-flow:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+/* =========================================
+   RESULTS CARD (STAGE C3 EXTRACTED)
+   ========================================= */
+
+.soil-disclaimer {
+  background-color: #fff3cd;
+  color: #856404;
+  padding: 1.5rem;
+  border-radius: 0.8rem;
+  margin-bottom: 2rem;
+  font-size: 1.4rem;
+  display: flex;
+  gap: 1rem;
+  align-items: flex-start;
+}
+
+.soil-disclaimer i {
+  margin-top: 0.2rem;
+}
+
+.soil-results-card {
+  border: 1px solid #dee2e6;
+  border-radius: 1.6rem;
+  padding: 2rem;
+  background-color: #ffffff;
+}
+
+.results-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  border-bottom: 1px dashed #e9ecef;
+  padding-bottom: 1.5rem;
+  margin-bottom: 1.5rem;
+}
+
+.results-title {
+  margin: 0;
+  font-size: 1.8rem;
+  color: #212529;
+}
+
+.results-subtitle {
+  margin: 0.5rem 0 0 0;
+  color: #6c757d;
+  font-size: 1.3rem;
+}
+
+.results-score {
+  background-color: #d4edda;
+  color: #155724;
+  padding: 0.6rem 1.2rem;
+  border-radius: 2rem;
+  font-weight: bold;
+  font-size: 1.4rem;
+}
+
+.results-section {
+  margin-bottom: 2rem;
+}
+
+.results-section-title {
+  font-size: 1.5rem;
+  margin: 0 0 1rem 0;
+  color: #343a40;
+}
+
+.results-text {
+  font-size: 1.4rem;
+  color: #495057;
+  line-height: 1.5;
+  margin: 0;
+}
+
+.amendments-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.amendment-card {
+  background-color: #f8f9fa;
+  padding: 1.5rem;
+  border-radius: 0.8rem;
+  border-left-width: 4px;
+  border-left-style: solid;
+}
+
+.amendment-card--organic {
+  border-left-color: #2d6a4f;
+}
+.amendment-card--conv {
+  border-left-color: #0077b6;
+}
+
+.amendment-title {
+  margin: 0 0 0.5rem 0;
+  font-size: 1.4rem;
+  color: #212529;
+}
+
+.amendment-text {
+  margin: 0;
+  font-size: 1.3rem;
+  color: #495057;
+}
+
+.results-actions {
+  margin-top: 2rem;
+}
+
+.btn-save-results {
+  width: 100%;
+  padding: 1.2rem;
+  background-color: #2d6a4f;
+  color: #ffffff;
+  border: none;
+  border-radius: 0.8rem;
+  font-weight: bold;
+  cursor: pointer;
+  font-size: 1.4rem;
+}
+
+/* =========================================
+   STAGE C7: DIY TEST ACCORDIONS
+   ========================================= */
+
+.diy-accordion {
+  border: 1px solid #dee2e6;
+  border-radius: 0.8rem;
+  margin-bottom: 1.5rem;
+  background-color: #ffffff;
+  overflow: hidden; /* Keeps child borders contained */
+}
+
+.diy-accordion__header {
+  width: 100%;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  border: none;
+  text-align: left;
+  cursor: pointer;
+  /* Strictly no transitions */
+}
+
+.diy-accordion__header:hover {
+  background-color: #e9ecef;
+}
+
+.diy-accordion__header--active {
+  background-color: #e9ecef;
+  border-bottom: 1px solid #dee2e6;
+}
+
+.diy-accordion__title {
+  font-size: 1.5rem;
+  font-weight: 600;
+  color: #212529;
+}
+
+.accordion-icon {
+  font-size: 1.4rem;
+  color: #6c757d;
+}
+
+.diy-accordion__content {
+  padding: 1.5rem;
+}
+
+.diy-accordion__content--hidden {
+  display: none !important;
+}
+
+.diy-instructions {
+  font-size: 1.4rem;
+  color: #495057;
+  background-color: #f1f3f5;
+  padding: 1.2rem;
+  border-radius: 0.8rem;
+  margin-bottom: 2rem;
+  line-height: 1.5;
+}
+
+/* =========================================
+   STAGE C8: QUESTIONNAIRE FLOW
+   ========================================= */
+
+.quest-question-title {
+  font-size: 1.8rem;
+  color: #212529;
+  margin-bottom: 2rem;
+  line-height: 1.4;
+  text-align: center;
+}
+
+.quest-options-grid {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+  margin-bottom: 3rem;
+}
+
+/* Style the label to look like a large clickable button */
+.quest-option-card {
+  display: block;
+  position: relative;
+  border: 2px solid #dee2e6;
+  border-radius: 1.2rem;
+  padding: 1.8rem;
+  cursor: pointer;
+  background-color: #ffffff;
+  /* Zero box shadows! */
+}
+
+/* Hide the actual default radio circle */
+.quest-radio-input {
+  position: absolute;
+  opacity: 0;
+  cursor: pointer;
+}
+
+/* The text inside the card */
+.quest-option-label {
+  font-size: 1.5rem;
+  font-weight: 500;
+  color: #495057;
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+}
+
+/* When the hidden radio is checked, style the outer card */
+.quest-radio-input:checked + .quest-option-label {
+  color: #2d6a4f;
+  font-weight: bold;
+}
+
+/* The magic trick to change the border of the parent when checked */
+.quest-option-card:has(.quest-radio-input:checked) {
+  border-color: #74c69d; /* Questionnaire Accent Green */
+  background-color: #f1fdf7;
+}
+
+/* The Submit/Next button */
+.btn-quest-next {
+  margin-top: auto; /* Pushes it to bottom */
+}
+
+/* =========================================
+   QUESTIONNAIRE DESKTOP LAYOUT (MEDIA QUERY)
+   ========================================= */
+
+@media (min-width: 768px) {
+  /* Uses a class modifier and enforces a strict fixed width */
+  .soil-input-flow--quest {
+    width: 800px; /* Forces it to be exactly 800px wide on desktop */
+    max-width: 100%; /* Safety fallback so it doesn't break if the window shrinks */
+    margin-left: auto;
+    margin-right: auto;
+  }
+}
+
+.soil-disclaimer--hidden {
+  display: none !important;
+}
+
+/* =========================================
+   AI LOADING SPINNER
+   ========================================= */
+.soil-spinner-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(255, 255, 255, 0.9);
+  z-index: 9999;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+}
+.spinner-icon {
+  font-size: 4rem;
+  color: #2d6a4f;
+  margin-bottom: 1rem;
+}
+.soil-spinner-overlay p {
+  font-size: 1.6rem;
+  color: #212529;
+  font-weight: 600;
+}

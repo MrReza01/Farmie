@@ -159,7 +159,7 @@ class ChatView {
         <div class="soil-shortcut">
           <div class="soil-shortcut__left">
             <i class="fa-solid fa-flask soil-shortcut__icon"></i>
-            <span class="soil-shortcut__text">Start Soil Test for this crop</span>
+          <span class="soil-shortcut__text">Start Soil Test for this crop</span>
           </div>
           <button class="btn-soil-cancel" aria-label="Dismiss shortcut">
             <i class="fa-solid fa-times"></i>
