@@ -1,4 +1,4 @@
-import * as model from './model.js';
+import * as model from './model/model.js';
 import navView from './views/navView.js';
 import modalView from './views/modalView.js';
 import resultsView from './views/resultsView.js';
