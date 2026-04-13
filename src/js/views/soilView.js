@@ -209,6 +209,11 @@ class SoilView {
     // 5. Build the final HTML string
     const markup = `
       <div class="soil-card ${config.borderClass}" data-id="${thread.id}">
+        
+        <button type="button" class="btn-delete-soil" aria-label="Delete Test">
+          <i class="fa-solid fa-trash"></i>
+        </button>
+
         <div class="soil-card__header">
           <div class="soil-card__icon-wrap">
             <i class="fas ${config.icon}"></i>
@@ -258,6 +263,95 @@ class SoilView {
     document.body.insertAdjacentHTML('beforeend', markup);
   }
 
+  // --- DELETE MODAL UI ---
+  _injectDeleteModal() {
+    if (this._deleteModalInjected) return;
+
+    // Notice we use unique IDs (delete-soil-modal) so it doesn't clash with the Crop modal!
+    const markup = `
+      <div class="modal-overlay" id="delete-soil-modal">
+        <div class="delete-modal">
+          <div class="delete-modal__icon">
+            <i class="fa-solid fa-triangle-exclamation"></i>
+          </div>
+          <h3 class="delete-modal__title">Delete this soil test?</h3>
+          <p class="delete-modal__text">This cannot be undone. Your soil test results and recommendations will be permanently erased.</p>
+          <div class="delete-modal__actions">
+            <button class="btn-delete-cancel" id="btn-cancel-soil-delete" type="button">Cancel</button>
+            <button class="btn-delete-confirm" id="btn-confirm-soil-delete" type="button">Yes, Delete</button>
+          </div>
+        </div>
+      </div>
+    `;
+    document.body.insertAdjacentHTML('beforeend', markup);
+
+    // 1. Cancel button logic
+    document
+      .getElementById('btn-cancel-soil-delete')
+      .addEventListener('click', () => this.hideDeleteModal());
+
+    // 2. Yes, Delete logic
+    document
+      .getElementById('btn-confirm-soil-delete')
+      .addEventListener('click', () => {
+        const targetId = this._soilToDeleteId;
+        this.hideDeleteModal();
+
+        if (this._deleteHandler && targetId) {
+          this._deleteHandler(targetId);
+        }
+      });
+
+    this._deleteModalInjected = true;
+  }
+
+  showDeleteModal(id) {
+    this._injectDeleteModal();
+    this._soilToDeleteId = id;
+    document
+      .getElementById('delete-soil-modal')
+      .classList.add('modal-overlay--active');
+  }
+
+  hideDeleteModal() {
+    const modal = document.getElementById('delete-soil-modal');
+    if (modal) modal.classList.remove('modal-overlay--active');
+    this._soilToDeleteId = null;
+  }
+
+  addHandlerDeleteConfirm(handler) {
+    this._deleteHandler = handler;
+  }
+
+  // --- TRASH CAN CLICK LISTENER ---
+  addHandlerDeleteIconClick() {
+    this._parentElement.addEventListener('click', (e) => {
+      const deleteBtn = e.target.closest('.btn-delete-soil');
+      if (!deleteBtn) return;
+
+      e.stopPropagation(); // Stop the card from opening!
+
+      const card = deleteBtn.closest('.soil-card');
+      if (!card) return;
+
+      // Show the beautiful modal instead of the ugly browser confirm()
+      this.showDeleteModal(card.dataset.id);
+    });
+  }
+
+  // --- SMOOTH FADE OUT ANIMATION ---
+  removeSoilCard(id) {
+    const card = this._parentElement.querySelector(
+      `.soil-card[data-id="${id}"]`
+    );
+    if (card) {
+      card.style.opacity = '0';
+      card.style.transform = 'scale(0.9)';
+      card.style.transition = 'all 0.3s ease';
+      setTimeout(() => card.remove(), 300);
+    }
+  }
+
   // Removes the loading spinner
   removeSpinner() {
     const spinner = document.getElementById('soil-spinner');
@@ -267,6 +361,8 @@ class SoilView {
   // Listens for clicks on any soil thread card
   addHandlerClickCard(handler) {
     this._threadsContainer.addEventListener('click', function (e) {
+      // THE FIX: If the user clicked the delete button, ignore the click entirely!
+      if (e.target.closest('.btn-delete-soil')) return;
       // Find the closest card element that was clicked
       const card = e.target.closest('.soil-card');
       if (!card) return;

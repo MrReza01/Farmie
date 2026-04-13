@@ -558,6 +558,20 @@ const controlLinkedSoilTest = function (cropId) {
   }
 };
 
+const controlDeleteSoilCard = function (id) {
+  // 1. Erase from the Model/Database
+  const success = model.deleteSoilThread(id);
+  if (!success) return;
+
+  // 2. Fade it out of the Soil Dashboard smoothly
+  soilView.removeSoilCard(id);
+
+  // 3. Check if we need to show the Empty State illustration
+  if (model.state.soilThreads.length === 0) {
+    soilView.render([]); // Or whatever method you use to draw the empty state!
+  }
+};
+
 const init = function () {
   const didCropsExpire = model.checkExpiredThreads();
   if (didCropsExpire) {
@@ -622,6 +636,12 @@ const init = function () {
   questFlowView.addHandlerSubmit(controlSubmitQuestFlow);
 
   chatView.addHandlerSoilShortcut(controlLinkedSoilTest);
+
+  // 1. Wakes up the trash can icons on the cards
+  soilView.addHandlerDeleteIconClick();
+
+  // 2. Connects the "Yes, Delete" button to the database controller
+  soilView.addHandlerDeleteConfirm(controlDeleteSoilCard);
 };
 
 init();

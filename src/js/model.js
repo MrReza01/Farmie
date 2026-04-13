@@ -959,6 +959,24 @@ export const processSoilTestResult = async function (threadId, formData) {
   }
 };
 
+export const deleteSoilThread = function (id) {
+  const soilToDelete = state.soilThreads.find((s) => s.id === id);
+  if (!soilToDelete) return false;
+
+  // 1. SOIL-SPECIFIC LOGIC: Unlink from Crop Threads
+  if (soilToDelete.linkedCropThreadId && state.savedCrops) {
+    const linkedCrop = state.savedCrops.find(
+      (c) => c.id === soilToDelete.linkedCropThreadId
+    );
+    // If the crop still exists, remove the soil connection
+    if (linkedCrop) linkedCrop.linkedSoilThreadId = null;
+    persistCrops(); // Save the updated crop database
+  }
+
+  // 2. GENERIC LOGIC: Use the utility to erase the soil test
+  return deleteItemById(state.soilThreads, id, persistSoilThreads);
+};
+
 export const loadSavedCrops = function () {
   const storage = localStorage.getItem('farmieCrops');
   if (storage) {

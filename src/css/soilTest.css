@@ -419,3 +419,36 @@
   color: #212529;
   font-weight: 600;
 }
+
+/* Add to your existing soil-card class if it isn't there already */
+.soil-card {
+  position: relative;
+}
+
+/* The Delete Button Styling */
+.btn-delete-soil {
+  position: absolute;
+  top: 1.6rem;
+  right: 1.6rem;
+  background: none;
+  border: none;
+  color: #ff6b6b; /* Soft red */
+  font-size: 1.6rem;
+  cursor: pointer;
+  opacity: 0; /* Hides it until hovered */
+  visibility: hidden;
+  transition: all 0.2s ease-in-out;
+  z-index: 10; /* Keeps it clickable above the card body */
+}
+
+/* Reveal the trash can when hovering over the card */
+.soil-card:hover .btn-delete-soil {
+  opacity: 0.6;
+  visibility: visible;
+}
+
+/* Light up fully when hovering directly over the trash can */
+.btn-delete-soil:hover {
+  opacity: 1;
+  transform: scale(1.1);
+}
