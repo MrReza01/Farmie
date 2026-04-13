@@ -537,6 +537,27 @@ const getActivePendingThreadId = () => {
     : null;
 };
 
+const controlLinkedSoilTest = function (cropId) {
+  // 1. Tell the Model to permanently hide the shortcut for this crop
+  const updatedCrop = model.dismissSoilShortcut(cropId);
+
+  // 2. Re-render the chat so the button instantly disappears from the screen
+  if (updatedCrop) {
+    chatView.renderMessages(updatedCrop);
+  }
+
+  // 3. THE MAGIC BULLET: Target the aria-label and simulate a native click!
+  const soilNavButton = document.querySelector(
+    '.bottom-nav__item[aria-label="Soil"]'
+  );
+
+  if (soilNavButton) {
+    soilNavButton.click(); // This fires your native navigation listener perfectly
+  } else {
+    console.error('Could not find the Soil navigation button!');
+  }
+};
+
 const init = function () {
   const didCropsExpire = model.checkExpiredThreads();
   if (didCropsExpire) {
@@ -599,6 +620,8 @@ const init = function () {
   diyFlowView.addHandlerSubmit(controlSubmitDiyFlow);
   questFlowView.addHandlerClose(controlCloseQuestFlow);
   questFlowView.addHandlerSubmit(controlSubmitQuestFlow);
+
+  chatView.addHandlerSoilShortcut(controlLinkedSoilTest);
 };
 
 init();

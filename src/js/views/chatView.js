@@ -358,6 +358,21 @@ class ChatView {
     const modal = document.getElementById('planting-modal');
     if (modal) modal.classList.remove('modal-overlay--active');
   }
+
+  addHandlerSoilShortcut(handler) {
+    this._parentElement.addEventListener('click', (e) => {
+      // 1. Check if they clicked the shortcut button
+      const btn = e.target.closest('.soil-shortcut__left');
+      if (!btn) return;
+
+      // 2. Grab the current crop ID
+      const cropId = this._currentThreadId;
+      if (!cropId) return;
+
+      // 3. Send the ID to the Controller
+      handler(cropId);
+    });
+  }
 }
 
 export default new ChatView();
