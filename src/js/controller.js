@@ -642,6 +642,8 @@ const init = function () {
 
   // 2. Connects the "Yes, Delete" button to the database controller
   soilView.addHandlerDeleteConfirm(controlDeleteSoilCard);
+
+  chatView.addHandlerToggleCalendar();
 };
 
 init();

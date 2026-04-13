@@ -52,13 +52,17 @@ class ChatView {
       .querySelector('.btn-thread-back')
       .addEventListener('click', this.hideChat.bind(this));
     // Toggle the calendar popup when the icon is clicked
-    this._chatContainer
-      .querySelector('.thread__calendar-icon')
-      .addEventListener('click', () => {
-        this._chatContainer
-          .querySelector('.calendar-popup')
-          .classList.toggle('calendar-popup--active');
-      });
+    // Toggle the calendar popup when the icon is clicked
+    // this._chatContainer
+    //   .querySelector('.thread__calendar-icon')
+    //   .addEventListener('click', (e) => {
+    //     // THE SHIELD: Stop the click from bubbling up to the document!
+    //     e.stopPropagation();
+
+    //     this._chatContainer
+    //       .querySelector('.calendar-popup')
+    //       .classList.toggle('calendar-popup--active');
+    //   });
 
     this._chatContainer
       .querySelector('.btn-confirm-planting')
@@ -371,6 +375,47 @@ class ChatView {
 
       // 3. Send the ID to the Controller
       handler(cropId);
+    });
+  }
+
+  // --- MASTER CALENDAR UI CONTROLLER ---
+  addHandlerToggleCalendar() {
+    // We attach one listener to the parent element so it works on ALL future chat messages
+    this._parentElement.addEventListener('click', (e) => {
+      // 1. SCENARIO A: The user clicked a calendar icon
+      const icon = e.target.closest('.thread__calendar-icon');
+      if (icon) {
+        // Find the specific popup living next to THIS clicked icon
+        const headerContainer = icon.closest('.thread__header-right');
+        const popup = headerContainer.querySelector('.calendar-popup');
+
+        if (popup) {
+          // Toggle this specific calendar open/closed
+          popup.classList.toggle('calendar-popup--active');
+
+          // Bonus UX: Close any *other* open calendars on the screen
+          document.querySelectorAll('.calendar-popup--active').forEach((p) => {
+            if (p !== popup) p.classList.remove('calendar-popup--active');
+          });
+        }
+        return; // Stop the script here!
+      }
+
+      // 2. SCENARIO B: The user clicked INSIDE an open popup
+      // We do nothing so they can click buttons inside the calendar safely
+      if (e.target.closest('.calendar-popup')) {
+        return;
+      }
+
+      // 3. SCENARIO C: The user clicked ANYWHERE ELSE (The background)
+      // Like you suggested, we check if there are any active popups first!
+      const activePopups = document.querySelectorAll('.calendar-popup--active');
+      if (activePopups.length > 0) {
+        // If they are active, sweep them closed
+        activePopups.forEach((popup) =>
+          popup.classList.remove('calendar-popup--active')
+        );
+      }
     });
   }
 }
