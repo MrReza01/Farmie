@@ -1,0 +1,695 @@
+/* --- SCAN CONTAINER & LAYOUT --- */
+.scan-container {
+  display: flex;
+  flex-direction: column;
+  height: 100%; /* Fills the space between header and bottom nav */
+}
+
+.scan-topbar {
+  display: flex;
+  justify-content: flex-end;
+  padding: 1.6rem 2.4rem 0; /* Pushes the icon inward */
+}
+
+.scan-body {
+  flex: 1; /* Takes up all remaining vertical space */
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Vertically centers the stacked elements */
+  align-items: center;
+  padding: 2.4rem;
+  max-width: 48rem; /* Keeps it from stretching too wide on desktop */
+  margin: 0 auto; /* Horizontally centers the entire block on desktop */
+  width: 100%;
+  gap: 2.4rem; /* Even spacing between upload, input, and button */
+}
+
+/* --- UPLOAD RECTANGLE --- */
+.scan-upload-box {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  width: 100%;
+  height: 28rem; /* Large rectangle per the design plan */
+  border: 2px dashed var(--color-grey-light, #ccc);
+  border-radius: 1.6rem;
+  background-color: var(--color-grey-lightest, #f8f9fa);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.scan-upload-box:hover,
+.scan-upload-box:active {
+  border-color: var(--color-primary, #2ecc71);
+  background-color: rgba(46, 204, 113, 0.05);
+}
+
+.scan-upload-box__content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+  text-align: center;
+}
+
+.scan-upload-box__icon {
+  font-size: 4.8rem;
+  color: var(--color-primary, #2ecc71);
+}
+
+.scan-upload-box__title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--color-text-dark, #333);
+}
+
+.scan-upload-box__subtitle {
+  font-size: 1.2rem;
+  color: var(--color-text-muted, #777);
+}
+
+/* --- IMAGE PREVIEW STATE --- */
+.scan-preview-box {
+  position: relative;
+  width: 100%;
+  height: 28rem;
+  border-radius: 1.6rem;
+  overflow: hidden;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+}
+
+.scan-preview-box__img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover; /* Ensures the image fills the rectangle perfectly */
+}
+
+.btn-remove-scan {
+  position: absolute;
+  top: 1.2rem;
+  right: 1.2rem;
+  width: 3.2rem;
+  height: 3.2rem;
+  border-radius: 50%;
+  background-color: rgba(0, 0, 0, 0.6);
+  color: #fff;
+  border: none;
+  font-size: 1.6rem;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  cursor: pointer;
+  backdrop-filter: blur(4px);
+  transition: background-color 0.2s ease;
+}
+
+.btn-remove-scan:hover {
+  background-color: #ff6b6b;
+}
+
+/* --- INPUTS & BUTTONS --- */
+.scan-input-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+  width: 100%;
+}
+
+.scan-input-group__label {
+  font-size: 1.4rem;
+  font-weight: 600;
+  color: var(--color-text-dark, #333);
+}
+
+.scan-input {
+  width: 100%;
+  padding: 1.4rem 1.6rem;
+  font-size: 1.6rem;
+  font-family: inherit;
+  color: var(--color-text-dark, #333);
+  background-color: #fff;
+  border: 1px solid var(--color-grey-light, #ddd);
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.03); /* Very soft resting shadow */
+  transition: all 0.25s ease;
+}
+
+.scan-input::placeholder {
+  color: var(--color-text-muted, #999);
+}
+
+/* The "Glow" effect when the farmer taps the input */
+.scan-input:focus {
+  outline: none;
+  border-color: var(--color-primary, #2ecc71);
+}
+
+/* --- HISTORY ICON BUTTON --- */
+.btn-scan-history {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4.4rem;
+  height: 4.4rem;
+  border: none;
+  border-radius: 50%; /* Makes it a perfect circle */
+  background-color: var(--color-grey-lightest, #f8f9fa);
+  color: var(--color-text-dark, #333);
+  font-size: 1.8rem;
+  cursor: pointer;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+  transition: all 0.2s ease;
+}
+
+/* Hover effect: Turns green and lifts up slightly */
+.btn-scan-history:hover {
+  background-color: var(--color-primary, #2ecc71);
+  color: #fff;
+  box-shadow: 0 4px 10px rgba(46, 204, 113, 0.2);
+}
+
+/* Active/Tap effect: Presses down */
+.btn-scan-history:active {
+  transform: translateY(0);
+  box-shadow: 0 2px 4px rgba(46, 204, 113, 0.2);
+}
+
+.btn-start-scan {
+  width: 100%; /* Makes the scan button span the full width of the container */
+  margin-top: 0.8rem;
+}
+
+/* Utility Class (if you don't already have one) */
+.u-hidden {
+  display: none !important;
+}
+
+/* --- DIAGNOSIS FULL SCREEN OVERLAY --- */
+.diagnosis-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--color-background, #ffffff);
+  z-index: 100; /* Covers header and bottom nav */
+  display: flex;
+  flex-direction: column;
+
+  /* Slide Up Animation */
+  transform: translateY(100%);
+  transition: transform 0.3s ease-in-out;
+}
+
+/* Toggled via JS to slide the screen up */
+.diagnosis-overlay--active {
+  transform: translateY(0);
+}
+
+/* --- STICKY HEADER --- */
+.diagnosis-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.6rem 2.4rem;
+  background-color: var(--color-background, #ffffff);
+  border-bottom: 1px solid var(--color-grey-light, #eee);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.diagnosis-header__title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--color-text-dark, #333);
+}
+
+/* --- SCROLLABLE BODY --- */
+.diagnosis-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2.4rem;
+}
+
+/* Desktop constraint */
+.diagnosis-content {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  gap: 2rem; /* Even spacing between all major blocks */
+}
+
+/* --- IMAGE --- */
+.diagnosis-img {
+  width: 100%;
+  height: 24rem;
+  object-fit: cover;
+  border-radius: 1.2rem;
+}
+
+/* --- TITLE & BADGES (Reused in S4) --- */
+.diagnosis-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1.2rem;
+}
+
+.diagnosis-disease {
+  font-size: 2.2rem;
+  font-weight: 700;
+  color: var(--color-text-dark, #333);
+  line-height: 1.2;
+}
+
+.badge {
+  padding: 0.6rem 1.2rem;
+  border-radius: 2rem;
+  font-size: 1.2rem;
+  font-weight: 600;
+  text-transform: uppercase;
+}
+
+.badge--mild {
+  background-color: #e3f2fd;
+  color: #1976d2;
+}
+.badge--moderate {
+  background-color: #fff3e0;
+  color: #f57c00;
+}
+.badge--severe {
+  background-color: #ffebee;
+  color: #d32f2f;
+}
+
+/* --- SPREAD RISK --- */
+.spread-risk {
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 1.4rem;
+  font-weight: 500;
+  color: var(--color-text-muted, #666);
+}
+
+.risk-dot {
+  width: 1rem;
+  height: 1rem;
+  border-radius: 50%;
+}
+
+.risk--isolated {
+  background-color: #2ecc71;
+}
+.risk--moderate {
+  background-color: #f1c40f;
+}
+.risk--contagious {
+  background-color: #e74c3c;
+}
+
+/* --- EXPLANATION --- */
+.diagnosis-desc {
+  font-size: 1.5rem;
+  line-height: 1.6;
+  color: var(--color-text-dark, #444);
+}
+
+/* --- ACCORDION (Native <details>) --- */
+.treatment-section {
+  display: flex;
+  flex-direction: column;
+  gap: 1.2rem;
+}
+
+.treatment-accordion {
+  border: 1px solid var(--color-grey-light, #ddd);
+  border-radius: 0.8rem;
+  overflow: hidden;
+}
+
+.treatment-accordion__title {
+  padding: 1.6rem;
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--color-text-dark, #333);
+  background-color: var(--color-grey-lightest, #f9f9f9);
+  cursor: pointer;
+  list-style: none; /* Hides default arrow in some browsers */
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Custom Arrow for details summary */
+.treatment-accordion__title::after {
+  content: '\25BC'; /* Down Arrow */
+  font-size: 1.2rem;
+  color: var(--color-text-muted, #777);
+  transition: transform 0.2s ease;
+}
+
+.treatment-accordion[open] .treatment-accordion__title::after {
+  transform: rotate(-180deg);
+}
+
+.treatment-accordion__content {
+  padding: 1.6rem;
+  font-size: 1.4rem;
+  line-height: 1.6;
+  border-top: 1px solid var(--color-grey-light, #ddd);
+}
+
+.treatment-accordion__content ol {
+  padding-left: 2rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.8rem;
+}
+
+/* --- LOW CONFIDENCE FALLBACK --- */
+.low-confidence {
+  background-color: #fff4e5;
+  border: 1px solid #ffe0b2;
+  border-radius: 1.2rem;
+  padding: 2rem;
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 1.2rem;
+}
+
+.low-confidence__icon {
+  font-size: 3.2rem;
+  color: #ed6c02;
+}
+
+.low-confidence h4 {
+  font-size: 1.6rem;
+  color: #e65100;
+}
+
+.low-confidence p {
+  font-size: 1.4rem;
+  color: #555;
+  line-height: 1.5;
+}
+
+/* --- SAVE BUTTON --- */
+.btn-save-history {
+  width: 100%;
+  margin-top: 1.6rem;
+}
+
+/* --- HISTORY FULL SCREEN OVERLAY --- */
+.history-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--color-background, #ffffff);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+
+  /* Slide In From Right Animation */
+  transform: translateX(100%);
+  transition: transform 0.3s ease-in-out;
+
+  /* z-index: 9999; */
+}
+
+.history-overlay--active {
+  transform: translateX(0);
+}
+
+/* --- STICKY HEADER --- */
+.history-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1.6rem 2.4rem;
+  background-color: var(--color-background, #ffffff);
+  border-bottom: 1px solid var(--color-grey-light, #eee);
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.history-header__title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--color-text-dark, #333);
+}
+
+/* --- SCROLLABLE BODY --- */
+.history-body {
+  flex: 1;
+  overflow-y: auto;
+  padding: 2.4rem;
+}
+
+.history-content {
+  max-width: 600px; /* Desktop constraint */
+  margin: 0 auto;
+}
+
+/* --- EMPTY STATE --- */
+.history-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  height: 40vh; /* Pushes it down towards the middle */
+  gap: 1.2rem;
+}
+
+.history-empty__icon {
+  font-size: 5.6rem;
+  color: var(--color-grey-light, #ccc);
+  margin-bottom: 0.8rem;
+}
+
+.history-empty__title {
+  font-size: 1.8rem;
+  font-weight: 600;
+  color: var(--color-text-dark, #333);
+}
+
+.history-empty__text {
+  font-size: 1.4rem;
+  color: var(--color-text-muted, #777);
+  max-width: 25rem;
+  line-height: 1.5;
+}
+
+/* --- HISTORY CARDS --- */
+.history-list {
+  display: flex;
+  flex-direction: column;
+  gap: 1.6rem;
+}
+
+.history-card {
+  display: flex;
+  align-items: center;
+  gap: 1.6rem;
+  padding: 1.2rem;
+  background-color: var(--color-background, #fff);
+  border: 1px solid var(--color-grey-light, #eee);
+  border-radius: 1.2rem;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.02);
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+.history-card:hover,
+.history-card:active {
+  border-color: var(--color-primary, #2ecc71);
+  background-color: rgba(46, 204, 113, 0.03);
+}
+
+/* Square Thumbnail */
+.history-card__img {
+  width: 6.4rem;
+  height: 6.4rem;
+  border-radius: 0.8rem;
+  object-fit: cover;
+}
+
+/* Info Column */
+.history-card__info {
+  flex: 1; /* Takes up remaining space between image and arrow */
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.4rem;
+}
+
+.history-card__title {
+  font-size: 1.6rem;
+  font-weight: 600;
+  color: var(--color-text-dark, #333);
+  margin-bottom: 0.2rem;
+}
+
+.history-card__date {
+  font-size: 1.2rem;
+  color: var(--color-text-muted, #777);
+  margin-top: 0.4rem;
+}
+
+/* Right Chevron Arrow */
+.history-card__arrow {
+  font-size: 1.6rem;
+  color: var(--color-grey-light, #ccc);
+}
+
+/* --- SCAN LOADER OVERLAY --- */
+.scan-loader-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: var(--color-background, #ffffff);
+  z-index: 200; /* High z-index to cover absolutely everything */
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 2.4rem;
+}
+
+/* A clean, modern CSS spinner */
+.scan-spinner {
+  width: 5.6rem;
+  height: 5.6rem;
+  border: 4px solid var(--color-grey-light, #eee);
+  border-top-color: var(--color-primary, #2ecc71);
+  border-radius: 50%;
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.scan-loader__text {
+  font-size: 1.6rem;
+  font-weight: 500;
+  color: var(--color-text-dark, #333);
+  text-align: center;
+  animation: pulseOpacity 1.5s ease-in-out infinite alternate;
+}
+
+/* Subtle fade effect for the text */
+@keyframes pulseOpacity {
+  from {
+    opacity: 0.6;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+/* Dynamic Severity Badges */
+.badge--mild,
+.badge--none {
+  background-color: #e8f5e9;
+  color: #2e7d32;
+}
+.badge--moderate {
+  background-color: #fff3e0;
+  color: #e65100;
+}
+.badge--severe {
+  background-color: #ffebee;
+  color: #c62828;
+}
+
+/* Dynamic Risk Dots */
+.risk--isolated,
+.risk--none {
+  background-color: #2e7d32;
+}
+.risk--moderate {
+  background-color: #f57c00;
+}
+.risk--contagious {
+  background-color: #d32f2f;
+}
+
+/* --- HEADER BACK BUTTONS (Diagnosis & History) --- */
+.btn-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 4rem;
+  height: 4rem;
+  border: none;
+  border-radius: 50%; /* Perfect circle */
+  background-color: transparent;
+  color: var(--color-text-dark, #333);
+  font-size: 1.8rem;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+
+/* Hover effect: Soft background, icon turns green */
+.btn-icon:hover {
+  background-color: var(--color-grey-lightest, #f1f3f5);
+  color: var(--color-primary, #2ecc71);
+}
+
+/* Active/Tap effect: Shrinks slightly to feel like a real physical button */
+.btn-icon:active {
+  transform: scale(0.92);
+  background-color: var(--color-grey-light, #e9ecef);
+}
+
+/* --- INLINE ERROR MESSAGE --- */
+.scan-error {
+  display: flex;
+  align-items: center;
+  gap: 1.2rem;
+  padding: 1.2rem 1.6rem;
+  background-color: #fef2f2; /* Soft red background */
+  border: 1px solid #fecaca; /* Red border */
+  border-radius: 1.2rem;
+  margin-bottom: 2rem;
+  animation: slideDownFade 0.3s ease-out;
+}
+
+.scan-error__icon {
+  color: #ef4444; /* Bright red */
+  font-size: 2rem;
+}
+
+.scan-error__text {
+  color: #991b1b; /* Dark red text for readability */
+  font-size: 1.4rem;
+  font-weight: 500;
+  line-height: 1.4;
+  margin: 0;
+}
+
+/* Smooth entrance animation */
+@keyframes slideDownFade {
+  from {
+    opacity: 0;
+    transform: translateY(-10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

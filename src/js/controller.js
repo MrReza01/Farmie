@@ -15,6 +15,11 @@ import kitFlowView from './views/kitFlowView.js';
 import diyFlowView from './views/diyFlowView.js';
 import questFlowView from './views/questFlowView.js';
 
+//  SCAN SECTION
+import diagnosisView from './views/diagnosisView.js';
+import scanHistoryView from './views/scanHistoryView.js';
+import scanView from './views/scanView.js';
+
 // --- SOIL TEST CREATION STATE ---
 const creationState = {
   selectedMethod: null,
@@ -572,6 +577,65 @@ const controlDeleteSoilCard = function (id) {
   }
 };
 
+// ================SCAN SECTIION ===========
+
+const controlStartScan = async function (imageData, cropName) {
+  try {
+    scanView.showLoader();
+
+    // Call the REAL AI API
+    const diagnosisData = await model.analyzePlantImage(imageData, cropName);
+
+    scanView.hideLoader();
+
+    // --- NEW: Paint the UI ---
+    diagnosisView.renderDiagnosis(diagnosisData, imageData, cropName);
+  } catch (err) {
+    scanView.hideLoader();
+
+    // --- NEW: Show UI Error ---
+    scanView.renderError(
+      'Unable to analyze the image right now. Please check your internet connection or try a clearer photo.'
+    );
+
+    // Keep this for your debugging
+    console.error('--- SCAN FAILED ---');
+    console.error(err);
+  }
+};
+
+const controlSaveScan = function (imageData, cropName, diagnosisData) {
+  // Save to DB
+  model.saveScanRecord(imageData, cropName, diagnosisData);
+  console.log('Scan successfully saved to FarmieDB!');
+};
+
+const controlShowHistory = function () {
+  // 1. Get data from Model
+  const historyData = model.loadScanHistory();
+
+  // 2. Pass data to View to render the list
+  scanHistoryView.renderHistoryList(historyData);
+
+  // 3. Slide the screen in
+  scanHistoryView.showHistory();
+};
+
+const controlViewHistoricalScan = function (id) {
+  // 1. Get the specific scan data from the model
+  const scanRecord = model.getScanById(id);
+  if (!scanRecord) return;
+
+  // 2. Pass the saved data to the diagnosis screen
+  // Note the 4th parameter 'true' flags this as a historical record!
+  diagnosisView.renderDiagnosis(
+    scanRecord.diagnosis,
+    scanRecord.imageData,
+    scanRecord.cropName || '',
+    true
+  );
+};
+
 const init = function () {
   const didCropsExpire = model.checkExpiredThreads();
   if (didCropsExpire) {
@@ -598,6 +662,7 @@ const init = function () {
   chatView.addHandlerConfirmPlanting(controlConfirmPlanting);
   dashboardView.addHandlerCardMenu();
   dashboardView.addHandlerDeleteConfirm(controlDeleteCrop);
+  chatView.addHandlerToggleCalendar();
 
   // ===================================== SOIL SECTION==================================
 
@@ -643,7 +708,11 @@ const init = function () {
   // 2. Connects the "Yes, Delete" button to the database controller
   soilView.addHandlerDeleteConfirm(controlDeleteSoilCard);
 
-  chatView.addHandlerToggleCalendar();
+  // SCAN SECTION
+  scanView.addHandlerStartScan(controlStartScan);
+  scanView.addHandlerShowHistory(controlShowHistory);
+  diagnosisView.addHandlerSaveHistory(controlSaveScan);
+  scanHistoryView.addHandlerClickCard(controlViewHistoricalScan);
 };
 
 init();

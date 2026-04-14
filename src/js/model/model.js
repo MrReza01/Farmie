@@ -2,7 +2,6 @@ import {
   OPENWEATHER_API_KEY,
   GEMINI_API_KEY,
   GROQ_API_KEY,
-  HUGGINGFACE_API_KEY,
 } from '../config.js';
 
 export const state = {
@@ -17,6 +16,9 @@ export const state = {
   // SOIL SECTION
   soilThreads: [],
   cropThreads: [],
+
+  // scan section
+  scanHistory: [],
 };
 
 /**
@@ -41,6 +43,10 @@ const persistCrops = function () {
 
 const persistSoilThreads = function () {
   localStorage.setItem('farmieSoilThreads', JSON.stringify(state.soilThreads));
+};
+
+export const persistScanHistory = function () {
+  localStorage.setItem('farmieScanHistory', JSON.stringify(state.scanHistory));
 };
 
 const generateId = function (prefix) {
@@ -983,7 +989,15 @@ export const loadSavedCrops = function () {
     state.savedCrops = JSON.parse(storage);
   }
 };
+
+export const loadScanHistoryStorage = function () {
+  const storage = localStorage.getItem('farmieScanHistory');
+  if (storage) {
+    state.scanHistory = JSON.parse(storage);
+  }
+};
 loadSavedCrops();
+loadScanHistoryStorage();
 
 // At the very bottom of src/js/model/model.js
 export * from './scanModel.js';

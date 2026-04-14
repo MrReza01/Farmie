@@ -42,6 +42,10 @@
 
     <link rel="stylesheet" href="src/css/main.css" />
 
+    <script
+      type="text/javascript"
+      src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"
+    ></script>
     <script defer type="module" src="src/js/controller.js"></script>
   </head>
 
@@ -145,6 +149,80 @@
           <button class="btn-start-soil">Start a Soil Test</button>
         </div>
       </main>
+
+      <section class="view view-scan view--hidden" id="view-scan">
+        <div class="scan-container">
+          <div class="scan-topbar">
+            <button
+              class="btn-icon btn-scan-history"
+              type="button"
+              aria-label="Scan History"
+            >
+              <i class="fa-solid fa-clock-rotate-left"></i>
+            </button>
+          </div>
+
+          <main class="scan-body">
+            <label
+              class="scan-upload-box"
+              for="scan-file-input"
+              id="scan-upload-box"
+            >
+              <div class="scan-upload-box__content">
+                <i class="fa-solid fa-cloud-arrow-up scan-upload-box__icon"></i>
+                <span class="scan-upload-box__title"
+                  >Tap to upload a plant photo</span
+                >
+                <span class="scan-upload-box__subtitle"
+                  >JPEG, PNG, WEBP (Max 6MB)</span
+                >
+              </div>
+              <input
+                type="file"
+                id="scan-file-input"
+                accept="image/jpeg, image/png, image/webp"
+                hidden
+              />
+            </label>
+
+            <div class="scan-preview-box u-hidden" id="scan-preview-box">
+              <img
+                src="imgs/farmie-logo.jpg"
+                alt="Plant Preview"
+                class="scan-preview-box__img"
+                id="scan-preview-img"
+              />
+              <button
+                class="btn-remove-scan"
+                type="button"
+                aria-label="Remove image"
+              >
+                <i class="fa-solid fa-xmark"></i>
+              </button>
+            </div>
+
+            <div class="scan-input-group">
+              <label for="scan-crop-name" class="scan-input-group__label"
+                >What plant is this? (Optional)</label
+              >
+              <input
+                type="text"
+                id="scan-crop-name"
+                class="input-text scan-input"
+                placeholder="e.g., Tomatoes, Maize"
+              />
+            </div>
+
+            <button
+              class="btn-primary btn-start-scan u-hidden"
+              id="btn-start-scan"
+              type="button"
+            >
+              <i class="fa-solid fa-microscope"></i> Analyze Plant
+            </button>
+          </main>
+        </div>
+      </section>
 
       <!-- PLAN NEW CROP -->
       <div class="modal modal--hidden">
