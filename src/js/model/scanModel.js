@@ -37,9 +37,6 @@ export const loadScanHistory = function () {
  * Retrieves a single scan record by its ID
  * @param {String} id - The unique ID of the scan
  */
-// export const getScanById = function (id) {
-//   return state.scanHistory.find((scan) => scan.id === id);
-// };
 
 /**
  * Sends the image to Groq's Vision Model and returns a structured JSON diagnosis

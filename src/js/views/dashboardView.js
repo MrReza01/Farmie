@@ -1,4 +1,4 @@
-import { WARNING_THRESHOLD } from '../model.js';
+import { WARNING_THRESHOLD } from '../model/model.js';
 
 class DashboardView {
   _parentElement = document.querySelector('.dashboard__crops-list');
