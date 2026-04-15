@@ -4,6 +4,8 @@ import {
   GROQ_API_KEY,
 } from '../config.js';
 
+const GROQ_CHAT_MODEL = `llama-3.1-8b-instant`;
+
 export const state = {
   currentView: 'dashboard',
   isModalOpen: false,

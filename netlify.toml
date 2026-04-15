@@ -1,0 +1,8 @@
+[build]
+  publish = "dist"
+  functions = "netlify/functions"
+
+[dev]
+  # We removed the 'command' line! This tells Netlify: "Do not start the frontend, I will do it myself."
+  targetPort = 1234
+  port = 8888

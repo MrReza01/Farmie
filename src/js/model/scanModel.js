@@ -1,5 +1,7 @@
 import { state, persistScanHistory } from './model.js';
-import { GROQ_API_KEY } from '../config.js';
+// import { GROQ_API_KEY } from '../config.js';
+
+const GROQ_IMAGE_MODEL = `meta-llama/llama-4-scout-17b-16e-instruct`;
 
 /**
  * Creates a new scan record, adds it to the state, and saves to LocalStorage
@@ -44,71 +46,26 @@ export const loadScanHistory = function () {
 
 export const analyzePlantImage = async function (imageData, cropName) {
   try {
-    const promptText = `
-      You are an expert agricultural plant pathologist. Analyze this image of a plant ${cropName ? `(Reported as: ${cropName})` : ''}.
-      Identify any diseases, pests, or deficiencies. 
-      You MUST respond ONLY with a valid JSON object. Do not include markdown formatting, backticks, or extra conversational text.
-      Use exactly this schema:
-      {
-        "diseaseName": "Name of disease/pest or 'Healthy'",
-        "severity": "mild", "moderate", "severe", or "none",
-        "spreadRisk": "isolated", "moderate", "contagious", or "none",
-        "explanation": "2-3 plain English sentences explaining the visual symptoms.",
-        "treatments": {
-          "organic": ["Step 1", "Step 2"],
-          "conventional": ["Step 1", "Step 2"]
-        },
-        "confidenceScore": 85
-      }
-    `;
+    // We ping our own custom Node.js endpoint!
+    const response = await fetch('/.netlify/functions/scanPlant', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // Pass the image and name into the event.body
+      body: JSON.stringify({ imageData, cropName }),
+    });
 
-    const response = await fetch(
-      'https://api.groq.com/openai/v1/chat/completions',
-      {
-        method: 'POST',
-        headers: {
-          Authorization: `Bearer ${GROQ_API_KEY}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          model: 'meta-llama/llama-4-scout-17b-16e-instruct',
-          messages: [
-            {
-              role: 'user',
-              content: [
-                { type: 'text', text: promptText },
-                { type: 'image_url', image_url: { url: imageData } },
-              ],
-            },
-          ],
-          temperature: 0.1,
-          max_tokens: 1024, // Added safety constraint
-        }),
-      }
-    );
-
-    // 1. Bulletproof Error Reading
     if (!response.ok) {
-      // Use .text() instead of .json() so it never crashes on unexpected HTML/Text
       const errorText = await response.text();
-      console.error('--- GROQ API RAW ERROR ---', errorText);
-      throw new Error(`Status ${response.status}: ${errorText}`);
+      throw new Error(`Local Server Error: ${errorText}`);
     }
 
-    const rawData = await response.json();
-    let aiContent = rawData.choices[0].message.content.trim();
-
-    // 2. Markdown Cleanup
-    if (aiContent.startsWith('```json')) {
-      aiContent = aiContent.replace(/^```json\n?/, '').replace(/\n?```$/, '');
-    } else if (aiContent.startsWith('```')) {
-      aiContent = aiContent.replace(/^```\n?/, '').replace(/\n?```$/, '');
-    }
-
-    const diagnosisData = JSON.parse(aiContent);
+    // Parse the JSON string sent back from the Netlify Function
+    const diagnosisData = await response.json();
     return diagnosisData;
   } catch (err) {
-    throw err; // Pass up to controller
+    throw err;
   }
 };
 

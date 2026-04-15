@@ -3,4 +3,8 @@ dist/
 .parcel-cache/
 src/js/config.js
 .proxyrc.json
+.env
 
+
+# Local Netlify folder
+.netlify
