@@ -447,7 +447,10 @@ const controlSubmitLabFlow = async function (formData) {
     soilView.renderResultView(updatedThread);
   } catch (err) {
     soilView.removeSpinner();
-    alert('Error connecting to AI. Please try again.');
+    // Replaced alert with your beautiful custom toast!
+    errorView.render(
+      err.message || 'Error connecting to AI. Please try again.'
+    );
   }
 };
 
@@ -465,7 +468,7 @@ const controlSubmitKitFlow = async function (formData) {
     soilView.renderResultView(updatedThread);
   } catch (err) {
     soilView.removeSpinner();
-    alert('Error connecting to AI. Please try again.');
+    errorView.render(err.message || 'Something went wrong. Please try again.');
   }
 };
 
@@ -483,7 +486,7 @@ const controlSubmitDiyFlow = async function (formData) {
     soilView.renderResultView(updatedThread);
   } catch (err) {
     soilView.removeSpinner();
-    alert('Error connecting to AI. Please try again.');
+    errorView.render(err.message || 'Something went wrong. Please try again.');
   }
 };
 
@@ -502,7 +505,7 @@ const controlSubmitQuestFlow = async function (formData) {
   } catch (err) {
     console.error('🚨 AI ERROR DETAILS:', err);
     soilView.removeSpinner();
-    alert('Error connecting to AI. Please try again.');
+    errorView.render(err.message || 'Something went wrong. Please try again.');
   }
 };
 

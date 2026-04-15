@@ -1,7 +1,4 @@
 import { state, persistScanHistory } from './model.js';
-// import { GROQ_API_KEY } from '../config.js';
-
-const GROQ_IMAGE_MODEL = `meta-llama/llama-4-scout-17b-16e-instruct`;
 
 /**
  * Creates a new scan record, adds it to the state, and saves to LocalStorage

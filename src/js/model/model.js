@@ -1,11 +1,3 @@
-import {
-  OPENWEATHER_API_KEY,
-  GEMINI_API_KEY,
-  GROQ_API_KEY,
-} from '../config.js';
-
-const GROQ_CHAT_MODEL = `llama-3.1-8b-instant`;
-
 export const state = {
   currentView: 'dashboard',
   isModalOpen: false,
@@ -55,55 +47,105 @@ const generateId = function (prefix) {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).substr(2, 5)}`;
 };
 
-// Add to the top of model.js
-export const DEV_MODE = false; // Change to false for Production (5 days)
-export const EXPIRY_DURATION = DEV_MODE
-  ? 3 * 60 * 1000
-  : 5 * 24 * 60 * 60 * 1000;
+// export const DEV_MODE = false; // Change to false for Production (5 days)
+// export const EXPIRY_DURATION = DEV_MODE
+//   ? 3 * 60 * 1000
+//   : 5 * 24 * 60 * 60 * 1000;
+
+// export const WARNING_THRESHOLD = DEV_MODE ? 1 * 60 * 1000 : 24 * 60 * 60 * 1000; // 1 minute for Dev, 24 hours for Prod
+
+export const EXPIRY_DURATION = 5 * 24 * 60 * 60 * 1000;
 
 // Add this below EXPIRY_DURATION
-export const WARNING_THRESHOLD = DEV_MODE ? 1 * 60 * 1000 : 24 * 60 * 60 * 1000; // 1 minute for Dev, 24 hours for Prod
+export const WARNING_THRESHOLD = 24 * 60 * 60 * 1000; // 1 minute for Dev, 24 hours for Prod
 
-const getWeatherData = async function (location) {
+// Inside your model.js / cropModel.js
+
+export const getWeatherData = async function (location) {
   try {
-    if (!navigator.onLine) {
-      throw new Error(`No internet connection!`);
-    }
-    const geoRes = await fetch(
-      `https://api.openweathermap.org/geo/1.0/direct?q=${location}&limit=1&appid=${OPENWEATHER_API_KEY}`
-    );
+    if (!navigator.onLine) throw new Error(`No internet connection!`);
 
-    if (!geoRes.ok) throw new Error(`Problem finding your location`);
+    // Fetch from your secure backend
+    const res = await fetch('/.netlify/functions/getWeather', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ location }),
+    });
 
-    const geoData = await geoRes.json();
+    const data = await res.json();
 
-    if (geoData.length === 0) {
-      throw new Error(
-        `Could not find your location ${location}. Please check the spelling`
-      );
-    }
+    // Catch the custom 404 error we threw from the backend for bad spelling
+    if (res.status === 404) throw new Error(data.error);
+    if (!res.ok) throw new Error('Problem getting the weather report');
 
-    const { lat, lon } = geoData[0];
-
-    const weatherRes = await fetch(
-      `https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${OPENWEATHER_API_KEY}`
-    );
-
-    if (!weatherRes.ok) throw new Error(`Problem getting the weather report`);
-
-    const weatherData = await weatherRes.json();
-
-    return weatherData;
+    return data;
   } catch (err) {
-    // Catch "Failed to fetch" (Slow internet/CORS issues)
     if (err.message === 'Failed to fetch') {
       throw new Error(
         'Connection too weak. Please check your internet and try again.'
       );
     }
-
-    // Pass through our custom errors (Spelling, No Internet, etc.)
     throw err;
+  }
+};
+
+export const generateAIPlan = async function (crop, location, weatherData) {
+  try {
+    // Fetch from your secure backend
+    const res = await fetch('/.netlify/functions/generateAIPlan', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ crop, location, weatherData }),
+    });
+
+    if (!res.ok)
+      throw new Error(`Could not generate a plan. Please try again.`);
+
+    // The backend already stripped markdown, so we just parse it!
+    const rawText = await res.text();
+    let planArray;
+
+    try {
+      const start = rawText.indexOf('[');
+      const end = rawText.lastIndexOf(']') + 1;
+      if (start === -1 || end === 0) throw new Error('No JSON array found');
+      planArray = JSON.parse(rawText.substring(start, end));
+    } catch (parseErr) {
+      console.error('Raw AI Output:', rawText);
+      throw new Error('The AI provided an unreadable plan. Please try again.');
+    }
+
+    // Health Checks
+    const requiredKeys = ['status', 'advice', 'verdict'];
+    const isPlanComplete =
+      Array.isArray(planArray) &&
+      planArray.length >= 5 &&
+      planArray.every((dayPlan) =>
+        requiredKeys.every(
+          (key) => Object.hasOwn(dayPlan, key) && dayPlan[key] !== null
+        )
+      );
+
+    if (!isPlanComplete) {
+      console.error('Incomplete Plan Structure:', planArray);
+      throw new Error('Plan generation was incomplete. Please try again.');
+    }
+
+    if (planArray[0] && planArray[0].error === 'invalid_crop') {
+      throw new Error(
+        `${crop} is not a valid crop. Please check your spelling.`
+      );
+    }
+
+    return planArray;
+  } catch (err) {
+    console.error('Final Catch Block:', err);
+    const userFriendlyMessage =
+      err.message.includes("reading 'advice'") ||
+      err.message.includes('undefined')
+        ? 'Something went wrong while analyzing the data. Please try again.'
+        : err.message;
+    throw new Error(userFriendlyMessage);
   }
 };
 
@@ -182,109 +224,6 @@ const processDailyWeather = function (weatherData) {
       description: description,
     };
   });
-};
-
-const generateAIPlan = async function (crop, location, weatherData) {
-  try {
-    const weatherString = weatherData
-      .map(
-        (day) =>
-          `${day.date} :${day.maxTemp}°C / ${day.minTemp}°C, ${day.rainChance} rain, ${day.sunlight}`
-      )
-      .join(' | ');
-
-    const res = await fetch(
-      `/groq-api/openai/v1/chat/completions`, // Bypassing CORS via your Parcel proxy
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${GROQ_API_KEY}`, // Groq requires the key here
-        },
-        body: JSON.stringify({
-          model: 'llama-3.1-8b-instant',
-          temperature: 0, // Keeps the AI strict and robotic so it doesn't break your JSON
-          messages: [
-            {
-              role: 'system',
-              content: `You are an expert agronomist advising a farmer. The farmer HAS NOT PLANTED YET. They are using this forecast to decide EXACTLY WHICH DAY to put their seeds or seedlings into the ground.
-
-            FIRST RULE: Verify if the user's crop is a real, cultivatable agricultural plant. Assume any real regional crop is valid. If it is NOT a real plant (complete gibberish), return exactly: [{"error": "invalid_crop"}]
-
-            You MUST return ONLY a raw, valid JSON array containing exactly 5 objects. Do NOT include markdown formatting, backticks, or the word 'json'.
-
-            Each object must have exactly THREE properties:
-            1. "advice": 2 to 3 sentences explaining exactly what will happen to the seeds/seedlings if they are planted on this specific day. Explain WHY the weather makes it good or bad, and what specific environmental risks to watch out for. DO NOT give maintenance advice for already-growing plants.
-            2. "verdict": A strict 2 to 4 word planting directive (e.g., "Very good to plant", "Plant with caution", "Do not plant").
-            3. "status": You MUST choose exactly one of these words based on the planting viability: "success" (great conditions), "warning" (acceptable but risky), or "danger" (terrible conditions).`,
-            },
-            {
-              role: 'user',
-              // We pass your specific variables right here at the end
-              content: `Crop: "${crop}"\nLocation: ${location}\nForecast: ${weatherString}\n\nAnalyze this 5-day weather forecast and provide the 5-day pre-planting evaluation.`,
-            },
-          ],
-        }),
-      }
-    );
-
-    if (!res.ok)
-      throw new Error(`Could not generate a plan. Please try again.`);
-
-    const aiData = await res.json();
-    const rawText = aiData.choices[0].message.content;
-
-    let planArray;
-    try {
-      // 1. EXTRACTION: Find the actual JSON array
-      const start = rawText.indexOf('[');
-      const end = rawText.lastIndexOf(']') + 1;
-
-      if (start === -1 || end === 0) throw new Error('No JSON array found');
-
-      planArray = JSON.parse(rawText.substring(start, end));
-    } catch (parseErr) {
-      console.error('Raw AI Output:', rawText); // Log this so you can see the "why"
-      throw new Error('The AI provided an unreadable plan. Please try again.');
-    }
-
-    // 2. UPDATED HEALTH CHECK: Match these to your actual prompt!
-    // Removed 'day' and 'recommendation' if the AI isn't explicitly told to send them.
-    const requiredKeys = ['status', 'advice', 'verdict'];
-
-    const isPlanComplete =
-      Array.isArray(planArray) &&
-      planArray.length >= 5 &&
-      planArray.every((dayPlan) =>
-        requiredKeys.every(
-          (key) => Object.hasOwn(dayPlan, key) && dayPlan[key] !== null
-        )
-      );
-
-    if (!isPlanComplete) {
-      console.error('Incomplete Plan Structure:', planArray);
-      throw new Error('Plan generation was incomplete. Please try again.');
-    }
-
-    // 3. CROP VALIDATION
-    if (planArray[0] && planArray[0].error === 'invalid_crop') {
-      throw new Error(
-        `${crop} is not a valid crop. Please check your spelling.`
-      );
-    }
-
-    return planArray;
-  } catch (err) {
-    console.error('Final Catch Block:', err);
-    // Masking logic remains the same
-    const userFriendlyMessage =
-      err.message.includes("reading 'advice'") ||
-      err.message.includes('undefined')
-        ? 'Something went wrong while analyzing the data. Please try again.'
-        : err.message;
-
-    throw new Error(userFriendlyMessage);
-  }
 };
 
 export const loadCropReport = async function (cropName, location) {
@@ -487,12 +426,11 @@ export const getAIResponse = async function (id, userMessage) {
   const cropThread = state.savedCrops.find((c) => c.id === id);
   if (!cropThread) return;
 
-  // 1. SMART STATE INJECTION
+  // 1. SMART STATE INJECTION (Keep exactly as it was!)
   const plantedStatus = cropThread.plantedAt
     ? `Planted on: ${new Date(cropThread.plantedAt).toLocaleDateString()}`
     : `Status: Not planted yet.`;
 
-  // We set the persona AND inject the hidden data here
   const systemContext = `You are Farmie, an expert agricultural AI assistant.
   Answer concisely and practically.
 
@@ -500,37 +438,29 @@ export const getAIResponse = async function (id, userMessage) {
   Crop: ${cropThread.crop}
   Location: ${cropThread.location}
   ${plantedStatus}
-  Weather Verdict: ${state.report.status || 'unknown'}
+  Weather Verdict: ${state.report?.status || 'unknown'}
   `;
 
   try {
-    // 2. THE REAL GROQ API CALL
-    const response = await fetch(
-      'https://api.groq.com/openai/v1/chat/completions',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${GROQ_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'llama-3.1-8b-instant', // You can change this to 'mixtral-8x7b-32768' or whichever Groq model you prefer!
-          messages: [
-            { role: 'system', content: systemContext },
-            // Note: If you eventually want short-term memory, we can slice the last 2 messages from cropThread.chatHistory and insert them here.
-            { role: 'user', content: userMessage },
-          ],
-          temperature: 0.7, // Keeps the AI focused but slightly creative
-        }),
-      }
-    );
+    // 2. THE SECURE BACKEND CALL
+    const response = await fetch('/.netlify/functions/getChatResponse', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // Pass both the context and the user message to the server
+      body: JSON.stringify({ systemContext, userMessage }),
+    });
 
-    if (!response.ok) throw new Error('Network error connecting to Groq');
+    if (!response.ok)
+      throw new Error('Network error connecting to local server');
 
+    // 3. Parse the exact reply from our backend
     const data = await response.json();
-    return data.choices[0].message.content;
+    return data.reply;
   } catch (err) {
-    console.error('Groq API Error:', err);
+    console.error('Server/API Error:', err);
+    // Keep your excellent user-friendly fallback message
     return "Sorry, I'm having a bit of trouble connecting to my agricultural database right now. Please try again in a second!";
   }
 };
@@ -678,37 +608,22 @@ export const getHarvestDataFromAI = async function (id) {
   3. If they planted on a BAD day (Recommended day: No), include extra care tips to help the crop survive the current weather.`;
 
   try {
-    const response = await fetch(
-      'https://api.groq.com/openai/v1/chat/completions',
-      {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          Authorization: `Bearer ${GROQ_API_KEY}`,
-        },
-        body: JSON.stringify({
-          model: 'llama-3.1-8b-instant',
-          messages: [
-            { role: 'system', content: systemPrompt },
-            { role: 'user', content: userPrompt }, // The missing piece that fixes the 400 error!
-          ],
-          temperature: 0.3,
-          response_format: { type: 'json_object' }, // Forces Groq to output perfect JSON!
-        }),
-      }
-    );
+    // 3. Fetch from your NEW secure backend!
+    const response = await fetch('/.netlify/functions/getHarvestData', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      // Pass the prompts securely to the server
+      body: JSON.stringify({ systemPrompt, userPrompt }),
+    });
 
-    // Advanced Error Logging: This tells us EXACTLY what Groq is mad about if it fails again
     if (!response.ok) {
-      const errorDetails = await response.text();
-      console.error('Groq API Rejected Request:', errorDetails);
-      throw new Error(`Groq Network Error: ${response.status}`);
+      throw new Error(`Local Server Error: ${response.status}`);
     }
 
-    const data = await response.json();
-
-    // Because we used response_format: "json_object", we can just parse it directly safely
-    const aiData = JSON.parse(data.choices[0].message.content);
+    // Since the backend sent back the perfectly formatted JSON string, we just parse it:
+    const aiData = await response.json();
 
     // --- APPLY THE AI DATA TO OUR APP ---
 
@@ -876,11 +791,15 @@ export const processSoilTestResult = async function (threadId, formData) {
     // 2. Check if there is a linked crop to contextualize the prompt
     let cropContext = '';
     if (thread.linkedCropThreadId) {
-      const linkedCrop = state.cropThreads.find(
-        (c) => c.id === thread.linkedCropThreadId
-      );
+      // NOTE: Make sure state.cropThreads exists, or change to state.savedCrops depending on your setup!
+      const linkedCrop =
+        state.savedCrops?.find((c) => c.id === thread.linkedCropThreadId) ||
+        state.cropThreads?.find((c) => c.id === thread.linkedCropThreadId);
+
       if (linkedCrop) {
-        cropContext = `The farmer is specifically growing: ${linkedCrop.cropName}. Tailor the summary and amendments to this specific crop's ideal pH and nutrient needs.`;
+        // Use linkedCrop.crop or linkedCrop.cropName depending on your data structure
+        const cropName = linkedCrop.crop || linkedCrop.cropName;
+        cropContext = `The farmer is specifically growing: ${cropName}. Tailor the summary and amendments to this specific crop's ideal pH and nutrient needs.`;
       }
     }
 
@@ -918,37 +837,21 @@ export const processSoilTestResult = async function (threadId, formData) {
       ${sourceNote}
     `;
 
-    // 5. Hit your local Groq proxy
-    const response = await fetch(`/groq-api/openai/v1/chat/completions`, {
+    // 5. SECURE FETCH: Hit your new local Netlify Function
+    const response = await fetch('/.netlify/functions/processSoilTest', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
-        Authorization: `Bearer ${GROQ_API_KEY}`,
       },
-      body: JSON.stringify({
-        model: 'llama-3.1-8b-instant',
-        temperature: 0, // Keeps Llama strict
-        response_format: { type: 'json_object' }, // Forces strict JSON output
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt },
-        ],
-      }),
+      // Send only the prompts to the backend
+      body: JSON.stringify({ systemPrompt, userPrompt }),
     });
 
-    if (!response.ok) throw new Error('Failed to connect to the AI.');
+    if (!response.ok)
+      throw new Error('Failed to connect to the secure server.');
 
-    const data = await response.json();
-
-    // 6. Extract and parse the JSON response from Llama
-    let aiText = data.choices[0].message.content;
-
-    // Safety fallback: Strip markdown if Llama disobeys the system prompt
-    aiText = aiText
-      .replace(/```json/g, '')
-      .replace(/```/g, '')
-      .trim();
-    const parsedResults = JSON.parse(aiText);
+    // 6. The backend already cleaned the text, so we just parse it directly
+    const parsedResults = await response.json();
 
     // 7. Update the thread in our database
     thread.status = 'completed';
@@ -957,6 +860,7 @@ export const processSoilTestResult = async function (threadId, formData) {
     thread.updatedAt = new Date().toISOString();
 
     // 8. Save to Local Storage
+    // Ensure persistSoilThreads() is available in this scope!
     persistSoilThreads();
 
     // Return the updated thread so the controller can render it
@@ -998,6 +902,7 @@ export const loadScanHistoryStorage = function () {
     state.scanHistory = JSON.parse(storage);
   }
 };
+
 loadSavedCrops();
 loadScanHistoryStorage();
 
