@@ -64,6 +64,17 @@
         </h1>
       </header>
 
+      <!-- ERROR STATE -->
+          <section class="error-state error-state--hidden">
+          <i class="fa-solid fa-wifi error-state__icon"></i>
+
+          <p class="error-state__text">
+            Couldn't load farm record. Check your connection and try again.
+          </p>
+
+          <button class="error-state__retry">Retry</button>
+        </section>
+
       <!-- FAB BUTTON -->
       <button class="fab fab--pulsing" aria-label="plan new crop">
         <i class="fa-solid fa-plus"></i>
@@ -105,7 +116,7 @@
           />
 
           <h2 class="empty-state__title">Welcome to Farmie</h2>
-
+<p class="empty-statte__desc">Your Expert Farm Advisor</p>
           <p class="empty-state__text">
             Your field is currently empty. Select a crop to get a detailed,
             5-day planting plan. Tap the <i class="fa-solid fa-plus"></i> button
@@ -115,15 +126,7 @@
 
         <div class="dashboard__crops-list"></div>
 
-        <section class="error-state error-state--hidden">
-          <i class="fa-solid fa-wifi error-state__icon"></i>
-
-          <p class="error-state__text">
-            Couldn't load farm record. Check your connection and try again.
-          </p>
-
-          <button class="error-state__retry">Retry</button>
-        </section>
+     
       </main>
 
       <!-- ============ (SOIL SECTION) ================= -->
@@ -329,49 +332,6 @@
   
   <div class="buyer-grid">
     
-    <!-- <article class="listing-card">
-      <div class="card-body" tabindex="0" role="button" aria-label="View details for Maize">
-        <span class="discount-badge">10% OFF</span>
-        
-        <div class="card-image-wrapper bg-maize">
-          <div class="crop-image-placeholder"></div>
-        </div>
-        
-        <div class="card-content">
-          <h4 class="card-title">Maize</h4>
-          
-          <div class="card-pricing has-discount">
-            <span class="price-original">₦15000 / bag</span>
-            <span class="price-discounted">₦13500 / bag</span>
-          </div>
-          
-          <p class="card-availability">Available Now • Moniya, Oyo</p>
-        </div>
-      </div>
-      
-       <a href="https://mrreza.netlify.app" target="_blank" class="btn-contact-farmer">Contact Farmer</a>
-    </article>
-
-    <article class="listing-card">
-      <div class="card-body" tabindex="0" role="button" aria-label="View details for Cassava">
-        
-        <div class="card-image-wrapper bg-cassava">
-          <div class="crop-image-placeholder"></div>
-        </div>
-        
-        <div class="card-content">
-          <h4 class="card-title">Cassava Tubers</h4>
-          
-          <div class="card-pricing">
-            <span class="price-current">₦8000 / tonne</span>
-          </div>
-          
-          <p class="card-availability">Coming Soon • Iseyin, Oyo</p>
-        </div>
-      </div>
-      
-      <a href="https://mrreza.netlify.app" target="_blank" class="btn-contact-farmer">Contact Farmer</a>
-    </article> -->
 
   </div>
 </div>

@@ -193,8 +193,18 @@
   font-size: 2.4rem;
   color: var(--color-primary);
   margin-bottom: var(--spacing-sm);
+
   opacity: 0;
   animation: fadeup 0.6s ease 0.2s forwards;
+}
+
+.empty-statte__desc {
+  font-size: 1.8rem;
+  color: #7bf38b;
+  opacity: 0;
+  margin-bottom: var(--spacing-sm);
+
+  animation: fadeup 0.6s ease 0.3s forwards;
 }
 
 .empty-state__text {
@@ -218,33 +228,57 @@
   }
 }
 
+/* ============================================== */
+/* GLOBAL OFFLINE STATE                           */
+/* ============================================== */
+
+body.is-offline .fab,
+body.is-offline .bottom-nav,
+body.is-offline .view,
+body.is-offline .modal,
+body.is-offline .results-container {
+  display: none !important;
+}
+
 .error-state {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-sm);
+  justify-content: center;
+  height: calc(100vh - 60px); /* Assumes your header is roughly 60px tall */
+  padding: 2rem;
+  text-align: center;
+  background-color: var(--color-white, #fff);
+  z-index: 9999;
 }
 
 .error-state--hidden {
-  display: none;
+  display: none !important;
 }
 
 .error-state__icon {
-  font-size: 2.4rem;
+  font-size: 4rem;
   color: var(--color-warning);
+  margin-bottom: 1.5rem;
+}
+
+.error-state__text {
+  font-size: 1.6rem;
+  color: #666;
+  margin-bottom: 2rem;
 }
 
 .error-state__retry {
-  padding: 0.8rem 1.6rem;
+  padding: 1rem 3rem;
   background-color: var(--color-primary);
   color: var(--color-surafce);
   border: none;
   border-radius: 2rem;
+  font-size: 1.4rem;
   font-weight: bold;
   cursor: pointer;
   margin-top: var(--spacing-sm);
 }
-
 /* =============================================================FORM TO PLAN OR SEARCH FOR NEW CROP ========================================================== */
 .modal {
   position: fixed;

@@ -25,6 +25,7 @@ import scanView from './views/scanView.js';
 import marketToastView from './views/marketToastView.js';
 import marketDetailView from './views/marketDetailView.js';
 import marketView from './views/marketView.js';
+import networkView from './views/networkView.js';
 
 // --- SOIL TEST CREATION STATE ---
 const creationState = {
@@ -32,10 +33,38 @@ const creationState = {
   linkedCropThreadId: null,
 };
 
+// ==============================================
+// GLOBAL NETWORK STATE
+// ==============================================
+
+const controlOffline = function () {
+  console.warn('Network connection lost.');
+  networkView.show();
+};
+
+const controlOnline = function () {
+  console.log('Network connection restored.');
+  networkView.hide();
+
+  // Optional: If you wanted to automatically refresh data when they reconnect,
+  // you could call your loadListings() or fetch functions here.
+};
+
+const controlRetry = function () {
+  // navigator.onLine is a native browser property that returns true or false
+  if (navigator.onLine) {
+    controlOnline();
+  } else {
+    // Optional: Add a little visual feedback if they click retry but are still offline
+    console.warn('Still offline. Check connection.');
+
+    // You could trigger a toast here if you wanted:
+    // marketToastView.render('Still no connection detected.');
+  }
+};
+
 const controlNavigation = function (clickedBtn) {
   navView.updateActiveState(clickedBtn);
-
-  // LATER
 };
 
 const controlOpenModal = function () {
@@ -720,6 +749,14 @@ const controlMarketSearch = function (query) {
 };
 
 const init = function () {
+  if (!navigator.onLine) {
+    controlOffline();
+  }
+
+  // 2. Register Network Listeners
+  networkView.addHandlerNetwork(controlOffline, controlOnline);
+  networkView.addHandlerRetry(controlRetry);
+
   const didCropsExpire = model.checkExpiredThreads();
   if (didCropsExpire) {
     console.log(`Expired crops removed`);
