@@ -1,4 +1,5 @@
 import * as model from './model/model.js';
+import * as scanModel from './model/scanModel.js';
 import navView from './views/navView.js';
 import modalView from './views/modalView.js';
 import resultsView from './views/resultsView.js';
@@ -19,6 +20,11 @@ import questFlowView from './views/questFlowView.js';
 import diagnosisView from './views/diagnosisView.js';
 import scanHistoryView from './views/scanHistoryView.js';
 import scanView from './views/scanView.js';
+
+// MARKET SECTION
+import marketToastView from './views/marketToastView.js';
+import marketDetailView from './views/marketDetailView.js';
+import marketView from './views/marketView.js';
 
 // --- SOIL TEST CREATION STATE ---
 const creationState = {
@@ -639,6 +645,80 @@ const controlViewHistoricalScan = function (id) {
   );
 };
 
+// ================ MARKET SECTION
+const controlAddListing = async function (listingData) {
+  // 1. Save to LocalStorage via the model
+  const newListing = scanModel.addListing(listingData);
+
+  // 2. Show the success toast (it handles its own 3s timer and slide animations)
+  marketToastView.render('Listing added successfully!');
+
+  // 3. Reset the form just as the toast is sliding back up (approx 2.5s)
+  setTimeout(() => {
+    marketView.resetForm();
+  }, 2500);
+
+  // 4. Background Wikipedia Fetch (Fails silently if network issues)
+  try {
+    // Standard fetch pattern
+    const res = await fetch(
+      `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(newListing.cropName)}`
+    );
+    if (!res.ok) throw new Error('Wiki image not found');
+
+    const data = await res.json();
+    if (data.thumbnail && data.thumbnail.source) {
+      // Update the model with the fetched image
+      scanModel.updateListingImage(newListing.id, data.thumbnail.source);
+      console.log(`Image fetched and saved for ${newListing.cropName}`);
+    }
+  } catch (err) {
+    console.log(
+      'Background Wiki Fetch failed, using fallback later:',
+      err.message
+    );
+  }
+};
+
+const controlToggleBuyer = function () {
+  // Get data from model
+  const listings = scanModel.loadListings();
+  // Pass to view to render
+  marketView.renderListingCards(listings);
+};
+
+// STAGE M11: Show Listing Details
+const controlListingDetail = function (id) {
+  // 1. Fetch full data object from model
+  const listing = scanModel.getListingById(id);
+
+  if (!listing) return; // Guard clause just in case
+
+  // 2. Pass data to detail view and slide it in
+  marketDetailView.render(listing);
+  marketDetailView.show();
+};
+
+// STAGE M12: Real-time Search Filtering
+const controlMarketSearch = function (query) {
+  // 1. Get all listings from the model
+  const allListings = scanModel.loadListings();
+
+  // 2. If the search is empty, restore all cards (Step 3)
+  if (!query) {
+    marketView.renderListingCards(allListings);
+    return;
+  }
+
+  // 3. Filter the array by crop name (Step 4)
+  const filteredListings = allListings.filter((listing) =>
+    listing.cropName.toLowerCase().includes(query)
+  );
+
+  // 4. Render the filtered array, passing the query for the empty state
+  marketView.renderListingCards(filteredListings, query);
+};
+
 const init = function () {
   const didCropsExpire = model.checkExpiredThreads();
   if (didCropsExpire) {
@@ -716,6 +796,11 @@ const init = function () {
   scanView.addHandlerShowHistory(controlShowHistory);
   diagnosisView.addHandlerSaveHistory(controlSaveScan);
   scanHistoryView.addHandlerClickCard(controlViewHistoricalScan);
+  marketView.init();
+  marketView.addHandlerSubmit(controlAddListing);
+  marketView.addHandlerToggleBuyer(controlToggleBuyer);
+  marketView.addHandlerClickCard(controlListingDetail);
+  marketView.addHandlerSearch(controlMarketSearch);
 };
 
 init();

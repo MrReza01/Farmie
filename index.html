@@ -150,6 +150,7 @@
         </div>
       </main>
 
+      <!-- =========== SCAN SECTION ========= -->
       <section class="view view-scan view--hidden" id="view-scan">
         <div class="scan-container">
           <div class="scan-topbar">
@@ -222,6 +223,160 @@
             </button>
           </main>
         </div>
+      </section>
+
+      <!-- ===============MARKET SCETION ========== -->
+      <section class="view view-market view--hidden" id="view-market">
+        <header class="market-header">
+          <div class="market-toggle-container">
+            <span class="toggle-label buyer-label">Buyer</span>
+            <label class="theme-switch">
+              <input type="checkbox" id="market-view-toggle" checked />
+              <span class="slider round"></span>
+            </label>
+            <span class="toggle-label farmer-label active">Farmer</span>
+          </div>
+
+          <h2 class="market-center-label">Farmer View</h2>
+
+          <div class="market-search-wrapper">
+            <input
+              type="text"
+              class="market-search-input"
+              placeholder="Search market..."
+              disabled
+            />
+          </div>
+        </header>
+
+        <div id="market-toast-hook"></div>
+
+        <div class="market-view-farmer ">
+          <p style="padding: 2rem; text-align: center">
+            <form class="market-form" id="add-listing-form">
+  
+  <h3 class="form-heading">Create a New Listing</h3>
+
+  <div class="form-group">
+    <label for="market-crop-name">Crop Name</label>
+    <input type="text" id="market-crop-name" name="cropName" required placeholder="e.g., Maize, Cassava">
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="market-quantity">Quantity</label>
+      <div class="input-group">
+        <input type="number" id="market-quantity" name="quantity" required min="1" placeholder="50">
+        <select id="market-unit" name="unit">
+          <option value="kg">kg</option>
+          <option value="bags">bags</option>
+          <option value="tonnes">tonnes</option>
+        </select>
+      </div>
+    </div>
+    <div class="form-group">
+      <label for="market-price">Price per Unit (₦)</label>
+      <input type="number" id="market-price" name="price" required min="1" placeholder="15000">
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="market-location">Farm Location</label>
+    <input type="text" id="market-location" name="location" required placeholder="e.g., Moniya, Oyo State">
+  </div>
+
+  <div class="form-group">
+    <label>Availability</label>
+    <div class="tappable-options">
+      <label class="tappable-btn">
+        <input type="radio" name="availability" value="now" checked>
+        <span class="tappable-content">Available Now</span>
+      </label>
+      <label class="tappable-btn">
+        <input type="radio" name="availability" value="soon">
+        <span class="tappable-content">Coming Soon</span>
+      </label>
+    </div>
+  </div>
+
+  <div class="form-group date-picker-group hidden-field">
+    <label for="market-date">Date Available</label>
+    <input type="date" id="market-date" name="availableDate">
+  </div>
+
+  <div class="form-row">
+    <div class="form-group">
+      <label for="market-discount">Discount <span class="optional-label">(optional)</span></label>
+      <div class="input-group">
+        <input type="number" id="market-discount" name="discount" min="0" max="100" placeholder="10">
+        <span class="input-addon">%</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="form-group">
+    <label for="market-description">Description <span class="optional-label">(optional)</span></label>
+    <textarea id="market-description" name="description" rows="3" placeholder="Add any details about crop quality, farm practices, etc."></textarea>
+  </div>
+
+  <button type="submit" class="btn-market-submit">List Crop on Market</button>
+
+</form>
+          </p>
+        </div>
+
+   <div class="market-view-buyer view--hidden">
+  
+  <div class="buyer-grid">
+    
+    <!-- <article class="listing-card">
+      <div class="card-body" tabindex="0" role="button" aria-label="View details for Maize">
+        <span class="discount-badge">10% OFF</span>
+        
+        <div class="card-image-wrapper bg-maize">
+          <div class="crop-image-placeholder"></div>
+        </div>
+        
+        <div class="card-content">
+          <h4 class="card-title">Maize</h4>
+          
+          <div class="card-pricing has-discount">
+            <span class="price-original">₦15000 / bag</span>
+            <span class="price-discounted">₦13500 / bag</span>
+          </div>
+          
+          <p class="card-availability">Available Now • Moniya, Oyo</p>
+        </div>
+      </div>
+      
+       <a href="https://mrreza.netlify.app" target="_blank" class="btn-contact-farmer">Contact Farmer</a>
+    </article>
+
+    <article class="listing-card">
+      <div class="card-body" tabindex="0" role="button" aria-label="View details for Cassava">
+        
+        <div class="card-image-wrapper bg-cassava">
+          <div class="crop-image-placeholder"></div>
+        </div>
+        
+        <div class="card-content">
+          <h4 class="card-title">Cassava Tubers</h4>
+          
+          <div class="card-pricing">
+            <span class="price-current">₦8000 / tonne</span>
+          </div>
+          
+          <p class="card-availability">Coming Soon • Iseyin, Oyo</p>
+        </div>
+      </div>
+      
+      <a href="https://mrreza.netlify.app" target="_blank" class="btn-contact-farmer">Contact Farmer</a>
+    </article> -->
+
+  </div>
+</div>
+
+<div id="market-detail-hook"></div>
       </section>
 
       <!-- PLAN NEW CROP -->

@@ -13,6 +13,43 @@ export const state = {
 
   // scan section
   scanHistory: [],
+
+  // MARKET SECTION
+
+  // Seeded with the two placeholder listings from Stage M5
+  marketListings: [
+    {
+      id: 'seed-1',
+      cropName: 'Maize',
+      quantity: 50,
+      unit: 'bags',
+      price: 15000,
+      location: 'Moniya, Oyo State',
+      availability: 'now',
+      availableDate: null,
+      discount: 10,
+      description:
+        'Freshly harvested maize, excellent quality. Ready for pickup at the farm gate.',
+      imageUrl: null,
+      discountedPrice: 13500, // Pre-calculated
+      createdAt: new Date(Date.now() - 100000).toISOString(), // Slightly older timestamp
+    },
+    {
+      id: 'seed-2',
+      cropName: 'Cassava Tubers',
+      quantity: 10,
+      unit: 'tonnes',
+      price: 8000,
+      location: 'Iseyin, Oyo State',
+      availability: 'soon',
+      availableDate: '2026-05-01',
+      discount: null,
+      description: 'High-yield cassava variety, perfect for garri processing.',
+      imageUrl: null,
+      discountedPrice: null,
+      createdAt: new Date(Date.now() - 200000).toISOString(), // Even older timestamp
+    },
+  ],
 };
 
 /**
