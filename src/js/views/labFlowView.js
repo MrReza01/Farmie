@@ -1,37 +1,46 @@
 class LabFlowView {
   _parentElement = document.querySelector('.view-soil');
 
+  /**
+   * @description Injects the lab report flow markup into the soil view.
+   * @returns {void}
+   */
   render() {
-    // Inject the markup directly into the soil view
     const markup = this._generateMarkup();
     this._parentElement.insertAdjacentHTML('beforeend', markup);
   }
 
-  // We will wire this up in the next step to close the form
+  /**
+   * @description Attaches a handler for the close button click event within the lab flow.
+   * @param {Function} handler - The controller function to handle closing the flow.
+   * @returns {void}
+   */
   addHandlerClose(handler) {
     this._parentElement.addEventListener('click', function (e) {
-      // THE FIX: Strictly scope this to the Lab Report container!
       const btnClose = e.target.closest('#flow-lab-report .btn-close-flow');
       if (!btnClose) return;
       handler();
     });
   }
 
-  // Extracts data and sends it to the Controller
+  /**
+   * @description Attaches a handler for the form submission and extracts soil lab data.
+   * @param {Function} handler - The controller function to process the lab data.
+   * @returns {void}
+   */
   addHandlerSubmit(handler) {
     this._parentElement.addEventListener('submit', function (e) {
       const form = e.target.closest('.soil-lab-form');
       if (!form) return;
 
-      e.preventDefault(); // Stop page reload
+      e.preventDefault();
 
-      // Gather the data from the form
       const formData = {
         ph: parseFloat(form.querySelector('#lab-ph').value),
         n: form.querySelector('#lab-n').value,
         p: form.querySelector('#lab-p').value,
         k: form.querySelector('#lab-k').value,
-        // Only parse OM if a value was actually typed in
+        // Converts string to float only if input is not empty to avoid NaN
         om: form.querySelector('#lab-om').value
           ? parseFloat(form.querySelector('#lab-om').value)
           : null,
@@ -41,7 +50,10 @@ class LabFlowView {
     });
   }
 
-  // Removes the form from the DOM completely
+  /**
+   * @description Removes the lab report flow container from the DOM.
+   * @returns {void}
+   */
   remove() {
     const flowContainer = document.getElementById('flow-lab-report');
     if (flowContainer) flowContainer.remove();

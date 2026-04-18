@@ -5,6 +5,11 @@ class DashboardView {
   _deleteModalInjected = false;
   _cropToDeleteId = null;
 
+  /**
+   * @description Renders the crop cards to the dashboard or displays an empty state if no data exists.
+   * @param {Array} data - Array of crop thread objects to be rendered.
+   * @returns {void}
+   */
   render(data) {
     const emptyState = document.querySelector('.empty-state');
 
@@ -20,7 +25,6 @@ class DashboardView {
     const markup = data.map(this._generateMarkup.bind(this)).join('');
     this._parentElement.insertAdjacentHTML('afterbegin', markup);
 
-    // NEW FIX: Instantly snap the dashboard to the top the exact moment new data is rendered!
     const dashboardContainer = document.querySelector('.view-dashboard');
     if (dashboardContainer) {
       dashboardContainer.scrollTop = 0;
@@ -47,7 +51,6 @@ class DashboardView {
       ? `<div class="crop-card__warning-badge"><i class="fa-solid fa-triangle-exclamation"></i> Action Required</div>`
       : '';
 
-    // 3. Return the HTML
     return `
     <div class="crop-card" data-id="${thread.id}">
       <div class="crop-card__image-container">
@@ -87,10 +90,15 @@ class DashboardView {
     `;
   }
 
+  /**
+   * @description Attaches a click handler to the dashboard crops list for navigating to crop details.
+   * @param {Function} handler - The controller function to handle the selection.
+   * @returns {void}
+   */
   addHandlerClickCrop(handler) {
     this._parentElement.addEventListener('click', function (e) {
       if (e.target.closest('.card-menu')) return;
-      // BUG FIX: Added the missing period (.) so it correctly finds the CSS class!
+      // Finds the specific card element within the dashboard list
       const clickedCard = e.target.closest('.crop-card');
 
       if (!clickedCard) return;
@@ -100,10 +108,13 @@ class DashboardView {
     });
   }
 
+  /**
+   * @description Attaches event handlers for managing the crop card dropdown menus and delete actions.
+   * @returns {void}
+   */
   addHandlerCardMenu() {
-    // BUG FIX: Using (e) => ensures 'this' successfully triggers the Danger Modal!
     this._parentElement.addEventListener('click', (e) => {
-      // 1. If they click the new "X" button, just close the menu!
+      // Closes menu if the close button is clicked
       if (e.target.closest('.btn-close-dropdown')) {
         document
           .querySelectorAll('.card-menu__dropdown')
@@ -142,7 +153,6 @@ class DashboardView {
       }
     });
 
-    // 4. Click anywhere else on the screen to close the menu
     window.addEventListener('click', () => {
       document.querySelectorAll('.card-menu__dropdown').forEach((dropdown) => {
         dropdown.classList.remove('card-menu__dropdown--active');
@@ -150,11 +160,9 @@ class DashboardView {
     });
   }
 
-  // --- STAGE B7: DELETE MODAL UI ---
   _injectDeleteModal() {
     if (this._deleteModalInjected) return;
 
-    // Notice this HTML uses the exact CSS classes we added earlier!
     const markup = `
       <div class="modal-overlay" id="delete-modal">
         <div class="delete-modal">
@@ -172,13 +180,10 @@ class DashboardView {
     `;
     document.body.insertAdjacentHTML('beforeend', markup);
 
-    // 1. Cancel button logic
     document
       .getElementById('btn-cancel-delete')
       .addEventListener('click', () => this.hideDeleteModal());
 
-    // 2. Yes, Delete logic (With debug logs!)
-    // 2. Yes, Delete logic (Cleaned up for production)
     document
       .querySelector('.btn-delete-confirm')
       .addEventListener('click', () => {
@@ -194,30 +199,48 @@ class DashboardView {
     this._deleteModalInjected = true;
   }
 
+  /**
+   * @description Displays the delete confirmation modal for a specific crop plan.
+   * @param {string} id - The ID of the crop thread to be marked for deletion.
+   * @returns {void}
+   */
   showDeleteModal(id) {
     this._injectDeleteModal();
-    this._cropToDeleteId = id; // Save the ID so the 'Yes' button knows what to destroy
+    this._cropToDeleteId = id;
     document
       .getElementById('delete-modal')
       .classList.add('modal-overlay--active');
   }
 
+  /**
+   * @description Hides the delete confirmation modal.
+   * @returns {void}
+   */
   hideDeleteModal() {
     const modal = document.getElementById('delete-modal');
     if (modal) modal.classList.remove('modal-overlay--active');
     this._cropToDeleteId = null;
   }
 
+  /**
+   * @description Attaches a handler to be executed when the user confirms deletion in the modal.
+   * @param {Function} handler - The controller function to handle deletion logic.
+   * @returns {void}
+   */
   addHandlerDeleteConfirm(handler) {
-    this._deleteHandler = handler; // Saves the controller function for the Yes button
+    this._deleteHandler = handler;
   }
 
+  /**
+   * @description Removes a specific crop card from the DOM with a transition.
+   * @param {string} id - The ID of the crop card to remove.
+   * @returns {void}
+   */
   removeCropCard(id) {
     const card = this._parentElement.querySelector(
       `.crop-card[data-id="${id}"]`
     );
     if (card) {
-      // Smooth fade-out animation before removing it from the DOM
       card.style.opacity = '0';
       card.style.transform = 'scale(0.9)';
       card.style.transition = 'all 0.3s ease';

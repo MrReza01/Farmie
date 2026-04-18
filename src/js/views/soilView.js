@@ -1,17 +1,19 @@
 class SoilView {
-  // Assuming this is the container for the soil dashboard/homepage
   _parentElement = document.querySelector('.view-soil');
   _emptyState = document.querySelector('.soil-empty-state');
   _threadsContainer = document.querySelector('.soil-threads-list');
 
-  // Renders the Results using ACTUAL AI Data
+  /**
+   * @description Renders the soil analysis results using AI data and configures result view interaction.
+   * @param {Object} thread - The soil thread object containing analysis results and form data.
+   * @returns {void}
+   */
   renderResultView(thread) {
     this.toggleDashboardVisibility(false);
 
     const existingView = document.getElementById('flow-results-view');
     if (existingView) existingView.remove();
 
-    // Extract the AI results and the source
     const results = thread.results;
     const source = thread.formData.source;
     const disclaimerClass =
@@ -72,12 +74,10 @@ class SoilView {
 
     this._parentElement.insertAdjacentHTML('beforeend', markup);
 
-    // Both buttons can just close the view and go back to dashboard
+    // Both navigation and action buttons restore the dashboard state
     const closeHandler = () => {
       document.getElementById('flow-results-view').remove();
       this.toggleDashboardVisibility(true);
-      // Optional: Refresh the dashboard cards here so the "Completed" status shows
-      // soilView.renderDashboardCards(model.state.soilThreads);
     };
 
     document
@@ -87,10 +87,6 @@ class SoilView {
       .querySelector('.btn-save-results')
       .addEventListener('click', closeHandler);
   }
-  // The stub requested in your blueprint (we will wire data into this later)
-  // renderSoilResults(test, _thread) {
-  //   // TODO in C5-C8: Accept real data, clear the container, and render dynamic markup
-  // }
 
   _generateResultsMarkup() {
     return `
@@ -153,22 +149,27 @@ class SoilView {
     `;
   }
 
-  // Toggles between the empty state and the list view
+  /**
+   * @description Toggles the visibility between the empty state placeholder and the active threads list.
+   * @param {boolean} hasThreads - Indicates if there are existing soil threads to display.
+   * @returns {void}
+   */
   toggleEmptyState(hasThreads) {
     if (hasThreads) {
-      // Hide empty state, show list
       this._emptyState.classList.add('soil-view__empty-state--hidden');
       this._threadsContainer.classList.remove('soil-threads-list--hidden');
     } else {
-      // Show empty state, hide list
       this._emptyState.classList.remove('soil-view__empty-state--hidden');
       this._threadsContainer.classList.add('soil-threads-list--hidden');
     }
   }
 
-  // Generates and injects a single thread card
+  /**
+   * @description Generates and injects a formatted soil test thread card into the dashboard.
+   * @param {Object} thread - The soil thread data object to render.
+   * @returns {void}
+   */
   renderSoilCard(thread) {
-    // 1. Icon & Color configuration mapping
     const methodConfig = {
       'lab-report': { icon: 'fa-flask', borderClass: 'soil-card--lab' },
       'basic-kit': { icon: 'fa-vial', borderClass: 'soil-card--kit' },
@@ -180,7 +181,6 @@ class SoilView {
     };
     const config = methodConfig[thread.method] || methodConfig['basic-kit'];
 
-    // 2. Status Pill configuration
     const statusConfig = {
       pending: '<span class="status-pill status-pill--pending">Pending</span>',
       completed:
@@ -190,12 +190,10 @@ class SoilView {
     };
     const statusMarkup = statusConfig[thread.status] || statusConfig['pending'];
 
-    // 3. Linked Crop Pill (Only render if linked)
     const linkedMarkup = thread.linkedCropThreadId
-      ? `<div class="soil-card__linked-crop"><i class="fas fa-link"></i> Linked Crop</div>` // Note: In a real flow, you'd fetch the actual crop name
+      ? `<div class="soil-card__linked-crop"><i class="fas fa-link"></i> Linked Crop</div>`
       : '';
 
-    // 4. Results Summary (Only render if status is not pending)
     const resultsMarkup =
       thread.status !== 'pending' && thread.tests.length > 0
         ? `
@@ -206,7 +204,6 @@ class SoilView {
       `
         : '';
 
-    // 5. Build the final HTML string
     const markup = `
       <div class="soil-card ${config.borderClass}" data-id="${thread.id}">
         
@@ -234,25 +231,29 @@ class SoilView {
       </div>
     `;
 
-    // 6. Inject into the DOM
-    this._threadsContainer.insertAdjacentHTML('afterbegin', markup); // Puts the newest card at the top
+    this._threadsContainer.insertAdjacentHTML('afterbegin', markup);
   }
 
-  // Hides/Shows the dashboard elements when a flow is active
+  /**
+   * @description Manages visibility of main dashboard components when entering or exiting sub-flows.
+   * @param {boolean} show - Whether to show or hide the dashboard list and action area.
+   * @returns {void}
+   */
   toggleDashboardVisibility(show) {
     const actionArea = document.querySelector('.soil-action-area');
     if (show) {
-      // Bring the list and button back
       this._threadsContainer.classList.remove('soil-threads-list--hidden');
       if (actionArea) actionArea.style.display = 'flex';
     } else {
-      // Hide them so the form takes over
       this._threadsContainer.classList.add('soil-threads-list--hidden');
       if (actionArea) actionArea.style.display = 'none';
     }
   }
 
-  // Shows the loading spinner
+  /**
+   * @description Injects and displays a loading spinner overlay.
+   * @returns {void}
+   */
   renderSpinner() {
     const markup = `
       <div class="soil-spinner-overlay" id="soil-spinner">
@@ -263,11 +264,9 @@ class SoilView {
     document.body.insertAdjacentHTML('beforeend', markup);
   }
 
-  // --- DELETE MODAL UI ---
   _injectDeleteModal() {
     if (this._deleteModalInjected) return;
 
-    // Notice we use unique IDs (delete-soil-modal) so it doesn't clash with the Crop modal!
     const markup = `
       <div class="modal-overlay" id="delete-soil-modal">
         <div class="delete-modal">
@@ -285,12 +284,10 @@ class SoilView {
     `;
     document.body.insertAdjacentHTML('beforeend', markup);
 
-    // 1. Cancel button logic
     document
       .getElementById('btn-cancel-soil-delete')
       .addEventListener('click', () => this.hideDeleteModal());
 
-    // 2. Yes, Delete logic
     document
       .getElementById('btn-confirm-soil-delete')
       .addEventListener('click', () => {
@@ -305,6 +302,11 @@ class SoilView {
     this._deleteModalInjected = true;
   }
 
+  /**
+   * @description Displays the delete confirmation modal for a specific soil test.
+   * @param {string} id - The unique ID of the soil thread to be deleted.
+   * @returns {void}
+   */
   showDeleteModal(id) {
     this._injectDeleteModal();
     this._soilToDeleteId = id;
@@ -313,33 +315,48 @@ class SoilView {
       .classList.add('modal-overlay--active');
   }
 
+  /**
+   * @description Hides the soil test delete confirmation modal.
+   * @returns {void}
+   */
   hideDeleteModal() {
     const modal = document.getElementById('delete-soil-modal');
     if (modal) modal.classList.remove('modal-overlay--active');
     this._soilToDeleteId = null;
   }
 
+  /**
+   * @description Attaches a handler to be executed when the user confirms a soil test deletion.
+   * @param {Function} handler - The controller function to handle deletion logic.
+   * @returns {void}
+   */
   addHandlerDeleteConfirm(handler) {
     this._deleteHandler = handler;
   }
 
-  // --- TRASH CAN CLICK LISTENER ---
+  /**
+   * @description Attaches a click event listener to handle deletion requests via soil card trash icons.
+   * @returns {void}
+   */
   addHandlerDeleteIconClick() {
     this._parentElement.addEventListener('click', (e) => {
       const deleteBtn = e.target.closest('.btn-delete-soil');
       if (!deleteBtn) return;
 
-      e.stopPropagation(); // Stop the card from opening!
+      e.stopPropagation();
 
       const card = deleteBtn.closest('.soil-card');
       if (!card) return;
 
-      // Show the beautiful modal instead of the ugly browser confirm()
       this.showDeleteModal(card.dataset.id);
     });
   }
 
-  // --- SMOOTH FADE OUT ANIMATION ---
+  /**
+   * @description Removes a soil thread card from the DOM with a scale and fade transition.
+   * @param {string} id - The unique ID of the card to be removed.
+   * @returns {void}
+   */
   removeSoilCard(id) {
     const card = this._parentElement.querySelector(
       `.soil-card[data-id="${id}"]`
@@ -348,22 +365,28 @@ class SoilView {
       card.style.opacity = '0';
       card.style.transform = 'scale(0.9)';
       card.style.transition = 'all 0.3s ease';
+      // Synchronize DOM removal with CSS transition duration
       setTimeout(() => card.remove(), 300);
     }
   }
 
-  // Removes the loading spinner
+  /**
+   * @description Removes the loading spinner overlay from the DOM.
+   * @returns {void}
+   */
   removeSpinner() {
     const spinner = document.getElementById('soil-spinner');
     if (spinner) spinner.remove();
   }
 
-  // Listens for clicks on any soil thread card
+  /**
+   * @description Attaches a click event listener to soil thread cards for navigation to details.
+   * @param {Function} handler - The controller function to handle thread selection.
+   * @returns {void}
+   */
   addHandlerClickCard(handler) {
     this._threadsContainer.addEventListener('click', function (e) {
-      // THE FIX: If the user clicked the delete button, ignore the click entirely!
       if (e.target.closest('.btn-delete-soil')) return;
-      // Find the closest card element that was clicked
       const card = e.target.closest('.soil-card');
       if (!card) return;
 

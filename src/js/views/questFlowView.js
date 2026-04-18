@@ -1,9 +1,8 @@
 class QuestFlowView {
   _parentElement = document.querySelector('.view-soil');
   _currentStep = 0;
-  _answers = {}; // Stores the answers as they progress
+  _answers = {};
 
-  // The complete questionnaire data
   _questions = [
     {
       id: 'q1-color',
@@ -49,12 +48,15 @@ class QuestFlowView {
     },
   ];
 
+  /**
+   * @description Injects the questionnaire base markup into the soil view and starts the first step.
+   * @returns {void}
+   */
   render() {
     this.remove();
-    this._currentStep = 0; // Reset on open
-    this._answers = {}; // Reset answers
+    this._currentStep = 0;
+    this._answers = {};
 
-    // Inject the base container
     const baseMarkup = `
       <div class="soil-input-flow soil-input-flow--quest" id="flow-questionnaire">
         <div class="soil-input-flow__header">
@@ -68,14 +70,9 @@ class QuestFlowView {
     `;
     this._parentElement.insertAdjacentHTML('beforeend', baseMarkup);
 
-    // Render the first question
     this._renderCurrentStep();
     this._attachInternalListeners();
   }
-
-  // --------------------------------------------------
-  // INTERNAL UI LOGIC
-  // --------------------------------------------------
 
   _renderCurrentStep() {
     const container = document.getElementById('quest-form-container');
@@ -85,7 +82,6 @@ class QuestFlowView {
     const currentQ = this._questions[this._currentStep];
     progressText.textContent = `Question ${this._currentStep + 1} of ${this._questions.length}`;
 
-    // Generate the large tappable radio buttons
     const optionsMarkup = currentQ.options
       .map(
         (opt, index) => `
@@ -97,11 +93,10 @@ class QuestFlowView {
       )
       .join('');
 
-    // If it's the last step, show "Get Results", otherwise show "Next"
     const buttonText =
       this._currentStep === this._questions.length - 1 ? 'Get Results' : 'Next';
     const buttonColor =
-      this._currentStep === this._questions.length - 1 ? '#74C69D' : '#495057'; // Accent color for final submit
+      this._currentStep === this._questions.length - 1 ? '#74C69D' : '#495057';
 
     container.innerHTML = `
       <h3 class="quest-question-title">${currentQ.title}</h3>
@@ -111,7 +106,6 @@ class QuestFlowView {
       <button type="submit" class="btn-submit-flow btn-quest-next" style="background-color: ${buttonColor};" disabled>${buttonText}</button>
     `;
 
-    // Re-attach validation so the Next button unlocks when an option is tapped
     this._attachValidation();
   }
 
@@ -119,18 +113,14 @@ class QuestFlowView {
     const flowContainer = document.getElementById('flow-questionnaire');
     if (!flowContainer) return;
 
-    // Handle "Back" Button
     flowContainer.addEventListener('click', (e) => {
       const backBtn = e.target.closest('#btn-quest-back');
       if (!backBtn) return;
 
       if (this._currentStep > 0) {
-        // Go back one step
         this._currentStep--;
         this._renderCurrentStep();
       } else {
-        // If on Step 1, the controller handles closing the flow completely
-        // We fire a custom event that the controller will listen to
         flowContainer.dispatchEvent(
           new CustomEvent('closeFlowReq', { bubbles: true })
         );
@@ -142,45 +132,46 @@ class QuestFlowView {
     const form = document.getElementById('quest-form-container');
     const nextBtn = form.querySelector('.btn-quest-next');
 
-    // Listen for radio selections to enable the Next button instantly
     form.addEventListener('change', () => {
       const isChecked = form.querySelector('input[type="radio"]:checked');
       if (isChecked) nextBtn.disabled = false;
     });
   }
 
-  // --------------------------------------------------
-  // CONTROLLER COMMUNICATION
-  // --------------------------------------------------
-
+  /**
+   * @description Attaches a listener for the custom close event fired when navigating back from the first question.
+   * @param {Function} handler - The controller function to handle closing the flow.
+   * @returns {void}
+   */
   addHandlerClose(handler) {
-    // Listens for the custom event fired when Back is clicked on Step 1
     this._parentElement.addEventListener('closeFlowReq', function (e) {
       if (!e.target.closest('#flow-questionnaire')) return;
       handler();
     });
   }
 
+  /**
+   * @description Attaches a submit listener to the questionnaire form to handle navigation between steps or final submission.
+   * @param {Function} handler - The controller function to process the final questionnaire data.
+   * @returns {void}
+   */
   addHandlerSubmit(handler) {
     this._parentElement.addEventListener('submit', (e) => {
       const form = e.target.closest('#quest-form-container');
       if (!form) return;
       e.preventDefault();
 
-      // 1. Save the answer from the current screen
       const currentQ = this._questions[this._currentStep];
       const selectedValue = form.querySelector(
         'input[type="radio"]:checked'
       ).value;
       this._answers[currentQ.id] = selectedValue;
 
-      // 2. Decide what to do next
+      // Progresses to the next question or submits the final dataset to the handler
       if (this._currentStep < this._questions.length - 1) {
-        // Move to next question
         this._currentStep++;
         this._renderCurrentStep();
       } else {
-        // Final step submitted! Send all answers to Controller
         const finalData = {
           source: 'questionnaire',
           color: this._answers['q1-color'],
@@ -193,6 +184,10 @@ class QuestFlowView {
     });
   }
 
+  /**
+   * @description Removes the questionnaire flow container from the DOM.
+   * @returns {void}
+   */
   remove() {
     const flowContainer = document.getElementById('flow-questionnaire');
     if (flowContainer) flowContainer.remove();

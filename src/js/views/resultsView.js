@@ -3,6 +3,11 @@ class ResultsView {
   _data;
   _currentDayIndex = 0;
 
+  /**
+   * @description Renders the results view with the provided data and updates button visibility.
+   * @param {Object} data - The results data object containing daily weather and AI advice.
+   * @returns {void}
+   */
   render(data) {
     this._data = data;
     const markup = this._generateMarkup();
@@ -11,6 +16,10 @@ class ResultsView {
     this._syncAddCropButtonVisibility();
   }
 
+  /**
+   * @description Displays a loading spinner with cycling messages while the plan is being generated.
+   * @returns {void}
+   */
   renderSpinner() {
     const messages = [
       'Checking weather conditions',
@@ -42,12 +51,14 @@ class ResultsView {
     const textEl = this._parentElement.querySelector('.loader__text');
 
     this._loaderInterval = setInterval(() => {
+      // Cycles through messages with a fade transition effect
       index = (index + 1) % messages.length;
       textEl.classList.add('loader__text--fade');
 
       setTimeout(() => {
         textEl.textContent = messages[index];
         textEl.classList.remove('loader__text--fade');
+        // Matches the CSS transition duration for smoothness
       }, 300);
     }, 2000);
   }
@@ -76,6 +87,10 @@ class ResultsView {
     );
   }
 
+  /**
+   * @description Attaches event listeners for the carousel navigation between different result days.
+   * @returns {void}
+   */
   addHandlerCarousel() {
     this._parentElement.addEventListener('click', (e) => {
       const btnPrev = e.target.closest('.btn-nav--prev');
@@ -96,6 +111,7 @@ class ResultsView {
       }
 
       this.render(this._data);
+      // Re-renders view and forces detail visibility on day switch for better UX
 
       const detailsContainer = document.querySelector('.results__details');
       const icon = document.querySelector('.btn-toggle-details i');
@@ -112,6 +128,11 @@ class ResultsView {
     });
   }
 
+  /**
+   * @description Attaches a click event listener to handle closing the results view.
+   * @param {Function} handler - The controller function to execute when closing results.
+   * @returns {void}
+   */
   addHandlerClose(handler) {
     this._parentElement.addEventListener('click', function (e) {
       const btn = e.target.closest('.btn-close-results');
@@ -121,6 +142,11 @@ class ResultsView {
     });
   }
 
+  /**
+   * @description Attaches a click event listener to handle adding a crop to the dashboard.
+   * @param {Function} handler - The controller function to execute when adding a crop.
+   * @returns {void}
+   */
   addHandlerAddCrop(handler) {
     this._parentElement.addEventListener('click', function (e) {
       const btn = e.target.closest('.btn-add-crop');
@@ -147,6 +173,7 @@ class ResultsView {
       'results__details--hidden'
     );
 
+    // Ensures the CTA button is only visible when the user is viewing the full plan details
     if (isDetailsVisible) {
       addCropBtn.classList.remove('btn-add-crop--hidden');
     } else {

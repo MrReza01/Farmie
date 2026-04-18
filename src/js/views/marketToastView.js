@@ -2,34 +2,39 @@ class MarketToastView {
   _parentElement = document.querySelector('#market-toast-hook');
   _timeoutId;
 
-  // Render the toast and trigger the slide-down animation
+  /**
+   * @description Renders the success toast message and manages the entry/exit animations.
+   * @param {string} [message='Listing added successfully'] - The message to display.
+   * @returns {void}
+   */
   render(message = 'Listing added successfully') {
     const markup = this._generateMarkup(message);
 
     this.clear();
     this._parentElement.insertAdjacentHTML('afterbegin', markup);
 
-    // Grab the newly injected element
     const toastElement = this._parentElement.querySelector('.market-toast');
 
-    // Force a tiny frame delay so the browser registers the element before adding the visible class
+    // Nested requestAnimationFrame ensures the browser paints the initial state before triggering the CSS transition
     requestAnimationFrame(() => {
       requestAnimationFrame(() => {
         toastElement.classList.add('visible');
       });
     });
 
-    // Clear any existing timeouts to prevent animation glitches if spammed
     if (this._timeoutId) clearTimeout(this._timeoutId);
 
-    // Slide it back up after 3 seconds
     this._timeoutId = setTimeout(() => {
       toastElement.classList.remove('visible');
-      // Wait for the slide-up transition to finish (0.4s) before wiping the HTML
+      // Synchronize DOM cleanup with the duration of the slide-up transition
       setTimeout(() => this.clear(), 400);
     }, 3000);
   }
 
+  /**
+   * @description Clears the toast container's inner HTML.
+   * @returns {void}
+   */
   clear() {
     this._parentElement.innerHTML = '';
   }

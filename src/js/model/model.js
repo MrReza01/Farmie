@@ -6,17 +6,9 @@ export const state = {
   searchLocation: '',
   report: {},
   savedCrops: [],
-
-  // SOIL SECTION
   soilThreads: [],
   cropThreads: [],
-
-  // scan section
   scanHistory: [],
-
-  // MARKET SECTION
-
-  // Seeded with the two placeholder listings from Stage M5
   marketListings: [
     {
       id: 'seed-1',
@@ -32,7 +24,7 @@ export const state = {
         'Freshly harvested maize, excellent quality. Ready for pickup at the farm gate.',
       imageUrl: null,
       discountedPrice: 13500, // Pre-calculated
-      createdAt: new Date(Date.now() - 100000).toISOString(), // Slightly older timestamp
+      createdAt: new Date(Date.now() - 100000).toISOString(),
     },
     {
       id: 'seed-2',
@@ -47,18 +39,11 @@ export const state = {
       description: 'High-yield cassava variety, perfect for garri processing.',
       imageUrl: null,
       discountedPrice: null,
-      createdAt: new Date(Date.now() - 200000).toISOString(), // Even older timestamp
+      createdAt: new Date(Date.now() - 200000).toISOString(),
     },
   ],
 };
 
-/**
- * Generic Deletion Utility
- * @param {Array} collection - The state array to remove from (e.g., state.savedCrops)
- * @param {string} id - The ID of the item to delete
- * @param {Function} persist - The specific save function to call after deletion
- * @returns {boolean} - True if deleted, false if not found
- */
 const deleteItemById = function (collection, id, persist) {
   const index = collection.findIndex((item) => item.id === id);
   if (index === -1) return false;
@@ -76,6 +61,10 @@ const persistSoilThreads = function () {
   localStorage.setItem('farmieSoilThreads', JSON.stringify(state.soilThreads));
 };
 
+/**
+ * @description Persists the current scan history to local storage.
+ * @returns {void}
+ */
 export const persistScanHistory = function () {
   localStorage.setItem('farmieScanHistory', JSON.stringify(state.scanHistory));
 };
@@ -84,20 +73,15 @@ const generateId = function (prefix) {
   return `${prefix}-${Date.now().toString(36)}-${Math.random().toString(36).substr(2, 5)}`;
 };
 
-// export const DEV_MODE = false; // Change to false for Production (5 days)
-// export const EXPIRY_DURATION = DEV_MODE
-//   ? 3 * 60 * 1000
-//   : 5 * 24 * 60 * 60 * 1000;
-
-// export const WARNING_THRESHOLD = DEV_MODE ? 1 * 60 * 1000 : 24 * 60 * 60 * 1000; // 1 minute for Dev, 24 hours for Prod
-
 export const EXPIRY_DURATION = 5 * 24 * 60 * 60 * 1000;
+export const WARNING_THRESHOLD = 24 * 60 * 60 * 1000;
 
-// Add this below EXPIRY_DURATION
-export const WARNING_THRESHOLD = 24 * 60 * 60 * 1000; // 1 minute for Dev, 24 hours for Prod
-
-// Inside your model.js / cropModel.js
-
+/**
+ * @description Fetches weather data for a specified location from the secure backend function.
+ * @param {string} location - The name of the city or region.
+ * @returns {Promise<Object>} The raw weather data object.
+ * @throws {Error} If network connection is lost or the location is not found.
+ */
 export const getWeatherData = async function (location) {
   try {
     if (!navigator.onLine) throw new Error(`No internet connection!`);
@@ -111,7 +95,6 @@ export const getWeatherData = async function (location) {
 
     const data = await res.json();
 
-    // Catch the custom 404 error we threw from the backend for bad spelling
     if (res.status === 404) throw new Error(data.error);
     if (!res.ok) throw new Error('Problem getting the weather report');
 
@@ -127,9 +110,16 @@ export const getWeatherData = async function (location) {
   }
 };
 
+/**
+ * @description Generates a 5-day planting plan by sending crop and weather data to the AI service.
+ * @param {string} crop - The name of the crop.
+ * @param {string} location - The farm location.
+ * @param {Array} weatherData - An array of formatted daily weather objects.
+ * @returns {Promise<Array>} An array of daily advice objects from the AI.
+ * @throws {Error} If the AI response is malformed or the crop is invalid.
+ */
 export const generateAIPlan = async function (crop, location, weatherData) {
   try {
-    // Fetch from your secure backend
     const res = await fetch('/.netlify/functions/generateAIPlan', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -139,7 +129,6 @@ export const generateAIPlan = async function (crop, location, weatherData) {
     if (!res.ok)
       throw new Error(`Could not generate a plan. Please try again.`);
 
-    // The backend already stripped markdown, so we just parse it!
     const rawText = await res.text();
     let planArray;
 
@@ -149,13 +138,11 @@ export const generateAIPlan = async function (crop, location, weatherData) {
       if (start === -1 || end === 0) throw new Error('No JSON array found');
       planArray = JSON.parse(rawText.substring(start, end));
     } catch (parseErr) {
-      rror('Raw AI Output:', rawText);
       throw new Error('The AI provided an unreadable plan. Please try again.', {
         cause: parseErr,
       });
     }
 
-    // Health Checks
     const requiredKeys = ['status', 'advice', 'verdict'];
     const isPlanComplete =
       Array.isArray(planArray) &&
@@ -167,7 +154,6 @@ export const generateAIPlan = async function (crop, location, weatherData) {
       );
 
     if (!isPlanComplete) {
-      rror('Incomplete Plan Structure:', planArray);
       throw new Error('Plan generation was incomplete. Please try again.');
     }
 
@@ -179,7 +165,6 @@ export const generateAIPlan = async function (crop, location, weatherData) {
 
     return planArray;
   } catch (err) {
-    rror('Final Catch Block:', err);
     const userFriendlyMessage =
       err.message.includes("reading 'advice'") ||
       err.message.includes('undefined')
@@ -194,7 +179,6 @@ const processDailyWeather = function (weatherData) {
 
   weatherData.list.forEach((entry) => {
     const date = new Date(entry.dt * 1000).toDateString();
-
     if (!groupedData[date]) groupedData[date] = [];
     groupedData[date].push(entry);
   });
@@ -204,7 +188,6 @@ const processDailyWeather = function (weatherData) {
   return dates.map((date) => {
     const dayEntries = groupedData[date];
 
-    // highest and lowest temperatures
     const maxTemp = Math.max(...dayEntries.map((e) => e.main.temp_max));
     const minTemp = Math.min(...dayEntries.map((e) => e.main.temp_min));
 
@@ -222,17 +205,14 @@ const processDailyWeather = function (weatherData) {
           new Date(e.dt * 1000).getHours() <= 3
       ) || dayEntries[0];
 
-    // CHANCES OF RAIN FALLING
     const maxPop = Math.max(...dayEntries.map((e) => e.pop || 0));
     const rainChance = Math.round(maxPop * 100);
 
-    // Humidity Value
     const avgHumidity = Math.round(
       dayEntries.reduce((sum, e) => sum + e.main.humidity, 0) /
         dayEntries.length
     );
 
-    // Sunlight chnaces
     const avgClouds =
       dayEntries.reduce((sum, e) => sum + e.clouds.all, 0) / dayEntries.length;
     let sunlight = 'Full Sun';
@@ -241,7 +221,6 @@ const processDailyWeather = function (weatherData) {
 
     const description = dayEntry.weather[0].description;
 
-    // Creating the string for date
     const dateObj = new Date(date);
     const dayName = new Intl.DateTimeFormat(`en-US`, {
       weekday: `long`,
@@ -266,6 +245,12 @@ const processDailyWeather = function (weatherData) {
   });
 };
 
+/**
+ * @description Orchestrates the retrieval of weather data and AI planting advice to build a crop report.
+ * @param {string} cropName - The name of the crop.
+ * @param {string} location - The farm location.
+ * @returns {Promise<void>}
+ */
 export const loadCropReport = async function (cropName, location) {
   const sanitizedCrop = cropName.toLowerCase().trim();
   const sanitizedLocation = location.trim();
@@ -276,7 +261,6 @@ export const loadCropReport = async function (cropName, location) {
   const realWeather = await getWeatherData(sanitizedLocation);
   const formattedWeatherArray = processDailyWeather(realWeather);
 
-  // Sending the the weather report to ai
   const aiPlanArray = await generateAIPlan(
     sanitizedCrop,
     sanitizedLocation,
@@ -313,58 +297,48 @@ const getCropImage = async function (cropName) {
   }
 };
 
+/**
+ * @description Creates a new crop thread object, calculates the best planting days, and saves it to the dashboard.
+ * @returns {Promise<Object>} The newly created crop thread object.
+ */
 export const addCropToDashboard = async function () {
-  // 1. Fetch the crop image
   const imageUrl = await getCropImage(state.report.crop);
 
-  // 2. Setup precise timestamps using your Dev Mode variable
   const now = new Date();
   const expiryDate = new Date(now.getTime() + EXPIRY_DURATION);
 
-  // 3. Calculate Best Days based on AI Status
   const verdict = state.report.status || 'success';
   let bestDaysArray;
   let daysString;
   if (verdict === 'warning' || verdict === 'danger') {
-    // Bad weather scenario
     bestDaysArray = [];
     daysString = `Looking at the 5-day forecast, there is no single best day for planting this crop at the moment. I'll keep monitoring the weather for you.`;
   } else {
-    // 1. THE BULLETPROOF FILTER: Keep only the days that are marked as a 'success'
     const goodDays = state.report.dailyData.filter(
       (day) => day.status === 'success'
     );
-
-    // 2. Extract just the date string (e.g., "Apr 10") from those successful days
     bestDaysArray = goodDays.map((day) => day.date);
 
-    // 3. Format the grammar based on how many successful days actually exist
     if (bestDaysArray.length === 0) {
-      // It's possible the overall verdict was good, but no individual day was a perfect 'success'
       daysString = `Looking at the 5-day forecast,there is no single best day to plant this crop at the moment. I'll keep monitoring to find the absolute perfect day.`;
     } else if (bestDaysArray.length === 1) {
       daysString = `Based on the forecast, the absolute best day to plant this crop is ${bestDaysArray[0]}.`;
     } else {
       const lastDay = bestDaysArray.pop();
       daysString = `Based on the forecast, the best days to plant are ${bestDaysArray.join(', ')} and ${lastDay}.`;
-      bestDaysArray.push(lastDay); // Put the last day back so we don't lose the data
+      bestDaysArray.push(lastDay);
     }
   }
 
-  // 4. Construct the dynamic welcome message
   const welcomeText = `Awesome! I've set up your tracking for ${state.report.crop} in ${state.report.location}. ${daysString}`;
 
-  // 5. Construct the ultimate Crop Thread Object (The Blueprint)
   const newCropThread = {
-    // --- Existing App Data ---
     id: Date.now().toString(),
-    crop: state.report.crop.trim().toLowerCase(), // Sanitized
+    crop: state.report.crop.trim().toLowerCase(),
     location: state.report.location,
     dailyData: state.report.dailyData,
     status: 'planning', // App Lifecycle State
     imageUrl: imageUrl,
-
-    // --- Stage B3 Data: Chat & Interactions ---
     soilShortcutDismissed: false,
     chatHistory: [
       {
@@ -373,10 +347,8 @@ export const addCropToDashboard = async function () {
         timestamp: now.toISOString(),
       },
     ],
-
-    // --- Stage A3 Data: Core Logic & Expiry ---
     title: `${state.report.crop} in ${state.report.location}`,
-    coordinates: { lat: null, lon: null }, // Ready for Geocoding API later
+    coordinates: { lat: null, lon: null },
     createdAt: now.toISOString(),
     expiresAt: expiryDate.toISOString(),
     plantedAt: null,
@@ -390,82 +362,83 @@ export const addCropToDashboard = async function () {
     expiryWarningSent: false,
   };
 
-  // 6. Save using your existing logic
   state.savedCrops.unshift(newCropThread);
   persistCrops();
 
   return newCropThread;
 };
+
+/**
+ * @description Checks and removes all unplanted crop threads that have surpassed their expiry duration.
+ * @returns {boolean} True if any threads were deleted, false otherwise.
+ */
 export const checkExpiredThreads = function () {
   const now = new Date();
   const initialLength = state.savedCrops.length;
 
-  // Rebuild the array, keeping ONLY crops that haven't expired OR have been planted
   state.savedCrops = state.savedCrops.filter((crop) => {
     const expiryDate = new Date(crop.expiresAt);
     const isExpired = now >= expiryDate;
 
-    // If it is expired AND the user hasn't planted it yet, delete it!
     if (isExpired && crop.plantedAt === null) {
       `🗑️ Auto-deleted expired crop: ${crop.title}`;
-      return false; // Returning false removes it from the array entirely
+      return false;
     }
-
-    return true; // Keep everything else
+    return true;
   });
 
-  // If the array shrank, it means crops were deleted. Save the new array to LocalStorage!
   if (state.savedCrops.length !== initialLength) {
     persistCrops();
-    return true; // Returns true so the controller knows a deletion occurred
+    return true;
   }
-
   return false;
 };
 
+/**
+ * @description Sets the soil test shortcut as dismissed for a specific crop thread.
+ * @param {string} id - The ID of the crop thread.
+ * @returns {Object|undefined} The updated crop thread object if found.
+ */
 export const dismissSoilShortcut = function (id) {
-  // 1. Find the specific crop in the array
   const crop = state.savedCrops.find((c) => c.id === id);
-
   if (crop) {
-    // 2. Flip the flag
     crop.soilShortcutDismissed = true;
-
-    // 3. Save the change to LocalStorage
     persistCrops();
-
-    // 4. Return the updated crop so the Controller can give it back to the View
     return crop;
   }
 };
 
+/**
+ * @description Adds a user's message to a crop thread's chat history and dismisses the soil shortcut.
+ * @param {string} id - The ID of the crop thread.
+ * @param {string} messageText - The text content of the user's message.
+ * @returns {Object|undefined} The updated crop thread object.
+ */
 export const addUserMessageToThread = function (id, messageText) {
   const crop = state.savedCrops.find((c) => c.id === id);
   if (!crop) return;
 
-  // 1. Add the user's message to the array
   crop.chatHistory.push({
-    role: 'user', // Flags it for the white right-aligned CSS bubble!
+    role: 'user',
     content: messageText,
     timestamp: new Date().toISOString(),
   });
 
-  // 2. THE RULE: Automatically dismiss the soil shortcut forever!
   crop.soilShortcutDismissed = true;
-
-  // 3. Save to LocalStorage
   persistCrops();
-
   return crop;
 };
 
-// --- STAGE B4: AI CHAT LOGIC ---
-
+/**
+ * @description Fetches an AI response for a specific chat message within a crop thread's context.
+ * @param {string} id - The ID of the crop thread.
+ * @param {string} userMessage - The text content provided by the user.
+ * @returns {Promise<string>} The AI's response text.
+ */
 export const getAIResponse = async function (id, userMessage) {
   const cropThread = state.savedCrops.find((c) => c.id === id);
   if (!cropThread) return;
 
-  // 1. SMART STATE INJECTION (Keep exactly as it was!)
   const plantedStatus = cropThread.plantedAt
     ? `Planted on: ${new Date(cropThread.plantedAt).toLocaleDateString()}`
     : `Status: Not planted yet.`;
@@ -481,60 +454,60 @@ export const getAIResponse = async function (id, userMessage) {
   `;
 
   try {
-    // 2. THE SECURE BACKEND CALL
     const response = await fetch('/.netlify/functions/getChatResponse', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      // Pass both the context and the user message to the server
       body: JSON.stringify({ systemContext, userMessage }),
     });
 
     if (!response.ok)
       throw new Error('Network error connecting to local server');
 
-    // 3. Parse the exact reply from our backend
     const data = await response.json();
     return data.reply;
-  } catch (err) {
-    rror('Server/API Error:', err);
-    // Keep your excellent user-friendly fallback message
+  } catch {
     return "Sorry, I'm having a bit of trouble connecting to my agricultural database right now. Please try again in a second!";
   }
 };
 
-// --- UPGRADED SCANNER ---
+/**
+ * @description Scans AI text for agricultural activities and associated timeframes to suggest calendar entries.
+ * @param {string} aiText - The text content to analyze.
+ * @returns {Object|null} An object with activity and time, or null if no match is found.
+ */
 export const detectCalendarActivity = function (aiText) {
   const text = aiText.toLowerCase();
   const keywords = [
-    'fertiliser',
-    'fertilizer',
-    'irrigation',
+    'fertiliser', 'fertilizer', 'irrigation',
     'water',
     'pruning',
     'pest',
     'harvest',
   ];
 
-  // This regex looks for common timeframes. You can expand this later!
   const timeRegex =
     /(today|tomorrow|monday|tuesday|wednesday|thursday|friday|saturday|sunday|in \d+ days|next week|day \d+)/;
 
   const foundActivity = keywords.find((word) => text.includes(word));
   const foundTimeMatch = text.match(timeRegex);
 
-  // THE NEW RULE: We ONLY trigger if we find an activity AND a timeframe!
   if (foundActivity && foundTimeMatch) {
     return {
       activity: foundActivity,
-      time: foundTimeMatch[0], // e.g., 'tomorrow'
+      time: foundTimeMatch[0],
     };
   }
   return null;
 };
 
-// --- UPGRADED MESSAGE SAVER ---
+/**
+ * @description Adds an AI-generated message to a crop thread and scans for calendar-related suggestions.
+ * @param {string} id - The ID of the crop thread.
+ * @param {string} messageText - The text content of the AI's message.
+ * @returns {Object|undefined} The updated crop thread object.
+ */
 export const addAIMessageToThread = function (id, messageText) {
   const crop = state.savedCrops.find((c) => c.id === id);
   if (!crop) return;
@@ -548,7 +521,6 @@ export const addAIMessageToThread = function (id, messageText) {
     role: 'assistant',
     content: messageText,
     timestamp: new Date().toISOString(),
-    // We now save BOTH the activity and the time (or null if the scanner rejected it)
     proposedActivity: detected ? detected.activity : null,
     proposedTime: detected ? detected.time : null,
     activityPromptAnswered: false,
@@ -558,8 +530,15 @@ export const addAIMessageToThread = function (id, messageText) {
   return crop;
 };
 
-// --- UPGRADED CALENDAR RESOLVER ---
-// Note: We added the 'time' parameter here!
+/**
+ * @description Resolves a pending calendar suggestion for a crop thread, either adding the event or skipping it.
+ * @param {string} id - The ID of the crop thread.
+ * @param {string} timestamp - The unique timestamp of the message containing the prompt.
+ * @param {string} activity - The agricultural activity name.
+ * @param {string} time - The timeframe for the activity.
+ * @param {boolean} isAccepted - Whether the user accepted the suggestion.
+ * @returns {Object|undefined} The updated crop thread object.
+ */
 export const resolveCalendarPrompt = function (
   id,
   timestamp,
@@ -570,7 +549,6 @@ export const resolveCalendarPrompt = function (
   const crop = state.savedCrops.find((c) => c.id === id);
   if (!crop) return;
 
-  // Failsafe: Create the events array if it doesn't exist yet for older crops
   if (!crop.calendarEvents) crop.calendarEvents = [];
 
   const targetMessage = crop.chatHistory.find(
@@ -579,14 +557,12 @@ export const resolveCalendarPrompt = function (
   if (targetMessage) targetMessage.activityPromptAnswered = true;
 
   if (isAccepted) {
-    // 1. Save it to our brand new calendar array!
     crop.calendarEvents.push({
       activity: activity,
       time: time,
       addedAt: new Date().toISOString(),
     });
 
-    // 2. Drop the receipt with the timeframe
     crop.chatHistory.push({
       role: 'proactive',
       content: `Farmie added a reminder for ${activity} (${time}) to your calendar.`,
@@ -598,20 +574,20 @@ export const resolveCalendarPrompt = function (
   return crop;
 };
 
-// --- STAGE B5: CONFIRM PLANTING & DYNAMIC AI HARVEST CALCULATION ---
-
+/**
+ * @description Confirms that a crop has been planted, locking in the date and ending the expiration timer.
+ * @param {string} id - The ID of the crop thread.
+ * @returns {Object|undefined} The updated crop thread object.
+ */
 export const confirmPlanting = function (id) {
   const crop = state.savedCrops.find((c) => c.id === id);
   if (!crop) return;
 
   const now = new Date();
-
-  // 1. Instantly lock in the dates and status
   crop.plantedAt = now.toISOString();
   crop.status = 'planted';
-  crop.expiresAt = null; // Stops the 5-day deletion timer forever
+  crop.expiresAt = null;
 
-  // 2. Check if they planted on a recommended day
   const todayName = now.toLocaleDateString('en-US', { weekday: 'long' });
   const isGoodDay =
     crop.bestDays &&
@@ -624,15 +600,16 @@ export const confirmPlanting = function (id) {
   return crop;
 };
 
-// --- NEW API CALL SPECIFICALLY FOR HARVEST CALCULATION ---
-
+/**
+ * @description Requests harvest prediction data and congratulatory advice from the AI based on the planting date.
+ * @param {string} id - The ID of the crop thread.
+ * @returns {Promise<Object>} The updated crop thread object with harvest details.
+ */
 export const getHarvestDataFromAI = async function (id) {
   const crop = state.savedCrops.find((c) => c.id === id);
   if (!crop) return;
 
   const plantedDate = new Date(crop.plantedAt).toLocaleDateString();
-
-  // 1. Give the AI its rules (System)
   const systemPrompt = `You are Farmie, an expert agricultural AI.
   CRITICAL: You must respond in pure JSON format only.
   JSON Format required: { "daysToHarvest": number, "message": "string" }`;
@@ -647,13 +624,11 @@ export const getHarvestDataFromAI = async function (id) {
   3. If they planted on a BAD day (Recommended day: No), include extra care tips to help the crop survive the current weather.`;
 
   try {
-    // 3. Fetch from your NEW secure backend!
     const response = await fetch('/.netlify/functions/getHarvestData', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      // Pass the prompts securely to the server
       body: JSON.stringify({ systemPrompt, userPrompt }),
     });
 
@@ -661,19 +636,13 @@ export const getHarvestDataFromAI = async function (id) {
       throw new Error(`Local Server Error: ${response.status}`);
     }
 
-    // Since the backend sent back the perfectly formatted JSON string, we just parse it:
     const aiData = await response.json();
-
-    // --- APPLY THE AI DATA TO OUR APP ---
-
-    // 1. Calculate the Harvest Date
     const harvestDate = new Date(
       new Date(crop.plantedAt).getTime() +
         aiData.daysToHarvest * 24 * 60 * 60 * 1000
     );
     crop.harvestAt = harvestDate.toISOString();
 
-    // 2. Build the Calendar Events
     if (!crop.calendarEvents) crop.calendarEvents = [];
     crop.calendarEvents.push({
       activity: `Planted ${crop.crop}`,
@@ -695,9 +664,7 @@ export const getHarvestDataFromAI = async function (id) {
 
     persistCrops();
     return crop;
-  } catch (err) {
-    rror('Harvest Calculation Error:', err);
-    // Fallback if internet drops
+  } catch {
     crop.chatHistory.push({
       role: 'assistant',
       content:
@@ -709,47 +676,43 @@ export const getHarvestDataFromAI = async function (id) {
   }
 };
 
-// --- STAGE B7: DELETE CROP THREAD ---
+/**
+ * @description Deletes a crop thread and unlinks any associated soil threads.
+ * @param {string} id - The unique ID of the crop thread to delete.
+ * @returns {boolean} True if deletion was successful.
+ */
 export const deleteCropThread = function (id) {
   const cropToDelete = state.savedCrops.find((c) => c.id === id);
   if (!cropToDelete) return false;
 
-  // 1. CROP-SPECIFIC LOGIC: Unlink Soil Threads
   if (cropToDelete.linkedSoilThreadId && state.soilThreads) {
     const linkedSoil = state.soilThreads.find(
       (s) => s.id === cropToDelete.linkedSoilThreadId
     );
     if (linkedSoil) linkedSoil.linkedCropThreadId = null;
-    // Note: If you have a persistSoil() function, call it here
   }
-
-  // 2. GENERIC LOGIC: Use the utility to erase the data
   return deleteItemById(state.savedCrops, id, persistCrops);
 };
 
-// --- BUMP THREAD TO TOP ---
+/**
+ * @description Moves a specific crop thread to the front of the dashboard list.
+ * @param {string} id - The unique ID of the crop thread.
+ * @returns {void}
+ */
 export const bumpCropToTop = function (id) {
-  // 1. Find where the crop currently sits
   const index = state.savedCrops.findIndex((c) => c.id === id);
 
-  // 2. If it's already at the very top (index 0) or doesn't exist, do nothing!
   if (index <= 0) return;
 
-  // 3. Pluck it out of the array
   const [bumpedCrop] = state.savedCrops.splice(index, 1);
-
-  // 4. Shove it into the very front of the array
   state.savedCrops.unshift(bumpedCrop);
-
-  // 5. Save the new order to Local Storage
   persistCrops();
 };
 
-// ===================================== SOIL SECTION==================================
-
-// --- SOIL THREAD DATABASE METHODS ---
-
-// 1. Load threads from LocalStorage on page load
+/**
+ * @description Loads existing soil threads from local storage into the application state.
+ * @returns {void}
+ */
 export const loadSoilThreads = function () {
   const storage = localStorage.getItem('farmieSoilThreads');
   if (storage) {
@@ -757,20 +720,24 @@ export const loadSoilThreads = function () {
   }
 };
 
-// 2. Create and save a brand new thread (Status: Pending)
+/**
+ * @description Creates and persists a new soil test thread.
+ * @param {string} method - The soil testing method used.
+ * @param {string|null} [linkedCropThreadId=null] - Optional ID of an associated crop thread.
+ * @param {string|null} [cropThreadTitle=null] - Optional title of an associated crop thread.
+ * @returns {Object} The newly created soil thread object.
+ */
 export const saveSoilThread = function (
   method,
   linkedCropThreadId = null,
   cropThreadTitle = null
 ) {
-  // Format today's date (e.g., "3 Apr 2026")
   const dateStr = new Date().toLocaleDateString('en-GB', {
     day: 'numeric',
     month: 'short',
     year: 'numeric',
   });
 
-  // Determine the Title based on linkage rules
   let title;
   if (linkedCropThreadId && cropThreadTitle) {
     title = cropThreadTitle; // Linked to crop
@@ -786,30 +753,30 @@ export const saveSoilThread = function (
     title = `${niceMethodName} — ${dateStr}`;
   }
 
-  // Build the Thread Object perfectly matching your blueprint
   const newThread = {
     id: generateId('soil'),
     title: title,
     method: method,
     createdAt: new Date().toISOString(),
     linkedCropThreadId: linkedCropThreadId,
-    status: 'pending', // Always created as pending first
-    tests: [], // Empty array ready for results later
+    status: 'pending',
+    tests: [],
   };
 
-  // Push to state and save to LocalStorage
   state.soilThreads.push(newThread);
   persistSoilThreads();
-
-  return newThread; // Return the object so the Controller can send it to the View
+  return newThread;
 };
 
-// 3. Update an existing thread (Used later when a test completes)
+/**
+ * @description Updates an existing soil thread with new properties and persists the change.
+ * @param {string} id - The ID of the soil thread to update.
+ * @param {Object} updates - An object containing the property changes.
+ * @returns {void}
+ */
 export const updateSoilThread = function (id, updates) {
   const threadIndex = state.soilThreads.findIndex((thread) => thread.id === id);
   if (threadIndex === -1) return;
-
-  // Merge the new data (updates) into the existing thread
   state.soilThreads[threadIndex] = {
     ...state.soilThreads[threadIndex],
     ...updates,
@@ -817,32 +784,30 @@ export const updateSoilThread = function (id, updates) {
   persistSoilThreads();
 };
 
-// ==========================================
-// MASTER SOIL AI FUNCTION (GROQ / LLAMA 3.1)
-// ==========================================
-
+/**
+ * @description Submits soil test data to the AI service for analysis and updates the corresponding soil thread with the results.
+ * @param {string} threadId - The ID of the soil thread to update.
+ * @param {Object} formData - The raw soil test data submitted by the user.
+ * @returns {Promise<Object>} The updated soil thread object containing analysis results.
+ * @throws {Error} If the soil thread is not found or the analysis fails.
+ */
 export const processSoilTestResult = async function (threadId, formData) {
   try {
-    // 1. Find the specific thread
     const thread = state.soilThreads.find((t) => t.id === threadId);
     if (!thread) throw new Error('Soil thread not found in database.');
 
-    // 2. Check if there is a linked crop to contextualize the prompt
     let cropContext = '';
     if (thread.linkedCropThreadId) {
-      // NOTE: Make sure state.cropThreads exists, or change to state.savedCrops depending on your setup!
       const linkedCrop =
         state.savedCrops?.find((c) => c.id === thread.linkedCropThreadId) ||
         state.cropThreads?.find((c) => c.id === thread.linkedCropThreadId);
 
       if (linkedCrop) {
-        // Use linkedCrop.crop or linkedCrop.cropName depending on your data structure
         const cropName = linkedCrop.crop || linkedCrop.cropName;
         cropContext = `The farmer is specifically growing: ${cropName}. Tailor the summary and amendments to this specific crop's ideal pH and nutrient needs.`;
       }
     }
 
-    // 3. Construct the System Prompt (Strict Rules)
     const systemPrompt = `
       You are an expert agronomist advising a farmer. Analyze the provided soil test data.
       You MUST respond with strictly valid JSON matching this exact structure. Do not include markdown formatting or backticks.
@@ -860,7 +825,6 @@ export const processSoilTestResult = async function (threadId, formData) {
       }
     `;
 
-    // 4. Construct the User Prompt (The Data)
     let sourceNote = '';
     if (formData.source === 'questionnaire')
       sourceNote =
@@ -876,58 +840,53 @@ export const processSoilTestResult = async function (threadId, formData) {
       ${sourceNote}
     `;
 
-    // 5. SECURE FETCH: Hit your new local Netlify Function
     const response = await fetch('/.netlify/functions/processSoilTest', {
       method: 'POST',
       headers: {
         'Content-Type': 'application/json',
       },
-      // Send only the prompts to the backend
       body: JSON.stringify({ systemPrompt, userPrompt }),
     });
 
     if (!response.ok)
       throw new Error('Failed to connect to the secure server.');
 
-    // 6. The backend already cleaned the text, so we just parse it directly
     const parsedResults = await response.json();
-
-    // 7. Update the thread in our database
     thread.status = 'completed';
     thread.results = parsedResults;
-    thread.formData = formData; // Save the raw inputs
+    thread.formData = formData;
     thread.updatedAt = new Date().toISOString();
 
-    // 8. Save to Local Storage
-    // Ensure persistSoilThreads() is available in this scope!
     persistSoilThreads();
-
-    // Return the updated thread so the controller can render it
     return thread;
   } catch (err) {
-    rror('💥 Error processing soil test:', err);
-    throw err; // Re-throw so the controller can show an error UI
+    throw err;
   }
 };
 
+/**
+ * @description Deletes a soil thread and removes its reference from any linked crop thread.
+ * @param {string} id - The ID of the soil thread to delete.
+ * @returns {boolean} True if the deletion was successful.
+ */
 export const deleteSoilThread = function (id) {
   const soilToDelete = state.soilThreads.find((s) => s.id === id);
   if (!soilToDelete) return false;
 
-  // 1. SOIL-SPECIFIC LOGIC: Unlink from Crop Threads
   if (soilToDelete.linkedCropThreadId && state.savedCrops) {
     const linkedCrop = state.savedCrops.find(
       (c) => c.id === soilToDelete.linkedCropThreadId
     );
-    // If the crop still exists, remove the soil connection
     if (linkedCrop) linkedCrop.linkedSoilThreadId = null;
-    persistCrops(); // Save the updated crop database
+    persistCrops();
   }
-
-  // 2. GENERIC LOGIC: Use the utility to erase the soil test
   return deleteItemById(state.soilThreads, id, persistSoilThreads);
 };
 
+/**
+ * @description Loads saved crop data from local storage into the application state.
+ * @returns {void}
+ */
 export const loadSavedCrops = function () {
   const storage = localStorage.getItem('farmieCrops');
   if (storage) {
@@ -935,6 +894,10 @@ export const loadSavedCrops = function () {
   }
 };
 
+/**
+ * @description Loads scan history from local storage into the application state.
+ * @returns {void}
+ */
 export const loadScanHistoryStorage = function () {
   const storage = localStorage.getItem('farmieScanHistory');
   if (storage) {
@@ -945,5 +908,4 @@ export const loadScanHistoryStorage = function () {
 loadSavedCrops();
 loadScanHistoryStorage();
 
-// At the very bottom of src/js/model/model.js
 export * from './scanModel.js';

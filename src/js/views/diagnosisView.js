@@ -207,7 +207,7 @@ class DiagnosisView {
 
       if (btn.disabled) return; // Prevent double saves
 
-      // Call the controller, passing all stored data
+     
       handler(
         this.currentImageData,
         this.currentCropName,

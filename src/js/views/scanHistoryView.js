@@ -1,12 +1,15 @@
 class ScanHistoryView {
   _parentElement = document.querySelector('.view-scan');
 
+  /**
+   * @description Initializes and renders the base history screen markup if it does not already exist.
+   * @returns {void}
+   */
   render() {
     if (!document.getElementById('history-screen')) {
       const markup = this._generateBaseMarkup();
       this._parentElement.insertAdjacentHTML('beforeend', markup);
 
-      // Wire the back arrow immediately after injecting
       this._parentElement
         .querySelector('.btn-close-history')
         .addEventListener('click', () => {
@@ -15,27 +18,32 @@ class ScanHistoryView {
     }
   }
 
+  /**
+   * @description Displays the scan history overlay with a transition effect.
+   * @returns {void}
+   */
   showHistory() {
-    // Grab elements right now
     const headerEl = document.querySelector('.header');
     const navEl = document.querySelector('.bottom-nav');
 
-    // Hide them
     if (headerEl) headerEl.classList.add('u-hidden');
     if (navEl) navEl.classList.add('u-hidden');
 
     const overlay = this._parentElement.querySelector('.history-overlay');
     if (overlay) {
+      // Delay allows the browser to register the element before starting transition
       setTimeout(() => overlay.classList.add('history-overlay--active'), 10);
     }
   }
 
+  /**
+   * @description Hides the scan history overlay and restores the main application layout.
+   * @returns {void}
+   */
   hideHistory() {
-    // Grab elements right now
     const headerEl = document.querySelector('.header');
     const navEl = document.querySelector('.bottom-nav');
 
-    // Restore them
     if (headerEl) headerEl.classList.remove('u-hidden');
     if (navEl) navEl.classList.remove('u-hidden');
 
@@ -43,28 +51,28 @@ class ScanHistoryView {
     if (overlay) overlay.classList.remove('history-overlay--active');
   }
 
-  // --- NEW: DYNAMIC LIST RENDERING ---
+  /**
+   * @description Renders the list of previous scans or an empty state message.
+   * @param {Array} historyData - The array of scan objects to display.
+   * @returns {void}
+   */
   renderHistoryList(historyData) {
-    this.render(); // Ensure the base HTML exists
+    this.render();
 
     const emptyState = document.getElementById('history-empty-state');
     const listContainer = document.getElementById('history-list-container');
 
-    // Clear the current list
     listContainer.innerHTML = '';
 
-    // Handle Empty State
     if (!historyData || historyData.length === 0) {
       emptyState.classList.remove('u-hidden');
       listContainer.classList.add('u-hidden');
       return;
     }
 
-    // Hide empty state, show list
     emptyState.classList.add('u-hidden');
     listContainer.classList.remove('u-hidden');
 
-    // Build and inject cards
     const cardsMarkup = historyData
       .map((scan) => this._generateCardMarkup(scan))
       .join('');
@@ -72,14 +80,12 @@ class ScanHistoryView {
   }
 
   _generateCardMarkup(scan) {
-    // Format the date dynamically using native Intl formatter
     const formattedDate = new Intl.DateTimeFormat('en-GB', {
       day: 'numeric',
       month: 'short',
       year: 'numeric',
     }).format(new Date(scan.date));
 
-    // Fallback if AI didn't catch the disease name
     const title = scan.diagnosis?.diseaseName || 'Unknown Issue';
     const severity = scan.diagnosis?.severity?.toLowerCase() || 'none';
     const severityText = severity.charAt(0).toUpperCase() + severity.slice(1);
@@ -126,9 +132,12 @@ class ScanHistoryView {
     `;
   }
 
-  // --- EVENT LISTENERS ---
+  /**
+   * @description Attaches a click event listener to history cards using event delegation.
+   * @param {Function} handler - The controller function to handle card selection.
+   * @returns {void}
+   */
   addHandlerClickCard(handler) {
-    // Event delegation: listen on the parent because cards are injected dynamically
     this._parentElement.addEventListener('click', (e) => {
       const card = e.target.closest('.history-card');
       if (!card) return;

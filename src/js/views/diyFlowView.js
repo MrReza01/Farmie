@@ -1,21 +1,18 @@
 class DiyFlowView {
   _parentElement = document.querySelector('.view-soil');
 
+  /**
+   * @description Injects the DIY test markup into the parent element and initializes UI listeners.
+   * @returns {void}
+   */
   render() {
-    // 1. Inject the markup
     const markup = this._generateMarkup();
     this._parentElement.insertAdjacentHTML('beforeend', markup);
 
-    // 2. Attach internal listeners for accordions and validation
     this._attachAccordionLogic();
     this._attachValidation();
   }
 
-  // --------------------------------------------------
-  // INTERNAL UI LOGIC
-  // --------------------------------------------------
-
-  // Handles opening and closing the dropdowns
   _attachAccordionLogic() {
     const container = document.getElementById('flow-diy-test');
     if (!container) return;
@@ -24,11 +21,10 @@ class DiyFlowView {
       const headerBtn = e.target.closest('.diy-accordion__header');
       if (!headerBtn) return;
 
-      // Find the content linked to this header
       const content = headerBtn.nextElementSibling;
       const icon = headerBtn.querySelector('.accordion-icon');
 
-      // Toggle visibility (using simple classes, no transitions)
+      // Toggles visibility classes and updates chevron icon direction
       if (content.classList.contains('diy-accordion__content--hidden')) {
         content.classList.remove('diy-accordion__content--hidden');
         icon.classList.replace('fa-chevron-down', 'fa-chevron-up');
@@ -41,29 +37,24 @@ class DiyFlowView {
     });
   }
 
-  // Enables the submit button if AT LEAST ONE field has data
   _attachValidation() {
     const form = document.querySelector('.soil-diy-form');
     const submitBtn = document.querySelector('#flow-diy-test .btn-submit-flow');
     if (!form || !submitBtn) return;
 
-    // Listen to all changes in the form
     form.addEventListener('input', function () {
-      // Get all inputs and selects
       const allInputs = Array.from(form.querySelectorAll('input, select'));
-
-      // Check if any single input has a value
+      // Button is enabled only if at least one field has a non-empty value
       const hasData = allInputs.some((input) => input.value.trim() !== '');
-
-      // Enable or disable the button
       submitBtn.disabled = !hasData;
     });
   }
 
-  // --------------------------------------------------
-  // CONTROLLER COMMUNICATION
-  // --------------------------------------------------
-
+  /**
+   * @description Attaches a handler for the close button click event.
+   * @param {Function} handler - The controller function to handle closing the flow.
+   * @returns {void}
+   */
   addHandlerClose(handler) {
     this._parentElement.addEventListener('click', function (e) {
       const btnClose = e.target.closest('#flow-diy-test .btn-close-flow');
@@ -72,19 +63,21 @@ class DiyFlowView {
     });
   }
 
+  /**
+   * @description Attaches a handler for the form submission and validates result values.
+   * @param {Function} handler - The controller function to process the DIY test data.
+   * @returns {void}
+   */
   addHandlerSubmit(handler) {
     this._parentElement.addEventListener('submit', function (e) {
       const form = e.target.closest('.soil-diy-form');
       if (!form) return;
       e.preventDefault();
 
-      // Gather data from all 5 tests
       const formData = {
         source: 'diy-test',
-        // Test A
         vinegarFizz: form.querySelector('#diy-vinegar').value || null,
         bakingSodaFizz: form.querySelector('#diy-baking-soda').value || null,
-        // Test B
         sandPercent: form.querySelector('#diy-sand').value
           ? parseFloat(form.querySelector('#diy-sand').value)
           : null,
@@ -94,19 +87,16 @@ class DiyFlowView {
         clayPercent: form.querySelector('#diy-clay').value
           ? parseFloat(form.querySelector('#diy-clay').value)
           : null,
-        // Test C
         earthworms: form.querySelector('#diy-worms').value
           ? parseInt(form.querySelector('#diy-worms').value)
           : null,
-        // Test D
         drainageTime: form.querySelector('#diy-drainage').value
           ? parseFloat(form.querySelector('#diy-drainage').value)
           : null,
-        // Test E
         squeezeResult: form.querySelector('#diy-squeeze').value || null,
       };
 
-      // Quick Validation: If they filled out the Jar Test, do they equal 100?
+      // Verifies that Jar Test percentages sum to exactly 100% if provided
       if (
         formData.sandPercent ||
         formData.siltPercent ||
@@ -120,7 +110,7 @@ class DiyFlowView {
           alert(
             'Jar Test values (Sand, Silt, Clay) must add up exactly to 100%. Please check your numbers.'
           );
-          return; // Stop submission
+          return;
         }
       }
 
@@ -128,14 +118,14 @@ class DiyFlowView {
     });
   }
 
+  /**
+   * @description Removes the DIY test flow container from the DOM.
+   * @returns {void}
+   */
   remove() {
     const flowContainer = document.getElementById('flow-diy-test');
     if (flowContainer) flowContainer.remove();
   }
-
-  // --------------------------------------------------
-  // MARKUP GENERATION
-  // --------------------------------------------------
 
   _generateMarkup() {
     return `

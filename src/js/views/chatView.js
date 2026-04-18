@@ -5,7 +5,6 @@ class ChatView {
   _currentThreadId = null;
   _modalInjected = false;
 
-  // --- 1. BUILDS THE "HOUSE" (Runs Once) ---
   _injectChatShell() {
     if (this._isShellInjected) return;
 
@@ -47,22 +46,9 @@ class ChatView {
     this._parentElement.insertAdjacentHTML('beforeend', markup);
     this._chatContainer = document.querySelector('.chat-container');
 
-    // Make the back button work
     this._chatContainer
       .querySelector('.btn-thread-back')
       .addEventListener('click', this.hideChat.bind(this));
-    // Toggle the calendar popup when the icon is clicked
-    // Toggle the calendar popup when the icon is clicked
-    // this._chatContainer
-    //   .querySelector('.thread__calendar-icon')
-    //   .addEventListener('click', (e) => {
-    //     // THE SHIELD: Stop the click from bubbling up to the document!
-    //     e.stopPropagation();
-
-    //     this._chatContainer
-    //       .querySelector('.calendar-popup')
-    //       .classList.toggle('calendar-popup--active');
-    //   });
 
     this._chatContainer
       .querySelector('.btn-confirm-planting')
@@ -70,13 +56,14 @@ class ChatView {
     this._isShellInjected = true;
   }
 
-  // --- STAGE B4: TYPING INDICATOR UI ---
-
+  /**
+   * @description Displays the typing indicator animation in the chat messages container.
+   * @returns {void}
+   */
   showTypingIndicator() {
     const messagesContainer =
       this._chatContainer.querySelector('.thread__messages');
 
-    // Inject the bouncing dots inside a green AI bubble
     const markup = `
       <div class="message message--typing" id="active-typing-indicator">
         <div class="typing-dots">
@@ -86,9 +73,13 @@ class ChatView {
     `;
 
     messagesContainer.insertAdjacentHTML('beforeend', markup);
-    messagesContainer.scrollTop = messagesContainer.scrollHeight; // Auto-scroll to show the dots!
+    messagesContainer.scrollTop = messagesContainer.scrollHeight;
   }
 
+  /**
+   * @description Removes the active typing indicator from the chat messages container.
+   * @returns {void}
+   */
   removeTypingIndicator() {
     const indicator = this._chatContainer.querySelector(
       '#active-typing-indicator'
@@ -98,12 +89,15 @@ class ChatView {
     }
   }
 
-  // --- 2. BUILDS THE "FURNITURE" (Runs every time a crop is clicked) ---
+  /**
+   * @description Renders all chat messages and interactive widgets for a specific crop thread.
+   * @param {Object} threadData - The crop thread data containing chat history and calendar events.
+   * @returns {void}
+   */
   renderMessages(threadData) {
     const messagesContainer =
       this._chatContainer.querySelector('.thread__messages');
-    messagesContainer.innerHTML = ''; // Clean out the old furniture first
-    // --- 1. Populate the Calendar Popup List ---
+    messagesContainer.innerHTML = '';
     const popupList = this._chatContainer.querySelector(
       '.calendar-popup__list'
     );
@@ -125,7 +119,6 @@ class ChatView {
         .join('');
     }
 
-    // --- 2. Build the Chat Bubbles ---
     let bubblesMarkup = threadData.chatHistory
       .map((msg) => {
         const typeClass =
@@ -136,7 +129,6 @@ class ChatView {
               : 'message--ai';
         let bubbleHtml = `<div class="message ${typeClass}">${msg.content}</div>`;
 
-        // NEW: Notice we now pull msg.proposedTime and inject it into the text and dataset!
         if (
           msg.proposedActivity &&
           msg.proposedTime &&
@@ -156,8 +148,6 @@ class ChatView {
       })
       .join('');
 
-    // Add the Soil Shortcut to the bottom
-    // (Note: bestDays check is bypassed right now so you can test it!)
     if (!threadData.soilShortcutDismissed) {
       bubblesMarkup += `
         <div class="soil-shortcut">
@@ -172,27 +162,26 @@ class ChatView {
       `;
     }
 
-    // Inject the furniture into the house
     messagesContainer.insertAdjacentHTML('beforeend', bubblesMarkup);
-
-    // Add this as the very last line inside renderMessages():
     messagesContainer.scrollTop = messagesContainer.scrollHeight;
   }
 
-  // --- 3. THE MAIN CONTROLLER TRIGGER ---
+  /**
+   * @description Activates and displays the chat view for a selected crop, populating it with relevant data.
+   * @param {Object} threadData - The crop data to display in the chat.
+   * @returns {void}
+   */
   showChat(threadData) {
-    this._injectChatShell(); // Make sure the house exists
+    this._injectChatShell();
 
     if (threadData) {
       this._currentThreadId = threadData.id;
-      // Update Title
       const titleElement = this._chatContainer.querySelector(
         '.thread__crop-title'
       );
       titleElement.textContent =
         threadData.title || `${threadData.crop} in ${threadData.location}`;
 
-      // Update Status Tag
       const statusElement = this._chatContainer.querySelector(
         '.thread__status-tag'
       );
@@ -204,10 +193,9 @@ class ChatView {
       if (threadData.status === 'planted') {
         plantBtn.style.display = 'none';
       } else {
-        plantBtn.style.display = 'flex'; // Show it if still in 'planning'
+        plantBtn.style.display = 'flex';
       }
 
-      // Render the messages!
       this.renderMessages(threadData);
     }
 
@@ -215,37 +203,49 @@ class ChatView {
     document.body.classList.add('split-screen-active');
   }
 
+  /**
+   * @description Hides the chat view and restores the standard application layout.
+   * @returns {void}
+   */
   hideChat() {
     if (this._chatContainer) {
       this._chatContainer.classList.remove('chat-container--active');
     }
 
-    // 1. NEW: Remove the global split-screen class so the app knows the chat is officially closed!
     document.body.classList.remove('split-screen-active');
-
-    // 2. EXISTING FIX: Destroy the sticky note just to be absolutely safe
     delete document.body.dataset.restoreSplit;
   }
 
+  /**
+   * @description Disables the split-screen layout mode and hides the chat container.
+   * @returns {void}
+   */
   disableSplitScreen() {
     document.body.classList.remove('split-screen-active');
     if (this._chatContainer)
       this._chatContainer.classList.remove('chat-container--active');
   }
 
+  /**
+   * @description Attaches a handler to dismiss the soil test shortcut recommendation.
+   * @param {Function} handler - The controller function to execute.
+   * @returns {void}
+   */
   addHandlerDismissShortcut(handler) {
-    // We attach the listener to the whole container because the cancel button is injected dynamically
     this._parentElement.addEventListener('click', (e) => {
       const cancelBtn = e.target.closest('.btn-soil-cancel');
       if (!cancelBtn) return;
 
-      // When clicked, pass the active crop ID to the Controller!
       handler(this._currentThreadId);
     });
   }
 
+  /**
+   * @description Attaches handlers for sending messages via form submission or the Enter key.
+   * @param {Function} handler - The controller function to handle the message sending.
+   * @returns {void}
+   */
   addHandlerSendMessage(handler) {
-    // 1. Listen for the Submit Button click
     this._parentElement.addEventListener('submit', (e) => {
       const form = e.target.closest('.thread__input-bar');
       if (!form) return;
@@ -254,14 +254,14 @@ class ChatView {
       const input = form.querySelector('.thread__input');
       const text = input.value.trim();
 
-      if (!text) return; // Don't send empty messages
+      if (!text) return;
 
-      input.value = ''; // Clear the box
-      handler(this._currentThreadId, text); // Send to Controller!
+      input.value = '';
+      handler(this._currentThreadId, text);
     });
 
-    // 2. Listen for the 'Enter' key (but allow Shift+Enter for new lines)
     this._parentElement.addEventListener('keydown', (e) => {
+      // Submits on Enter unless Shift is held for new lines
       if (
         e.target.classList.contains('thread__input') &&
         e.key === 'Enter' &&
@@ -276,27 +276,26 @@ class ChatView {
     });
   }
 
+  /**
+   * @description Attaches a handler to process user responses to calendar reminder prompts.
+   * @param {Function} handler - The controller function to handle prompt resolution.
+   * @returns {void}
+   */
   addHandlerCalendarPrompt(handler) {
     this._parentElement.addEventListener('click', (e) => {
       const addBtn = e.target.closest('.btn-calendar-add');
       const skipBtn = e.target.closest('.btn-calendar-skip');
 
-      if (!addBtn && !skipBtn) return; // Ignore clicks that aren't on our buttons
-
-      // Find the prompt box to grab our hidden data variables
       const promptBox = e.target.closest('.calendar-prompt');
-      const timestamp = promptBox.dataset.timestamp; // We use timestamp to uniquely identify which message this belongs to
-      // Find these lines and update them:
+      if (!promptBox) return;
+      const timestamp = promptBox.dataset.timestamp;
       const activity = promptBox.dataset.activity;
-      const time = promptBox.dataset.time; // Extract the time!
+      const time = promptBox.dataset.time;
       const isAccepted = !!addBtn;
 
-      // Send to the controller!
       handler(this._currentThreadId, timestamp, activity, time, isAccepted);
     });
   }
-
-  // --- STAGE B5: CONFIRM PLANTING UI ---
 
   _injectConfirmModal() {
     if (this._modalInjected) return;
@@ -318,26 +317,25 @@ class ChatView {
     `;
     this._parentElement.insertAdjacentHTML('beforeend', markup);
 
-    // Close modal when clicking "Not yet"
     document
       .querySelector('.btn-modal-no')
       .addEventListener('click', () => this.hideConfirmModal());
 
-    // 2. BULLETPROOF FIX: The "Yes" button
     document.querySelector('.btn-modal-yes').addEventListener('click', () => {
       this.hideConfirmModal();
 
-      // Fire the controller function we saved earlier!
       if (this._plantingHandler) {
         this._plantingHandler(this._currentThreadId);
-      } else {
-        rror('Controller handler missing!');
       }
     });
 
     this._modalInjected = true;
   }
 
+  /**
+   * @description Displays the planting confirmation modal with dynamic crop information.
+   * @returns {void}
+   */
   showConfirmModal() {
     this._injectConfirmModal();
 
@@ -352,17 +350,31 @@ class ChatView {
       .classList.add('modal-overlay--active');
   }
 
+  /**
+   * @description Attaches a handler for the planting confirmation action.
+   * @param {Function} handler - The controller function to handle confirmation.
+   * @returns {void}
+   */
   addHandlerConfirmPlanting(handler) {
     // We ONLY listen for the "Yes" button here to tell the Controller to save the data!
 
     this._plantingHandler = handler;
   }
 
+  /**
+   * @description Hides the planting confirmation modal.
+   * @returns {void}
+   */
   hideConfirmModal() {
     const modal = document.getElementById('planting-modal');
     if (modal) modal.classList.remove('modal-overlay--active');
   }
 
+  /**
+   * @description Attaches a handler for the soil test shortcut click event.
+   * @param {Function} handler - The controller function to execute.
+   * @returns {void}
+   */
   addHandlerSoilShortcut(handler) {
     this._parentElement.addEventListener('click', (e) => {
       // 1. Check if they clicked the shortcut button
@@ -379,6 +391,10 @@ class ChatView {
   }
 
   // --- MASTER CALENDAR UI CONTROLLER ---
+  /**
+   * @description Attaches a handler to toggle the calendar popup and manage visibility across multiple instances.
+   * @returns {void}
+   */
   addHandlerToggleCalendar() {
     // We attach one listener to the parent element so it works on ALL future chat messages
     this._parentElement.addEventListener('click', (e) => {
@@ -394,11 +410,12 @@ class ChatView {
           popup.classList.toggle('calendar-popup--active');
 
           // Bonus UX: Close any *other* open calendars on the screen
+          // Closes other active calendar popups to ensure only one is visible
           document.querySelectorAll('.calendar-popup--active').forEach((p) => {
             if (p !== popup) p.classList.remove('calendar-popup--active');
           });
         }
-        return; // Stop the script here!
+        return;
       }
 
       // 2. SCENARIO B: The user clicked INSIDE an open popup

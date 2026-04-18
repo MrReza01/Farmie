@@ -1,7 +1,6 @@
 class MarketDetailView {
   _parentElement = document.querySelector('#market-detail-hook');
 
-  // Listen for clicks inside the parent element (Event Delegation)
   constructor() {
     this._parentElement.addEventListener('click', (e) => {
       const backBtn = e.target.closest('.btn-back-detail');
@@ -9,7 +8,11 @@ class MarketDetailView {
     });
   }
 
-  // Generate HTML and inject it
+  /**
+   * @description Renders the detail view for a specific market listing.
+   * @param {Object} listing - The listing data object to render.
+   * @returns {void}
+   */
   render(listing) {
     if (!listing) return;
     const markup = this._generateMarkup(listing);
@@ -17,6 +20,10 @@ class MarketDetailView {
     this._parentElement.insertAdjacentHTML('afterbegin', markup);
   }
 
+  /**
+   * @description Displays the detail overlay with a slide-in animation.
+   * @returns {void}
+   */
   show() {
     const overlay = this._parentElement.querySelector('.market-detail-overlay');
     if (overlay) {
@@ -26,31 +33,36 @@ class MarketDetailView {
     }
   }
 
+  /**
+   * @description Hides the detail overlay and clears content after the animation completes.
+   * @returns {void}
+   */
   hide() {
     const overlay = this._parentElement.querySelector('.market-detail-overlay');
     if (overlay) {
       overlay.classList.remove('visible');
-      // Wait for the slide animation (0.3s) before clearing the HTML
+      // Synchronize DOM cleanup with the CSS transition duration
       setTimeout(() => this.clear(), 300);
     }
   }
 
+  /**
+   * @description Clears the detail view container.
+   * @returns {void}
+   */
   clear() {
     this._parentElement.innerHTML = '';
   }
 
   _generateMarkup(listing) {
-    // 1. Image Logic
     const imageMarkup = listing.imageUrl
       ? `<img src="${listing.imageUrl}" alt="${listing.cropName}" class="crop-image-actual">`
       : `<div class="fallback-letter">${listing.cropName.charAt(0)}</div>`;
 
-    // 2. Discount Badge Logic
     const badgeMarkup = listing.discount
       ? `<span class="detail-discount-badge">${listing.discount}% OFF</span>`
       : '';
 
-    // 3. Pricing Logic
     const priceMarkup = listing.discountedPrice
       ? `
         <div class="detail-pricing has-discount">
@@ -64,7 +76,6 @@ class MarketDetailView {
         </div>
       `;
 
-    // 4. Availability Logic
     const availabilityText =
       listing.availability === 'now'
         ? 'Available Now'
@@ -72,7 +83,6 @@ class MarketDetailView {
     const availabilityClass =
       listing.availability === 'now' ? 'status-now' : 'status-soon';
 
-    // 5. Description Logic
     const descriptionMarkup = listing.description
       ? `
         <div class="detail-description-section">

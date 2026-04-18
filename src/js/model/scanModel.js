@@ -1,54 +1,46 @@
 import { state, persistScanHistory } from './model.js';
 
 /**
- * Creates a new scan record, adds it to the state, and saves to LocalStorage
- * @param {String} imageData - Base64 string of the uploaded photo
- * @param {String} cropName - Optional user-provided name
- * @param {Object} diagnosisData - The full AI response object
+ * @description Creates a new scan record, adds it to the state, and persists it to local storage.
+ * @param {string} imageData - Base64 string of the uploaded photo.
+ * @param {string} cropName - Optional user-provided name.
+ * @param {Object} diagnosisData - The full AI response object.
+ * @returns {Object} The newly created scan record.
  */
 export const saveScanRecord = function (imageData, cropName, diagnosisData) {
   const scanRecord = {
-    id: Date.now().toString(), // Unique ID based on timestamp
+    id: Date.now().toString(),
     date: new Date().toISOString(),
     imageData: imageData,
     cropName: cropName || 'Unknown Plant',
     diagnosis: diagnosisData,
   };
 
-  // Add to the BEGINNING of the array so newest is always first
   state.scanHistory.unshift(scanRecord);
-
-  // Save to LocalStorage
   persistScanHistory();
-
-  return scanRecord; // Return it just in case the controller needs it
+  return scanRecord;
 };
 
 /**
- * Returns the entire scan history array
- * (Because we use unshift() in saveScanRecord, it is already sorted newest first)
+ * @description Returns the entire scan history array.
+ * @returns {Array} The scan history array.
  */
 export const loadScanHistory = function () {
   return state.scanHistory;
 };
 
 /**
- * Retrieves a single scan record by its ID
- * @param {String} id - The unique ID of the scan
+ * @description Sends the image to the backend for AI analysis and returns a structured JSON diagnosis.
+ * @param {string} imageData - Base64 image data.
+ * @param {string} cropName - Name of the crop.
+ * @returns {Promise<Object>} The AI diagnosis data.
  */
-
-/**
- * Sends the image to Groq's Vision Model and returns a structured JSON diagnosis
- */
-
 export const analyzePlantImage = async function (imageData, cropName) {
-  // We ping our own custom Node.js endpoint!
   const response = await fetch('/.netlify/functions/scanPlant', {
     method: 'POST',
     headers: {
       'Content-Type': 'application/json',
     },
-    // Pass the image and name into the event.body
     body: JSON.stringify({ imageData, cropName }),
   });
 
@@ -57,46 +49,49 @@ export const analyzePlantImage = async function (imageData, cropName) {
     throw new Error(`Local Server Error: ${errorText}`);
   }
 
-  // Parse the JSON string sent back from the Netlify Function
   const diagnosisData = await response.json();
   return diagnosisData;
 };
 
 /**
- * Retrieves a single scan record from history by its ID
+ * @description Retrieves a single scan record from history by its ID.
+ * @param {string} id - The unique ID of the scan.
+ * @returns {Object|undefined} The found scan record.
  */
 export const getScanById = function (id) {
   const history = loadScanHistory();
-  // Ensure we compare strings/numbers correctly by using == or converting types
   return history.find((scan) => scan.id == id);
 };
 
-//  ================= MARKET SECTION ================================
-// ==============================================
-// STAGE M7: MARKET DATA MODEL
-// ==============================================
-
-// Step 4: Save to LocalStorage
+/**
+ * @description Persists market listings to local storage.
+ * @returns {void}
+ */
 export const saveListings = function () {
   localStorage.setItem('farmieMarket', JSON.stringify(state.marketListings));
 };
 
-// Step 5: Load from LocalStorage (Returns newest first)
+/**
+ * @description Loads market listings from local storage and returns them sorted by newest first.
+ * @returns {Array} The sorted market listings.
+ */
 export const loadListings = function () {
   const storage = localStorage.getItem('farmieMarket');
   if (storage) {
     state.marketListings = JSON.parse(storage);
   }
 
-  // Return a copy of the array, sorted by newest timestamp first
   return state.marketListings
     .slice()
     .sort((a, b) => new Date(b.createdAt) - new Date(a.createdAt));
 };
 
-// Step 6 & 3: Create, Calculate, Append, and Save
+/**
+ * @description Creates, calculates discounts for, and saves a new market listing.
+ * @param {Object} listingData - Raw listing data from the form.
+ * @returns {Object} The created listing object.
+ */
 export const addListing = function (listingData) {
-  // Calculate the discounted price mathematically here in the model
   let calculatedDiscountedPrice = null;
   const priceNum = Number(listingData.price);
   const discountNum = Number(listingData.discount);
@@ -106,9 +101,9 @@ export const addListing = function (listingData) {
     calculatedDiscountedPrice = priceNum - discountAmount;
   }
 
-  // Build the strict listing object structure
   const newListing = {
-    id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(), // Generates unique ID
+    // Generates a unique ID using crypto if available, otherwise falls back to timestamp
+    id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
     cropName: listingData.cropName,
     quantity: Number(listingData.quantity),
     unit: listingData.unit,
@@ -119,28 +114,36 @@ export const addListing = function (listingData) {
       listingData.availability === 'soon' ? listingData.availableDate : null,
     discount: discountNum || null,
     description: listingData.description || null,
-    imageUrl: null, // To be populated by Wikipedia fetch later
+    imageUrl: null,
     discountedPrice: calculatedDiscountedPrice,
     createdAt: new Date().toISOString(),
   };
 
-  // Append to state and save to LocalStorage
   state.marketListings.push(newListing);
   saveListings();
 
-  return newListing; // Return it so the controller can pass it to the toast/view later if needed
+  return newListing;
 };
 
-// Step 7: Retrieve a single listing by ID (For the detail screen)
+/**
+ * @description Retrieves a single market listing by ID.
+ * @param {string} id - The ID of the listing.
+ * @returns {Object|undefined} The found listing.
+ */
 export const getListingById = function (id) {
   return state.marketListings.find((listing) => listing.id === id);
 };
 
-// STAGE M9: Update listing with Wikipedia Image
+/**
+ * @description Updates the image URL for a specific market listing and persists the change.
+ * @param {string} id - The ID of the listing.
+ * @param {string} imageUrl - The new image URL.
+ * @returns {void}
+ */
 export const updateListingImage = function (id, imageUrl) {
   const listing = state.marketListings.find((l) => l.id === id);
   if (listing) {
     listing.imageUrl = imageUrl;
-    saveListings(); // Persist the updated array to LocalStorage
+    saveListings();
   }
 };

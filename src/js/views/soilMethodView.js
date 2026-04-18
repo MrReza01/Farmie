@@ -2,9 +2,11 @@ class SoilMethodView {
   _parentElement = document.querySelector('.app-container');
   _modalElement = null;
 
-  // We will call this from the controller to render the UI
+  /**
+   * @description Renders the soil method selection modal into the application container.
+   * @returns {void}
+   */
   render() {
-    // Prevent rendering multiple times
     if (this._modalElement) return;
 
     const markup = this._generateMarkup();
@@ -12,46 +14,42 @@ class SoilMethodView {
     this._modalElement = this._parentElement.querySelector('.method-modal');
   }
 
-  // Toggles the modal and manages the global header/nav visibility
+  /**
+   * @description Toggles the visibility of the method selection modal and manages the visibility of global navigation elements.
+   * @returns {void}
+   */
   toggleModal() {
     if (!this._modalElement) this.render();
 
-    // Toggle the modal visibility
     this._modalElement.classList.toggle('method-modal--hidden');
 
-    // Hide/Show the global header and bottom nav
-    const header = document.querySelector('.header'); // Update if your header class is different
+    const header = document.querySelector('.header');
     const bottomNav = document.querySelector('.bottom-nav');
 
     if (this._modalElement.classList.contains('method-modal--hidden')) {
-      // Modal is closing: bring back header and nav
       if (header) header.style.display = '';
       if (bottomNav) bottomNav.style.display = '';
     } else {
-      // Modal is opening: hide header and nav for full-screen focus
       if (header) header.style.display = 'none';
       if (bottomNav) bottomNav.style.display = 'none';
     }
   }
 
-  // --- UI EVENT LISTENERS ---
-
-  // 1. Handles tapping the options
+  /**
+   * @description Attaches an event listener to handle the selection and visual highlighting of a soil testing method.
+   * @returns {void}
+   */
   addHandlerSelectMethod() {
-    // We use event delegation on the parent container
     this._parentElement.addEventListener('click', (e) => {
       const optionBtn = e.target.closest('.method-option');
       if (!optionBtn) return;
 
-      // Strip the selected class from ALL options
       this._parentElement.querySelectorAll('.method-option').forEach((btn) => {
         btn.classList.remove('method-option--selected');
       });
 
-      // Add the selected class ONLY to the clicked option
       optionBtn.classList.add('method-option--selected');
 
-      // Enable the Continue button now that a choice is made
       const continueBtn = this._parentElement.querySelector(
         '.btn-continue-method'
       );
@@ -59,52 +57,59 @@ class SoilMethodView {
     });
   }
 
-  // 2. Handles tapping the back/close arrow
+  /**
+   * @description Attaches an event listener to the modal's back/close button.
+   * @returns {void}
+   */
   addHandlerClose() {
     this._parentElement.addEventListener('click', (e) => {
       const closeBtn = e.target.closest('.method-modal__close-btn');
       if (!closeBtn) return;
 
-      this.toggleModal(); // Hides the modal and brings back the main nav
+      this.toggleModal();
     });
   }
 
-  // 3. Handles tapping the Continue button (Sends data to Controller)
+  /**
+   * @description Attaches an event listener to the continue button to initiate the selected testing flow.
+   * @param {Function} handler - The controller function to handle the selected method string.
+   * @returns {void}
+   */
   addHandlerContinue(handler) {
     this._parentElement.addEventListener('click', (e) => {
       const continueBtn = e.target.closest('.btn-continue-method');
       if (!continueBtn) return;
 
-      // Find exactly which option has the active class
       const selectedOption = this._parentElement.querySelector(
         '.method-option--selected'
       );
       if (!selectedOption) return;
 
-      // Extract the specific method (e.g., 'lab-report', 'diy-test') from the HTML data attribute
       const methodString = selectedOption.dataset.method;
 
-      // Send that string to the Controller so it knows where to route the user next
       handler(methodString);
     });
   }
 
-  // 4. Handles opening the modal from anywhere in the app (Entry Points A & B)
+  /**
+   * @description Attaches a global event listener to handle opening the soil method modal from various entry points.
+   * @param {Function} handler - The controller function to handle opening the modal, optionally receiving a thread ID.
+   * @returns {void}
+   */
   addHandlerOpenMethod(handler) {
+    // Listens on document to capture clicks from dynamic buttons across different views
     document.addEventListener('click', (e) => {
-      // Entry Point A: "Start a Soil Test" button
       const startBtn = e.target.closest('.btn-start-soil');
       if (startBtn) {
         e.preventDefault();
-        handler(); // Calls the controller with no thread ID
+        handler();
       }
 
-      // Entry Point B: Shortcut from a Crop Chat
       const shortcutBtn = e.target.closest('.btn-soil-shortcut');
       if (shortcutBtn) {
         e.preventDefault();
         const threadId = shortcutBtn.dataset.thread || 'unknown-thread';
-        handler(threadId); // Calls the controller and passes the thread ID
+        handler(threadId);
       }
     });
   }

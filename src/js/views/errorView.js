@@ -10,12 +10,18 @@ class ErrorView {
     });
   }
 
+  /**
+   * @description Displays an error toast message that automatically dismisses after 4 seconds.
+   * @param {string} message - The error message to display.
+   * @returns {void}
+   */
   render(message) {
     const markup = this._generateMarkup(message);
 
     this.clear();
     this._parentElement.insertAdjacentHTML('afterbegin', markup);
 
+    // Resets the auto-dismissal timer to prevent overlapping removal logic
     if (this._timeoutId) clearTimeout(this._timeoutId);
 
     this._timeoutId = setTimeout(() => {
@@ -23,6 +29,10 @@ class ErrorView {
     }, 4000);
   }
 
+  /**
+   * @description Clears the error toast container by removing all injected HTML.
+   * @returns {void}
+   */
   clear() {
     this._parentElement.innerHTML = '';
   }

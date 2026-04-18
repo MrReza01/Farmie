@@ -7,7 +7,6 @@ import errorView from './views/errorView.js';
 import dashboardView from './views/dashboardView.js';
 import chatView from './views/chatView.js';
 
-// SOIL SECTION IMPORTS
 import navigationView from './views/navigationView.js';
 import soilMethodView from './views/soilMethodView.js';
 import soilView from './views/soilView.js';
@@ -16,50 +15,32 @@ import kitFlowView from './views/kitFlowView.js';
 import diyFlowView from './views/diyFlowView.js';
 import questFlowView from './views/questFlowView.js';
 
-//  SCAN SECTION
 import diagnosisView from './views/diagnosisView.js';
 import scanHistoryView from './views/scanHistoryView.js';
 import scanView from './views/scanView.js';
 
-// MARKET SECTION
 import marketToastView from './views/marketToastView.js';
 import marketDetailView from './views/marketDetailView.js';
 import marketView from './views/marketView.js';
 import networkView from './views/networkView.js';
 
-// --- SOIL TEST CREATION STATE ---
 const creationState = {
   selectedMethod: null,
   linkedCropThreadId: null,
 };
 
-// ==============================================
-// GLOBAL NETWORK STATE
-// ==============================================
-
 const controlOffline = function () {
-  console.warn('Network connection lost.');
   networkView.show();
 };
 
 const controlOnline = function () {
   ('Network connection restored.');
   networkView.hide();
-
-  // Optional: If you wanted to automatically refresh data when they reconnect,
-  // you could call your loadListings() or fetch functions here.
 };
 
 const controlRetry = function () {
-  // navigator.onLine is a native browser property that returns true or false
   if (navigator.onLine) {
     controlOnline();
-  } else {
-    // Optional: Add a little visual feedback if they click retry but are still offline
-    console.warn('Still offline. Check connection.');
-
-    // You could trigger a toast here if you wanted:
-    // marketToastView.render('Still no connection detected.');
   }
 };
 
@@ -90,7 +71,6 @@ const controlCloseModal = function () {
 
 const controlGeneratePlan = async function (userInput) {
   try {
-    // FORM VALIDATION
     const crop = userInput.crop.trim();
     const location = userInput.location.trim();
 
@@ -98,22 +78,20 @@ const controlGeneratePlan = async function (userInput) {
       throw new Error(`Enter both a crop and your farm location`);
     }
 
+    // Validates inputs using letters and spaces only
     const isValidText = /^[a-zA-Z\s]+$/;
     if (!isValidText.test(crop) || !isValidText.test(location)) {
       throw new Error(`Use only letters for crop and location`);
     }
 
-    // hiding the form when both of the inputs are valid
     document.querySelector('.modal').classList.add('modal--hidden');
 
-    // to hide the mainpage fab, buttom nav
     document
       .querySelector('.view-dashboard')
       .classList.add('view-dashboard--hidden');
     document.querySelector('.fab').classList.add('fab--hidden');
     document.querySelector('.bottom-nav').classList.add('bottom-nav--hidden');
 
-    // to show header and spinner
     document.querySelector('.header').classList.remove('header--hidden');
 
     document
@@ -121,11 +99,8 @@ const controlGeneratePlan = async function (userInput) {
       .classList.remove('results-container--hidden');
     resultsView.renderSpinner();
 
-    //  AWAITING THE DATA
-
     await model.loadCropReport(userInput.crop, userInput.location);
 
-    //  modal to return to day for a new serach
     resultsView._currentDayIndex = 0;
 
     resultsView.render(model.state.report);
@@ -152,103 +127,79 @@ const controlCloseResults = function () {
   document.querySelector('.modal').classList.remove('modal--hidden');
   document.querySelector('.header').classList.add('header--hidden');
 
-  // model.state.currentView = 'dashboard';
   model.state.currentView = 'form';
 };
 
 const controlAddCrop = async function () {
-  try {
-    const newCrop = await model.addCropToDashboard();
+  const newCrop = await model.addCropToDashboard();
+  dashboardView.render(model.state.savedCrops);
 
-    dashboardView.render(model.state.savedCrops);
+  document
+    .querySelector('.results-container')
+    .classList.add('results-container--hidden');
+  document.querySelector('.modal').classList.add('modal--hidden');
 
-    // ... inside controlAddCrop ...
+  // Transitions the UI back to the main dashboard and clears scroll locks
+  document
+    .querySelector('.view-dashboard')
+    .classList.remove('view-dashboard--hidden');
 
-    document
-      .querySelector('.results-container')
-      .classList.add('results-container--hidden');
-    document.querySelector('.modal').classList.add('modal--hidden');
+  // FIX 1: Aggressively remove scroll locks from both body and html
+  document.body.classList.remove('no-scroll');
+  document.documentElement.classList.remove('no-scroll');
 
-    document
-      .querySelector('.view-dashboard')
-      .classList.remove('view-dashboard--hidden');
+  const fab = document.querySelector('.fab');
+  if (fab) fab.classList.remove('fab--hidden');
 
-    // FIX 1: Aggressively remove scroll locks from both body and html
-    document.body.classList.remove('no-scroll');
-    document.documentElement.classList.remove('no-scroll');
+  const bottomNav = document.querySelector('.bottom-nav');
+  if (bottomNav) bottomNav.classList.remove('bottom-nav--hidden');
 
-    const fab = document.querySelector('.fab');
-    if (fab) fab.classList.remove('fab--hidden');
+  const header = document.querySelector('.header');
+  if (header) header.classList.remove('header--hidden');
 
-    const bottomNav = document.querySelector('.bottom-nav');
-    if (bottomNav) bottomNav.classList.remove('bottom-nav--hidden');
-
-    const header = document.querySelector('.header');
-    if (header) header.classList.remove('header--hidden');
-
-    chatView.showChat(newCrop);
-  } catch (err) {
-    rror(`Error saving crop:`, err);
-  }
+  chatView.showChat(newCrop);
 };
 
 const controlSelectCrop = function (id) {
-  // 1. Find the specific crop data from your model using the ID
   const cropData = model.state.savedCrops.find((crop) => crop.id === id);
+  if (!cropData) return;
 
-  if (!cropData) return; // Safety check
-
-  // 2. Pass that specific data into the chat view!
   chatView.showChat(cropData);
 };
 
 const controlDismissShortcut = function (id) {
-  // 1. Tell the model to update the database
   const updatedCrop = model.dismissSoilShortcut(id);
 
-  // 2. If successful, instantly re-render the chat bubbles (which makes the shortcut disappear!)
   if (updatedCrop) {
     chatView.renderMessages(updatedCrop);
   }
 };
 
-// --- STAGE B4: LIVE CHAT CONTROLLER ---
-
 const controlSendMessage = async function (id, text) {
   try {
-    // 1. Save the user's message and instantly render it on the right side
     const updatedCrop = model.addUserMessageToThread(id, text);
     if (updatedCrop) {
       chatView.renderMessages(updatedCrop);
     }
 
-    // 2. Turn on the "Farmie is typing..." bouncing dots
     chatView.showTypingIndicator();
 
-    // 3. Send the context and the text to Groq (Awaits the real API response!)
+    // Async fetch of AI response based on thread context
     const aiResponseText = await model.getAIResponse(id, text);
 
-    // 4. The response arrived! Instantly kill the bouncing dots
     chatView.removeTypingIndicator();
 
-    // 5. Save the new AI text to the database
     const finalCropThread = model.addAIMessageToThread(id, aiResponseText);
 
-    // 6. Re-render the chat to show the final green AI bubble!
     if (finalCropThread) {
       chatView.renderMessages(finalCropThread);
     }
 
-    // 1. Move the data to the top of the database
     model.bumpCropToTop(id);
-
-    // 2. Refresh the dashboard sidebar instantly to show the new order
     dashboardView.render(model.state.savedCrops);
-  } catch (error) {
-    rror('Chat flow failed:', error);
+  } catch {
     chatView.removeTypingIndicator();
 
-    // Fallback: If the internet drops, save an error message so the user isn't stuck
     const errorThread = model.addAIMessageToThread(
       id,
       'I seem to have lost my connection. Please try sending that again!'
@@ -272,48 +223,36 @@ const controlCalendarPrompt = function (
     isAccepted
   );
   if (updatedCrop) {
-    chatView.renderMessages(updatedCrop); // Re-render to hide the widget!
+    chatView.renderMessages(updatedCrop);
   }
 };
 
-// --- STAGE B5: CONTROLLER LOGIC ---
-
 const controlConfirmPlanting = async function (id) {
-  // 1. Instantly update the status to 'planted' and hide the Plant button
   const plantedCrop = model.confirmPlanting(id);
   if (plantedCrop) {
-    chatView.showChat(plantedCrop); // Re-renders the header instantly
+    chatView.showChat(plantedCrop);
   }
 
-  // 2. Show the "Farmie is typing..." dots
   chatView.showTypingIndicator();
 
-  // 3. Fetch the custom harvest data and message from the AI
+  // Requests predicted harvest metrics and care advice from the AI model
   const finalizedCrop = await model.getHarvestDataFromAI(id);
 
-  // 4. Remove the typing dots and render the final AI congratulatory message
   chatView.removeTypingIndicator();
   if (finalizedCrop) {
     chatView.renderMessages(finalizedCrop);
   }
 
-  // 1. Move the data to the top of the database
   model.bumpCropToTop(id);
-
-  // 2. Refresh the dashboard sidebar instantly to show the new order
   dashboardView.render(model.state.savedCrops);
 };
 
 const controlDeleteCrop = function (id) {
-  // 1. Erase from the Model/Database
   const success = model.deleteCropThread(id);
   if (!success) return;
 
-  // 2. Fade it out of the Dashboard UI smoothly
   dashboardView.removeCropCard(id);
 
-  // 3. NEW: Check if we need to show the Empty State
-  // If the internal array is now empty, re-render to show the illustration
   if (model.state.savedCrops.length === 0) {
     dashboardView.render([]);
   }
@@ -323,48 +262,34 @@ const controlDeleteCrop = function (id) {
   }
 };
 
-// =========================================================================================== SOIL SECTION (COME BACK HERE BEFORE YOU START TO WORK ON THE OTHER SECTIONS) ===================================================================================
-
-// --- VIEW SWITCHER CONTROLLER ---
 const controlViewSwitcher = function (sectionName) {
-  // 1. Hide all main views
   document
     .querySelectorAll('.view')
     .forEach((view) => view.classList.add('view--hidden'));
 
-  // 2. Reset the desktop layout
   document.body.classList.remove('split-screen-active');
 
-  // 3. THE CHAT KILL-SWITCH
   const chatContainer = document.querySelector('.chat-container');
   if (chatContainer) {
     if (sectionName.includes('crop')) {
-      // If returning to crops, remove our JS lock so your normal chat code works again
       chatContainer.style.display = '';
     } else {
-      // If going to ANY other tab (like Soil), violently hide the chat
       chatContainer.style.display = 'none';
     }
   }
 
-  // 2. The "View Dictionary": Maps aria-labels to exact HTML classes
+  // Maps navigation labels to their corresponding view container selectors
   const viewMap = {
-    crops: '.view-dashboard', // Assuming aria-label is "Crops"
+    crops: '.view-dashboard',
     soil: '.view-soil',
-    scan: '.view-scan', // Example for your 3rd icon
-    market: '.view-market', // Example for your 4rd icon
+    scan: '.view-scan',
+    market: '.view-market',
   };
 
-  // 3. Look up the correct class and show it
-  const targetClass = viewMap[sectionName] || viewMap['crops']; // Defaults to crops if not found
+  const targetClass = viewMap[sectionName] || viewMap['crops'];
   const targetView = document.querySelector(targetClass);
   if (targetView) targetView.classList.remove('view--hidden');
 
-  // ... inside controlViewSwitcher ...
-
-  // Add this line to see exactly what the browser thinks you clicked:
-
-  // 4. Handle the FAB visibility
   const fab = document.querySelector('.fab');
   if (fab) {
     if (sectionName.includes('crop')) {
@@ -375,29 +300,22 @@ const controlViewSwitcher = function (sectionName) {
   }
 };
 
-// Opens the modal and optionally links a crop thread
 const controlOpenSoilMethod = function (threadId = null) {
-  // 1. Reset state for a fresh flow
   creationState.selectedMethod = null;
   creationState.linkedCropThreadId =
     typeof threadId === 'string' ? threadId : null;
 
-  // 2. Open the UI
   soilMethodView.toggleModal();
 };
 
-// Handles tapping an existing soil card on the dashboard
 const controlClickSoilCard = function (id) {
-  // 1. Find the specific thread in our database
   const thread = model.state.soilThreads.find((t) => t.id === id);
   if (!thread) return;
 
-  // 2. Hide the main dashboard so we can show the details
   soilView.toggleDashboardVisibility(false);
 
-  // 3. Route based on the thread's status
+  // Determines which testing flow or results view to display based on status
   if (thread.status === 'pending') {
-    // RESUME THE TEST: Open the correct input flow
     if (thread.method === 'lab-report') {
       labFlowView.render();
     } else if (thread.method === 'basic-kit') {
@@ -405,50 +323,37 @@ const controlClickSoilCard = function (id) {
     } else if (thread.method === 'diy-test') {
       diyFlowView.render();
     } else if (thread.method === 'questionnaire') {
-      questFlowView.render(); // <-- This guarantees the questionnaire opens!
+      questFlowView.render();
     } else {
-      `🚧 The flow for ${thread.method} is still under construction!`;
       soilView.toggleDashboardVisibility(true);
     }
   } else {
-    // VIEW RESULTS: The test is completed
     soilView.renderResultView(thread);
   }
 };
 
-// Handles the final "Continue" click from the Method Modal
 const controlSoilMethodContinue = function (selectedMethod) {
-  // 1. Save to temporary state
   creationState.selectedMethod = selectedMethod;
-
-  // 2. Hide the modal
   soilMethodView.toggleModal();
 
-  // 3. Attempt to find the Linked Crop Title (if we came from a crop thread)
   let linkedCropTitle = null;
   if (creationState.linkedCropThreadId) {
-    // Looks into your existing crop database to grab the name (e.g., "Tomatoes in Lagos")
     const crop = model.state.savedCrops.find(
       (c) => c.id === creationState.linkedCropThreadId
     );
     if (crop) linkedCropTitle = crop.title;
   }
 
-  // 4. Save the new thread to LocalStorage
+  // Initializes a new soil test thread in the local database
   const newThread = model.saveSoilThread(
     selectedMethod,
     creationState.linkedCropThreadId,
     linkedCropTitle
   );
 
-  // 5. Render the new card immediately to the dashboard
   soilView.renderSoilCard(newThread);
-
-  // 6. Hide the empty state
   soilView.toggleEmptyState(true);
 
-  // 7. ROUTING: Launch the correct input flow
-  // 7. ROUTING: Launch the correct input flow
   if (selectedMethod === 'lab-report') {
     soilView.toggleDashboardVisibility(false);
     labFlowView.render();
@@ -460,13 +365,10 @@ const controlSoilMethodContinue = function (selectedMethod) {
     diyFlowView.render();
   } else if (selectedMethod === 'questionnaire') {
     soilView.toggleDashboardVisibility(false);
-    questFlowView.render(); // <-- NEW ROUTE
-  } else {
-    `🚧 The flow for ${selectedMethod} is under construction!`;
+    questFlowView.render();
   }
 };
 
-// --- LAB ---
 const controlSubmitLabFlow = async function (formData) {
   try {
     const threadId = getActivePendingThreadId();
@@ -480,14 +382,12 @@ const controlSubmitLabFlow = async function (formData) {
     soilView.renderResultView(updatedThread);
   } catch (err) {
     soilView.removeSpinner();
-    // Replaced alert with your beautiful custom toast!
     errorView.render(
       err.message || 'Error connecting to AI. Please try again.'
     );
   }
 };
 
-// --- KIT ---
 const controlSubmitKitFlow = async function (formData) {
   try {
     const threadId = getActivePendingThreadId();
@@ -505,7 +405,6 @@ const controlSubmitKitFlow = async function (formData) {
   }
 };
 
-// --- DIY ---
 const controlSubmitDiyFlow = async function (formData) {
   try {
     const threadId = getActivePendingThreadId();
@@ -523,7 +422,6 @@ const controlSubmitDiyFlow = async function (formData) {
   }
 };
 
-// --- QUESTIONNAIRE ---
 const controlSubmitQuestFlow = async function (formData) {
   try {
     const threadId = getActivePendingThreadId();
@@ -536,7 +434,6 @@ const controlSubmitQuestFlow = async function (formData) {
     soilView.removeSpinner();
     soilView.renderResultView(updatedThread);
   } catch (err) {
-    rror('🚨 AI ERROR DETAILS:', err);
     soilView.removeSpinner();
     errorView.render(err.message || 'Something went wrong. Please try again.');
   }
@@ -593,9 +490,7 @@ const controlLinkedSoilTest = function (cropId) {
   );
 
   if (soilNavButton) {
-    soilNavButton.click(); // This fires your native navigation listener perfectly
-  } else {
-    rror('Could not find the Soil navigation button!');
+    soilNavButton.click(); // This fires native navigation listener perfectly
   }
 };
 
@@ -626,17 +521,13 @@ const controlStartScan = async function (imageData, cropName) {
 
     // --- NEW: Paint the UI ---
     diagnosisView.renderDiagnosis(diagnosisData, imageData, cropName);
-  } catch (err) {
+  } catch {
     scanView.hideLoader();
 
     // --- NEW: Show UI Error ---
     scanView.renderError(
       'Unable to analyze the image right now. Please check your internet connection or try a clearer photo.'
     );
-
-    // Keep this for your debugging
-    rror('--- SCAN FAILED ---');
-    rror(err);
   }
 };
 
@@ -671,22 +562,16 @@ const controlViewHistoricalScan = function (id) {
   );
 };
 
-// ================ MARKET SECTION
 const controlAddListing = async function (listingData) {
-  // 1. Save to LocalStorage via the model
   const newListing = scanModel.addListing(listingData);
-
-  // 2. Show the success toast (it handles its own 3s timer and slide animations)
   marketToastView.render('Listing added successfully!');
 
-  // 3. Reset the form just as the toast is sliding back up (approx 2.5s)
   setTimeout(() => {
     marketView.resetForm();
   }, 2500);
 
-  // 4. Background Wikipedia Fetch (Fails silently if network issues)
   try {
-    // Standard fetch pattern
+    // Fetches descriptive imagery from Wikipedia API to enrich the listing
     const res = await fetch(
       `https://en.wikipedia.org/api/rest_v1/page/summary/${encodeURIComponent(newListing.cropName)}`
     );
@@ -694,7 +579,6 @@ const controlAddListing = async function (listingData) {
 
     const data = await res.json();
     if (data.thumbnail && data.thumbnail.source) {
-      // Update the model with the fetched image
       scanModel.updateListingImage(newListing.id, data.thumbnail.source);
     }
   } catch (err) {
@@ -703,41 +587,30 @@ const controlAddListing = async function (listingData) {
 };
 
 const controlToggleBuyer = function () {
-  // Get data from model
   const listings = scanModel.loadListings();
-  // Pass to view to render
   marketView.renderListingCards(listings);
 };
 
-// STAGE M11: Show Listing Details
 const controlListingDetail = function (id) {
-  // 1. Fetch full data object from model
   const listing = scanModel.getListingById(id);
+  if (!listing) return;
 
-  if (!listing) return; // Guard clause just in case
-
-  // 2. Pass data to detail view and slide it in
   marketDetailView.render(listing);
   marketDetailView.show();
 };
 
-// STAGE M12: Real-time Search Filtering
 const controlMarketSearch = function (query) {
-  // 1. Get all listings from the model
   const allListings = scanModel.loadListings();
 
-  // 2. If the search is empty, restore all cards (Step 3)
   if (!query) {
     marketView.renderListingCards(allListings);
     return;
   }
 
-  // 3. Filter the array by crop name (Step 4)
   const filteredListings = allListings.filter((listing) =>
     listing.cropName.toLowerCase().includes(query)
   );
 
-  // 4. Render the filtered array, passing the query for the empty state
   marketView.renderListingCards(filteredListings, query);
 };
 
@@ -746,7 +619,6 @@ const init = function () {
     controlOffline();
   }
 
-  // 2. Register Network Listeners
   networkView.addHandlerNetwork(controlOffline, controlOnline);
   networkView.addHandlerRetry(controlRetry);
 
@@ -777,27 +649,20 @@ const init = function () {
   dashboardView.addHandlerDeleteConfirm(controlDeleteCrop);
   chatView.addHandlerToggleCalendar();
 
-  // ===================================== SOIL SECTION==================================
-
   navigationView.addHandlerSwitchView(controlViewSwitcher);
-
   soilMethodView.addHandlerSelectMethod();
   soilMethodView.addHandlerClose();
   soilMethodView.addHandlerContinue(controlSoilMethodContinue);
   soilMethodView.addHandlerOpenMethod(controlOpenSoilMethod);
 
-  // 1. Load existing soil threads from LocalStorage
   model.loadSoilThreads();
 
-  // 2. Render any existing threads to the screen on page load
   if (model.state.soilThreads.length > 0) {
-    // If we have data, render each card and hide the empty state
     model.state.soilThreads.forEach((thread) =>
       soilView.renderSoilCard(thread)
     );
     soilView.toggleEmptyState(true);
   } else {
-    // If no data, ensure the empty state is visible
     soilView.toggleEmptyState(false);
   }
   soilView.addHandlerClickCard(controlClickSoilCard);
@@ -812,16 +677,10 @@ const init = function () {
   diyFlowView.addHandlerSubmit(controlSubmitDiyFlow);
   questFlowView.addHandlerClose(controlCloseQuestFlow);
   questFlowView.addHandlerSubmit(controlSubmitQuestFlow);
-
   chatView.addHandlerSoilShortcut(controlLinkedSoilTest);
-
-  // 1. Wakes up the trash can icons on the cards
   soilView.addHandlerDeleteIconClick();
-
-  // 2. Connects the "Yes, Delete" button to the database controller
   soilView.addHandlerDeleteConfirm(controlDeleteSoilCard);
 
-  // SCAN SECTION
   scanView.addHandlerStartScan(controlStartScan);
   scanView.addHandlerShowHistory(controlShowHistory);
   diagnosisView.addHandlerSaveHistory(controlSaveScan);

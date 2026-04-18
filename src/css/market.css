@@ -1,20 +1,12 @@
-/* ============================================== */
-
-/* MARKET SECTION STYLES (PHASE M)                */
-
-/* ============================================== */
-
-/* The Header Layout */
 .market-header {
   display: flex;
   align-items: center;
   justify-content: space-between;
   padding: 1.5rem 2rem;
-  background-color: var(--color-white); /* Adjust to your variables */
+  background-color: var(--color-white);
   border-bottom: 1px solid #e0e0e0;
 }
 
-/* 1. The Toggle Container */
 .market-toggle-container {
   display: flex;
   align-items: center;
@@ -29,11 +21,10 @@
 }
 
 .toggle-label.active {
-  color: var(--color-primary, #2ecc71); /* Uses your primary green */
+  color: var(--color-primary, #2ecc71);
   font-weight: 700;
 }
 
-/* The actual toggle switch styling (Standard Pill Switch) */
 .theme-switch {
   position: relative;
   display: inline-block;
@@ -74,7 +65,6 @@
   transition: 0.4s;
 }
 
-/* When checked (Farmer View) it turns green */
 input:checked + .slider {
   background-color: var(--color-primary, #2ecc71);
 }
@@ -83,14 +73,12 @@ input:checked + .slider::before {
   transform: translateX(24px);
 }
 
-/* 2. The Center Label */
 .market-center-label {
   font-size: 1.8rem;
   font-weight: 600;
   color: #333;
 }
 
-/* 3. The Search Box */
 .market-search-input {
   padding: 0.8rem 1.6rem;
   border: 1px solid #ddd;
@@ -110,10 +98,6 @@ input:checked + .slider::before {
   opacity: 0.6;
 }
 
-/* =========================================
-   MARKET FORM
-   ========================================= */
-
 .market-form {
   display: flex;
   flex-direction: column;
@@ -125,10 +109,6 @@ input:checked + .slider::before {
   overflow-y: auto;
 }
 
-/* =========================================
-   FORM HEADING
-   ========================================= */
-
 .form-heading {
   font-family: var(--font-display);
   font-size: 2rem;
@@ -136,10 +116,6 @@ input:checked + .slider::before {
   color: var(--color-primary);
   margin-bottom: var(--spacing-xs);
 }
-
-/* =========================================
-   FORM GROUP — wraps label + input
-   ========================================= */
 
 .form-group {
   display: flex;
@@ -154,20 +130,11 @@ input:checked + .slider::before {
   color: var(--color-text);
 }
 
-/* =========================================
-   FORM ROW — two groups side by side
-   ========================================= */
-
 .form-row {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
 }
-
-/* =========================================
-   BASE INPUT STYLES
-   Applies to text, number, date, select
-   ========================================= */
 
 .market-form input[type='text'],
 .market-form input[type='number'],
@@ -204,17 +171,12 @@ input:checked + .slider::before {
   color: rgb(27 27 27 / 35%);
 }
 
-/* Error state — added by JS on invalid submit */
 .market-form input.input--error,
 .market-form select.input--error,
 .market-form textarea.input--error {
   border-color: var(--color-danger);
   box-shadow: 0 0 0 3px rgb(217 4 41 / 10%);
 }
-
-/* =========================================
-   INPUT GROUP — input + select or addon
-   ========================================= */
 
 .input-group {
   display: flex;
@@ -259,7 +221,6 @@ input:checked + .slider::before {
   cursor: pointer;
 }
 
-/* Percent addon for discount field */
 .input-addon {
   display: flex;
   align-items: center;
@@ -274,10 +235,6 @@ input:checked + .slider::before {
   flex-shrink: 0;
 }
 
-/* =========================================
-   TEXTAREA
-   ========================================= */
-
 .market-form textarea {
   height: auto;
   padding: var(--spacing-sm) var(--spacing-md);
@@ -285,10 +242,6 @@ input:checked + .slider::before {
   min-height: 9rem;
   line-height: 1.6;
 }
-
-/* =========================================
-   TAPPABLE OPTIONS — availability selector
-   ========================================= */
 
 .tappable-options {
   display: flex;
@@ -300,7 +253,6 @@ input:checked + .slider::before {
   cursor: pointer;
 }
 
-/* Hide the native radio input */
 .tappable-btn input[type='radio'] {
   position: absolute;
   opacity: 0;
@@ -325,7 +277,6 @@ input:checked + .slider::before {
   user-select: none;
 }
 
-/* Selected state — driven by the checked radio */
 .tappable-btn input[type='radio']:checked + .tappable-content {
   background-color: var(--color-primary);
   border-color: var(--color-primary);
@@ -339,15 +290,10 @@ input:checked + .slider::before {
   color: var(--color-primary);
 }
 
-/* =========================================
-   DATE PICKER GROUP
-   ========================================= */
-
 .date-picker-group {
   animation: slideDown 0.2s ease;
 }
 
-/* Hidden state toggled by JS */
 .hidden-field {
   display: none;
 }
@@ -357,16 +303,11 @@ input:checked + .slider::before {
     opacity: 0;
     transform: translateY(-0.8rem);
   }
-
   to {
     opacity: 1;
     transform: translateY(0);
   }
 }
-
-/* =========================================
-   OPTIONAL LABEL
-   ========================================= */
 
 .optional-label {
   font-size: 1.2rem;
@@ -374,10 +315,6 @@ input:checked + .slider::before {
   color: rgb(27 27 27 / 45%);
   margin-left: 0.4rem;
 }
-
-/* =========================================
-   SUBMIT BUTTON
-   ========================================= */
 
 .btn-market-submit {
   width: 100%;
@@ -412,10 +349,6 @@ input:checked + .slider::before {
   outline-offset: 3px;
 }
 
-/* =========================================
-   DESKTOP — min-width: 768px
-   ========================================= */
-
 @media (width >= 768px) {
   .market-form {
     max-width: 64rem;
@@ -423,61 +356,45 @@ input:checked + .slider::before {
     padding: var(--spacing-lg);
     gap: var(--spacing-lg);
   }
-
-  /* Form rows go side by side on desktop */
   .form-row {
     flex-direction: row;
     gap: var(--spacing-md);
   }
-
   .form-row .form-group {
     flex: 1;
   }
-
   .form-heading {
     font-size: 2.4rem;
   }
-
   .btn-market-submit {
     height: 6rem;
     font-size: 1.8rem;
   }
 }
 
-/* ============================================== */
-
-/* STAGE M4: SUCCESS TOAST COMPONENT              */
-
-/* ============================================== */
-
-/* The Hook Container */
 #market-toast-hook {
   position: absolute;
   width: 100%;
-  z-index: 90; /* Sits below the sticky header (z-index: 100) */
-  overflow: hidden; /* Hides the toast when it translates upwards */
+  z-index: 90;
+  overflow: hidden;
 }
 
-/* The Toast Element */
 .market-toast {
   display: flex;
   align-items: center;
   justify-content: center;
   gap: 1rem;
-  background-color: #e8f8f5; /* Light success green */
+  background-color: #e8f8f5;
   color: #27ae60;
   padding: 1.4rem;
   font-size: 1.5rem;
   font-weight: 600;
   border-bottom: 2px solid #2ecc71;
   box-shadow: 0 4px 6px rgb(0 0 0 / 5%);
-
-  /* Hidden by default using negative Y translation */
   transform: translateY(-100%);
-  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275); /* Gives it a nice little 'bounce' */
+  transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275);
 }
 
-/* The Modifier Class toggled by JS */
 .market-toast.visible {
   transform: translateY(0);
 }
@@ -486,28 +403,18 @@ input:checked + .slider::before {
   font-size: 1.8rem;
 }
 
-/* ============================================== */
-
-/* STAGE M5: BUYER VIEW GRID & LISTING CARD       */
-
-/* ============================================== */
-
 .market-view-buyer {
   padding: 1.5rem;
-  max-width: 1200px; /* Increased max-width so desktop fits more, smaller cards */
+  max-width: 1200px;
   margin: 0 auto;
 }
 
-/* Grid Layout */
 .buyer-grid {
   display: grid;
-
-  /* Desktop: auto-fills columns to keep cards compact (approx 220px wide) */
   grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
   gap: 1.5rem;
 }
 
-/* Strict 2x2 constraint for standard mobile screens */
 @media (width <= 600px) {
   .buyer-grid {
     grid-template-columns: 1fr 1fr;
@@ -515,31 +422,25 @@ input:checked + .slider::before {
   }
 }
 
-/* Only collapse to 1 column on extremely narrow phones (e.g. old iPhone SE) */
 @media (width <= 320px) {
   .buyer-grid {
     grid-template-columns: 1fr;
   }
 }
 
-/* ============================================== */
-
-/* LISTING CARD COMPONENT                         */
-
-/* ============================================== */
 .listing-card {
   display: flex;
   flex-direction: column;
   background-color: var(--color-white, #fff);
-  border-radius: 8px; /* Slightly sharper corners for a tighter look */
-  border: 1px solid #e0e0e0; /* Replaced box-shadow with a clean border */
+  border-radius: 8px;
+  border: 1px solid #e0e0e0;
   overflow: hidden;
   position: relative;
-  transition: transform 0.2s ease; /* Removed box-shadow transition */
+  transition: transform 0.2s ease;
 }
 
 .listing-card:hover {
-  transform: translateY(-2px); /* Minimal lift as requested */
+  transform: translateY(-2px);
 }
 
 .card-body {
@@ -558,18 +459,17 @@ input:checked + .slider::before {
   color: white;
   padding: 0.3rem 0.8rem;
   border-radius: 20px;
-  font-size: 1.1rem; /* Scaled down for smaller cards */
+  font-size: 1.1rem;
   font-weight: 700;
   z-index: 10;
 }
 
 .card-image-wrapper {
   width: 100%;
-  height: 120px; /* Reduced from 180px to prevent massive cards */
+  height: 120px;
   overflow: hidden;
 }
 
-/* Placeholder Utility Classes */
 .bg-maize {
   background-color: #ffd966;
 }
@@ -584,7 +484,7 @@ input:checked + .slider::before {
 }
 
 .card-content {
-  padding: 1rem; /* Tighter padding */
+  padding: 1rem;
   display: flex;
   flex-direction: column;
   gap: 0.6rem;
@@ -592,7 +492,7 @@ input:checked + .slider::before {
 }
 
 .card-title {
-  font-size: 1.4rem; /* Scaled down */
+  font-size: 1.4rem;
   font-weight: 700;
   color: #333;
   margin: 0;
@@ -617,25 +517,25 @@ input:checked + .slider::before {
 }
 
 .has-discount .price-discounted {
-  font-size: 1.5rem; /* Scaled down */
+  font-size: 1.5rem;
   font-weight: 800;
   color: var(--color-primary, #2ecc71);
 }
 
 .card-availability {
-  font-size: 1.1rem; /* Scaled down */
+  font-size: 1.1rem;
   color: #666;
   margin-top: auto;
 }
 
 .btn-contact-farmer {
-  margin: 0 1rem 1rem; /* Tighter margins */
-  padding: 0.8rem; /* Tighter padding */
+  margin: 0 1rem 1rem;
+  padding: 0.8rem;
   background-color: transparent;
-  border: 1px solid var(--color-primary, #2ecc71); /* Thinner border */
+  border: 1px solid var(--color-primary, #2ecc71);
   color: var(--color-primary, #2ecc71);
   border-radius: 6px;
-  font-size: 1.3rem; /* Scaled down */
+  font-size: 1.3rem;
   font-weight: 600;
   cursor: pointer;
   transition: all 0.2s ease;
@@ -648,13 +548,6 @@ input:checked + .slider::before {
   color: white;
 }
 
-/* ============================================== */
-
-/* STAGE M6: LISTING DETAIL OVERLAY               */
-
-/* ============================================== */
-
-/* The Overlay container - Hidden off-screen to the right by default */
 .market-detail-overlay {
   position: fixed;
   top: 0;
@@ -665,18 +558,14 @@ input:checked + .slider::before {
   z-index: 9999;
   display: flex;
   flex-direction: column;
-
-  /* The Slide Animation */
   transform: translateX(100%);
   transition: transform 0.3s ease-in-out;
 }
 
-/* The Modifier Class to slide it in */
 .market-detail-overlay.visible {
   transform: translateX(0);
 }
 
-/* Sticky Header */
 .detail-header {
   position: sticky;
   top: 0;
@@ -705,7 +594,6 @@ input:checked + .slider::before {
   margin: 0;
 }
 
-/* Scrollable Body */
 .detail-scroll-body {
   flex-grow: 1;
   overflow-y: auto;
@@ -713,13 +601,11 @@ input:checked + .slider::before {
   flex-direction: column;
 }
 
-/* Image */
 .detail-image-wrapper {
   width: 100%;
   height: 250px;
 }
 
-/* Content Area */
 .detail-content {
   padding: 2rem;
   display: flex;
@@ -745,7 +631,6 @@ input:checked + .slider::before {
   margin: 0;
 }
 
-/* Pricing */
 .detail-pricing {
   display: flex;
   flex-direction: column;
@@ -766,7 +651,6 @@ input:checked + .slider::before {
   color: var(--color-primary, #2ecc71);
 }
 
-/* Info Grid */
 .detail-info-grid {
   display: grid;
   grid-template-columns: 1fr 1fr;
@@ -795,7 +679,6 @@ input:checked + .slider::before {
   color: #333;
 }
 
-/* Availability Pill */
 .detail-availability-section {
   display: flex;
   flex-direction: column;
@@ -818,7 +701,6 @@ input:checked + .slider::before {
   border: 1px solid var(--color-primary, #2ecc71);
 }
 
-/* Description */
 .detail-description-section {
   display: flex;
   flex-direction: column;
@@ -831,7 +713,6 @@ input:checked + .slider::before {
   color: #555;
 }
 
-/* Footer Button */
 .detail-footer {
   padding: 2rem;
   background-color: #f9f9f9;
@@ -851,21 +732,13 @@ input:checked + .slider::before {
   text-decoration: none;
 }
 
-/* STAGE M9: Form Validation Error State */
 .input-error {
   border-color: #e74c3c !important;
   background-color: #fdf2f0 !important;
 }
 
-/* ============================================== */
-
-/* STAGE M10: DYNAMIC CARDS & EMPTY STATE         */
-
-/* ============================================== */
-
-/* Empty State Container */
 .market-empty-state {
-  grid-column: 1 / -1; /* Spans the entire grid */
+  grid-column: 1 / -1;
   text-align: center;
   padding: 4rem 2rem;
 }
@@ -881,7 +754,6 @@ input:checked + .slider::before {
   color: #888;
 }
 
-/* Image Fallback (When Wiki API fails or is loading) */
 .fallback-letter {
   background-color: var(--color-primary, #2ecc71);
   display: flex;
@@ -894,7 +766,6 @@ input:checked + .slider::before {
   height: 100%;
 }
 
-/* Real Image styling */
 .crop-image-actual {
   width: 100%;
   height: 100%;

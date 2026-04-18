@@ -1,26 +1,35 @@
 class KitFlowView {
   _parentElement = document.querySelector('.view-soil');
 
+  /**
+   * @description Injects the basic kit flow markup into the DOM and initializes validation.
+   * @returns {void}
+   */
   render() {
-    // 1. Inject the markup
     const markup = this._generateMarkup();
     this._parentElement.insertAdjacentHTML('beforeend', markup);
 
-    // 2. Attach the disabled button listener immediately after rendering
     this._attachValidation();
   }
 
-  // Listens for the Back button
+  /**
+   * @description Attaches a handler for the close button click event.
+   * @param {Function} handler - The controller function to handle closing the flow.
+   * @returns {void}
+   */
   addHandlerClose(handler) {
     this._parentElement.addEventListener('click', function (e) {
-      // Look specifically for the close button inside THIS flow
       const btnClose = e.target.closest('#flow-basic-kit .btn-close-flow');
       if (!btnClose) return;
       handler();
     });
   }
 
-  // Extracts data and sends to Controller
+  /**
+   * @description Attaches a handler for the form submission and extracts result values.
+   * @param {Function} handler - The controller function to process the kit data.
+   * @returns {void}
+   */
   addHandlerSubmit(handler) {
     this._parentElement.addEventListener('submit', function (e) {
       const form = e.target.closest('.soil-kit-form');
@@ -33,14 +42,13 @@ class KitFlowView {
         n: form.querySelector('#kit-n').value,
         p: form.querySelector('#kit-p').value,
         k: form.querySelector('#kit-k').value,
-        source: 'basic-kit', // Important for the AI prompt later!
+        source: 'basic-kit',
       };
 
       handler(formData);
     });
   }
 
-  // The disabled button logic requested in your blueprint
   _attachValidation() {
     const phInput = document.getElementById('kit-ph');
     const submitBtn = document.querySelector(
@@ -49,9 +57,8 @@ class KitFlowView {
 
     if (!phInput || !submitBtn) return;
 
-    // Listen for typing in the pH field
     phInput.addEventListener('input', function () {
-      // Must not be empty, must be >= 0, and must be <= 14
+      // Enables submission only if pH is a valid number within the 0-14 range
       if (phInput.value !== '' && phInput.value >= 0 && phInput.value <= 14) {
         submitBtn.disabled = false;
       } else {
@@ -60,6 +67,10 @@ class KitFlowView {
     });
   }
 
+  /**
+   * @description Removes the basic kit flow container from the DOM.
+   * @returns {void}
+   */
   remove() {
     const flowContainer = document.getElementById('flow-basic-kit');
     if (flowContainer) flowContainer.remove();
