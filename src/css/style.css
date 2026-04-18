@@ -4,7 +4,6 @@
   flex-direction: column;
   position: relative;
   padding-bottom: 7.2rem;
-
   overflow-x: hidden;
   width: 100%;
 }
@@ -22,7 +21,6 @@
   transition:
     transform 0.3s ease,
     opacity 0.3s ease;
-
   position: sticky;
   top: 0;
   z-index: 800;
@@ -165,7 +163,6 @@
   transition:
     opacity 0.3s ease,
     transform 0.3s ease;
-
   overflow-x: hidden;
 }
 
@@ -182,6 +179,7 @@
 .empty-state--hidden {
   display: none;
 }
+
 .empty-state__img {
   width: 22rem;
   margin-bottom: var(--spacing-lg);
@@ -193,7 +191,6 @@
   font-size: 2.4rem;
   color: var(--color-primary);
   margin-bottom: var(--spacing-sm);
-
   opacity: 0;
   animation: fadeup 0.6s ease 0.2s forwards;
 }
@@ -203,7 +200,6 @@
   color: #7bf38b;
   opacity: 0;
   margin-bottom: var(--spacing-sm);
-
   animation: fadeup 0.6s ease 0.3s forwards;
 }
 
@@ -229,7 +225,9 @@
 }
 
 /* ============================================== */
+
 /* GLOBAL OFFLINE STATE                           */
+
 /* ============================================== */
 
 body.is-offline .fab,
@@ -279,6 +277,7 @@ body.is-offline .results-container {
   cursor: pointer;
   margin-top: var(--spacing-sm);
 }
+
 /* =============================================================FORM TO PLAN OR SEARCH FOR NEW CROP ========================================================== */
 .modal {
   position: fixed;

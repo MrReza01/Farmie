@@ -88,9 +88,9 @@ class SoilView {
       .addEventListener('click', closeHandler);
   }
   // The stub requested in your blueprint (we will wire data into this later)
-  renderSoilResults(test, thread) {
-    // TODO in C5-C8: Accept real data, clear the container, and render dynamic markup
-  }
+  // renderSoilResults(test, _thread) {
+  //   // TODO in C5-C8: Accept real data, clear the container, and render dynamic markup
+  // }
 
   _generateResultsMarkup() {
     return `

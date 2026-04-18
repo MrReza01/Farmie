@@ -42,28 +42,24 @@ export const loadScanHistory = function () {
  */
 
 export const analyzePlantImage = async function (imageData, cropName) {
-  try {
-    // We ping our own custom Node.js endpoint!
-    const response = await fetch('/.netlify/functions/scanPlant', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      // Pass the image and name into the event.body
-      body: JSON.stringify({ imageData, cropName }),
-    });
+  // We ping our own custom Node.js endpoint!
+  const response = await fetch('/.netlify/functions/scanPlant', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+    },
+    // Pass the image and name into the event.body
+    body: JSON.stringify({ imageData, cropName }),
+  });
 
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`Local Server Error: ${errorText}`);
-    }
-
-    // Parse the JSON string sent back from the Netlify Function
-    const diagnosisData = await response.json();
-    return diagnosisData;
-  } catch (err) {
-    throw err;
+  if (!response.ok) {
+    const errorText = await response.text();
+    throw new Error(`Local Server Error: ${errorText}`);
   }
+
+  // Parse the JSON string sent back from the Netlify Function
+  const diagnosisData = await response.json();
+  return diagnosisData;
 };
 
 /**

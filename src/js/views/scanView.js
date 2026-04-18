@@ -1,3 +1,5 @@
+/* global imageCompression */
+
 class ScanView {
   _parentElement = document.querySelector('.view-scan');
 
@@ -166,7 +168,7 @@ class ScanView {
           this._btnScan.classList.remove('u-hidden');
         };
       } catch (error) {
-        console.error('Error compressing image:', error);
+        rror('Error compressing image:', error);
         alert('Could not process this image. Please try another one.');
       }
     });

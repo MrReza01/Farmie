@@ -42,11 +42,8 @@
 
     <link rel="stylesheet" href="src/css/main.css" />
 
-    <script
-      type="text/javascript"
-      src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"
-    ></script>
-    <script defer type="module" src="src/js/controller.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
+    <script type="module" src="src/js/controller.js"></script>
   </head>
 
   <body>
@@ -65,15 +62,15 @@
       </header>
 
       <!-- ERROR STATE -->
-          <section class="error-state error-state--hidden">
-          <i class="fa-solid fa-wifi error-state__icon"></i>
+      <section class="error-state error-state--hidden">
+        <i class="fa-solid fa-wifi error-state__icon"></i>
 
-          <p class="error-state__text">
-            Couldn't load farm record. Check your connection and try again.
-          </p>
+        <p class="error-state__text">
+          Couldn't load farm record. Check your connection and try again.
+        </p>
 
-          <button class="error-state__retry">Retry</button>
-        </section>
+        <button class="error-state__retry">Retry</button>
+      </section>
 
       <!-- FAB BUTTON -->
       <button class="fab fab--pulsing" aria-label="plan new crop">
@@ -116,7 +113,7 @@
           />
 
           <h2 class="empty-state__title">Welcome to Farmie</h2>
-<p class="empty-statte__desc">Your Expert Farm Advisor</p>
+          <p class="empty-statte__desc">Your Expert Farm Advisor</p>
           <p class="empty-state__text">
             Your field is currently empty. Select a crop to get a detailed,
             5-day planting plan. Tap the <i class="fa-solid fa-plus"></i> button
@@ -125,12 +122,10 @@
         </section>
 
         <div class="dashboard__crops-list"></div>
-
-     
       </main>
 
       <!-- ============ (SOIL SECTION) ================= -->
-      <main class="view view-soil view--hidden">
+      <section class="view view-soil view--hidden">
         <div class="soil-empty-state">
           <div class="soil-illustration-wrapper">
             <img
@@ -151,7 +146,7 @@
         <div class="soil-action-area">
           <button class="btn-start-soil">Start a Soil Test</button>
         </div>
-      </main>
+      </section>
 
       <!-- =========== SCAN SECTION ========= -->
       <section class="view view-scan view--hidden" id="view-scan">
@@ -166,7 +161,7 @@
             </button>
           </div>
 
-          <main class="scan-body">
+          <div class="scan-body">
             <label
               class="scan-upload-box"
               for="scan-file-input"
@@ -224,7 +219,7 @@
             >
               <i class="fa-solid fa-microscope"></i> Analyze Plant
             </button>
-          </main>
+          </div>
         </div>
       </section>
 
@@ -254,89 +249,128 @@
 
         <div id="market-toast-hook"></div>
 
-        <div class="market-view-farmer ">
-          <p style="padding: 2rem; text-align: center">
-            <form class="market-form" id="add-listing-form">
-  
-  <h3 class="form-heading">Create a New Listing</h3>
+        <div class="market-view-farmer">
+          <p style="padding: 2rem; text-align: center"></p>
+          <form class="market-form" id="add-listing-form">
+            <h3 class="form-heading">Create a New Listing</h3>
 
-  <div class="form-group">
-    <label for="market-crop-name">Crop Name</label>
-    <input type="text" id="market-crop-name" name="cropName" required placeholder="e.g., Maize, Cassava">
-  </div>
+            <div class="form-group">
+              <label for="market-crop-name">Crop Name</label>
+              <input
+                type="text"
+                id="market-crop-name"
+                name="cropName"
+                required
+                placeholder="e.g., Maize, Cassava"
+              />
+            </div>
 
-  <div class="form-row">
-    <div class="form-group">
-      <label for="market-quantity">Quantity</label>
-      <div class="input-group">
-        <input type="number" id="market-quantity" name="quantity" required min="1" placeholder="50">
-        <select id="market-unit" name="unit">
-          <option value="kg">kg</option>
-          <option value="bags">bags</option>
-          <option value="tonnes">tonnes</option>
-        </select>
-      </div>
-    </div>
-    <div class="form-group">
-      <label for="market-price">Price per Unit (₦)</label>
-      <input type="number" id="market-price" name="price" required min="1" placeholder="15000">
-    </div>
-  </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="market-quantity">Quantity</label>
+                <div class="input-group">
+                  <input
+                    type="number"
+                    id="market-quantity"
+                    name="quantity"
+                    required
+                    min="1"
+                    placeholder="50"
+                  />
+                  <select id="market-unit" name="unit">
+                    <option value="kg">kg</option>
+                    <option value="bags">bags</option>
+                    <option value="tonnes">tonnes</option>
+                  </select>
+                </div>
+              </div>
+              <div class="form-group">
+                <label for="market-price">Price per Unit (₦)</label>
+                <input
+                  type="number"
+                  id="market-price"
+                  name="price"
+                  required
+                  min="1"
+                  placeholder="15000"
+                />
+              </div>
+            </div>
 
-  <div class="form-group">
-    <label for="market-location">Farm Location</label>
-    <input type="text" id="market-location" name="location" required placeholder="e.g., Moniya, Oyo State">
-  </div>
+            <div class="form-group">
+              <label for="market-location">Farm Location</label>
+              <input
+                type="text"
+                id="market-location"
+                name="location"
+                required
+                placeholder="e.g., Moniya, Oyo State"
+              />
+            </div>
 
-  <div class="form-group">
-    <label>Availability</label>
-    <div class="tappable-options">
-      <label class="tappable-btn">
-        <input type="radio" name="availability" value="now" checked>
-        <span class="tappable-content">Available Now</span>
-      </label>
-      <label class="tappable-btn">
-        <input type="radio" name="availability" value="soon">
-        <span class="tappable-content">Coming Soon</span>
-      </label>
-    </div>
-  </div>
+            <div class="form-group">
+              <label>Availability</label>
+              <div class="tappable-options">
+                <label class="tappable-btn">
+                  <input type="radio" name="availability" value="now" checked />
+                  <span class="tappable-content">Available Now</span>
+                </label>
+                <label class="tappable-btn">
+                  <input type="radio" name="availability" value="soon" />
+                  <span class="tappable-content">Coming Soon</span>
+                </label>
+              </div>
+            </div>
 
-  <div class="form-group date-picker-group hidden-field">
-    <label for="market-date">Date Available</label>
-    <input type="date" id="market-date" name="availableDate">
-  </div>
+            <div class="form-group date-picker-group hidden-field">
+              <label for="market-date">Date Available</label>
+              <input type="date" id="market-date" name="availableDate" />
+            </div>
 
-  <div class="form-row">
-    <div class="form-group">
-      <label for="market-discount">Discount <span class="optional-label">(optional)</span></label>
-      <div class="input-group">
-        <input type="number" id="market-discount" name="discount" min="0" max="100" placeholder="10">
-        <span class="input-addon">%</span>
-      </div>
-    </div>
-  </div>
+            <div class="form-row">
+              <div class="form-group">
+                <label for="market-discount"
+                  >Discount
+                  <span class="optional-label">(optional)</span></label
+                >
+                <div class="input-group">
+                  <input
+                    type="number"
+                    id="market-discount"
+                    name="discount"
+                    min="0"
+                    max="100"
+                    placeholder="10"
+                  />
+                  <span class="input-addon">%</span>
+                </div>
+              </div>
+            </div>
 
-  <div class="form-group">
-    <label for="market-description">Description <span class="optional-label">(optional)</span></label>
-    <textarea id="market-description" name="description" rows="3" placeholder="Add any details about crop quality, farm practices, etc."></textarea>
-  </div>
+            <div class="form-group">
+              <label for="market-description"
+                >Description
+                <span class="optional-label">(optional)</span></label
+              >
+              <textarea
+                id="market-description"
+                name="description"
+                rows="3"
+                placeholder="Add any details about crop quality, farm practices, etc."
+              ></textarea>
+            </div>
 
-  <button type="submit" class="btn-market-submit">List Crop on Market</button>
-
-</form>
-          </p>
+            <button type="submit" class="btn-market-submit">
+              List Crop on Market
+            </button>
+          </form>
         </div>
 
-   <div class="market-view-buyer view--hidden">
-  
-  <div class="buyer-grid">
-    
+        <div class="market-view-buyer view--hidden">
+          <div class="buyer-grid"></div>
+        </div>
 
-  </div>
-</div>
-
-<div id="market-detail-hook"></div>
+        <div id="market-detail-hook"></div>
       </section>
 
       <!-- PLAN NEW CROP -->

@@ -43,7 +43,7 @@ const controlOffline = function () {
 };
 
 const controlOnline = function () {
-  console.log('Network connection restored.');
+  ('Network connection restored.');
   networkView.hide();
 
   // Optional: If you wanted to automatically refresh data when they reconnect,
@@ -188,7 +188,7 @@ const controlAddCrop = async function () {
 
     chatView.showChat(newCrop);
   } catch (err) {
-    console.error(`Error saving crop:`, err);
+    rror(`Error saving crop:`, err);
   }
 };
 
@@ -245,7 +245,7 @@ const controlSendMessage = async function (id, text) {
     // 2. Refresh the dashboard sidebar instantly to show the new order
     dashboardView.render(model.state.savedCrops);
   } catch (error) {
-    console.error('Chat flow failed:', error);
+    rror('Chat flow failed:', error);
     chatView.removeTypingIndicator();
 
     // Fallback: If the internet drops, save an error message so the user isn't stuck
@@ -407,9 +407,7 @@ const controlClickSoilCard = function (id) {
     } else if (thread.method === 'questionnaire') {
       questFlowView.render(); // <-- This guarantees the questionnaire opens!
     } else {
-      console.log(
-        `🚧 The flow for ${thread.method} is still under construction!`
-      );
+      `🚧 The flow for ${thread.method} is still under construction!`;
       soilView.toggleDashboardVisibility(true);
     }
   } else {
@@ -464,7 +462,7 @@ const controlSoilMethodContinue = function (selectedMethod) {
     soilView.toggleDashboardVisibility(false);
     questFlowView.render(); // <-- NEW ROUTE
   } else {
-    console.log(`🚧 The flow for ${selectedMethod} is under construction!`);
+    `🚧 The flow for ${selectedMethod} is under construction!`;
   }
 };
 
@@ -538,7 +536,7 @@ const controlSubmitQuestFlow = async function (formData) {
     soilView.removeSpinner();
     soilView.renderResultView(updatedThread);
   } catch (err) {
-    console.error('🚨 AI ERROR DETAILS:', err);
+    rror('🚨 AI ERROR DETAILS:', err);
     soilView.removeSpinner();
     errorView.render(err.message || 'Something went wrong. Please try again.');
   }
@@ -597,7 +595,7 @@ const controlLinkedSoilTest = function (cropId) {
   if (soilNavButton) {
     soilNavButton.click(); // This fires your native navigation listener perfectly
   } else {
-    console.error('Could not find the Soil navigation button!');
+    rror('Could not find the Soil navigation button!');
   }
 };
 
@@ -637,15 +635,14 @@ const controlStartScan = async function (imageData, cropName) {
     );
 
     // Keep this for your debugging
-    console.error('--- SCAN FAILED ---');
-    console.error(err);
+    rror('--- SCAN FAILED ---');
+    rror(err);
   }
 };
 
 const controlSaveScan = function (imageData, cropName, diagnosisData) {
   // Save to DB
   model.saveScanRecord(imageData, cropName, diagnosisData);
-  console.log('Scan successfully saved to FarmieDB!');
 };
 
 const controlShowHistory = function () {
@@ -699,13 +696,9 @@ const controlAddListing = async function (listingData) {
     if (data.thumbnail && data.thumbnail.source) {
       // Update the model with the fetched image
       scanModel.updateListingImage(newListing.id, data.thumbnail.source);
-      console.log(`Image fetched and saved for ${newListing.cropName}`);
     }
   } catch (err) {
-    console.log(
-      'Background Wiki Fetch failed, using fallback later:',
-      err.message
-    );
+    ('Background Wiki Fetch failed, using fallback later:', err.message);
   }
 };
 
@@ -759,7 +752,7 @@ const init = function () {
 
   const didCropsExpire = model.checkExpiredThreads();
   if (didCropsExpire) {
-    console.log(`Expired crops removed`);
+    `Expired crops removed`;
   }
 
   dashboardView.render(model.state.savedCrops);

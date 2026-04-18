@@ -119,7 +119,8 @@ export const getWeatherData = async function (location) {
   } catch (err) {
     if (err.message === 'Failed to fetch') {
       throw new Error(
-        'Connection too weak. Please check your internet and try again.'
+        'Connection too weak. Please check your internet and try again.',
+        { cause: err }
       );
     }
     throw err;
@@ -148,8 +149,10 @@ export const generateAIPlan = async function (crop, location, weatherData) {
       if (start === -1 || end === 0) throw new Error('No JSON array found');
       planArray = JSON.parse(rawText.substring(start, end));
     } catch (parseErr) {
-      console.error('Raw AI Output:', rawText);
-      throw new Error('The AI provided an unreadable plan. Please try again.');
+      rror('Raw AI Output:', rawText);
+      throw new Error('The AI provided an unreadable plan. Please try again.', {
+        cause: parseErr,
+      });
     }
 
     // Health Checks
@@ -164,7 +167,7 @@ export const generateAIPlan = async function (crop, location, weatherData) {
       );
 
     if (!isPlanComplete) {
-      console.error('Incomplete Plan Structure:', planArray);
+      rror('Incomplete Plan Structure:', planArray);
       throw new Error('Plan generation was incomplete. Please try again.');
     }
 
@@ -176,13 +179,13 @@ export const generateAIPlan = async function (crop, location, weatherData) {
 
     return planArray;
   } catch (err) {
-    console.error('Final Catch Block:', err);
+    rror('Final Catch Block:', err);
     const userFriendlyMessage =
       err.message.includes("reading 'advice'") ||
       err.message.includes('undefined')
         ? 'Something went wrong while analyzing the data. Please try again.'
         : err.message;
-    throw new Error(userFriendlyMessage);
+    throw new Error(userFriendlyMessage, { cause: err });
   }
 };
 
@@ -305,7 +308,7 @@ const getCropImage = async function (cropName) {
 
     const data = await res.json();
     return data.thumbnail ? data.thumbnail.source : null;
-  } catch (err) {
+  } catch {
     return null;
   }
 };
@@ -320,9 +323,8 @@ export const addCropToDashboard = async function () {
 
   // 3. Calculate Best Days based on AI Status
   const verdict = state.report.status || 'success';
-  let bestDaysArray = [];
-  let daysString = '';
-
+  let bestDaysArray;
+  let daysString;
   if (verdict === 'warning' || verdict === 'danger') {
     // Bad weather scenario
     bestDaysArray = [];
@@ -405,7 +407,7 @@ export const checkExpiredThreads = function () {
 
     // If it is expired AND the user hasn't planted it yet, delete it!
     if (isExpired && crop.plantedAt === null) {
-      console.log(`🗑️ Auto-deleted expired crop: ${crop.title}`);
+      `🗑️ Auto-deleted expired crop: ${crop.title}`;
       return false; // Returning false removes it from the array entirely
     }
 
@@ -496,7 +498,7 @@ export const getAIResponse = async function (id, userMessage) {
     const data = await response.json();
     return data.reply;
   } catch (err) {
-    console.error('Server/API Error:', err);
+    rror('Server/API Error:', err);
     // Keep your excellent user-friendly fallback message
     return "Sorry, I'm having a bit of trouble connecting to my agricultural database right now. Please try again in a second!";
   }
@@ -694,7 +696,7 @@ export const getHarvestDataFromAI = async function (id) {
     persistCrops();
     return crop;
   } catch (err) {
-    console.error('Harvest Calculation Error:', err);
+    rror('Harvest Calculation Error:', err);
     // Fallback if internet drops
     crop.chatHistory.push({
       role: 'assistant',
@@ -769,7 +771,7 @@ export const saveSoilThread = function (
   });
 
   // Determine the Title based on linkage rules
-  let title = '';
+  let title;
   if (linkedCropThreadId && cropThreadTitle) {
     title = cropThreadTitle; // Linked to crop
   } else {
@@ -903,7 +905,7 @@ export const processSoilTestResult = async function (threadId, formData) {
     // Return the updated thread so the controller can render it
     return thread;
   } catch (err) {
-    console.error('💥 Error processing soil test:', err);
+    rror('💥 Error processing soil test:', err);
     throw err; // Re-throw so the controller can show an error UI
   }
 };

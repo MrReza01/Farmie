@@ -63,7 +63,7 @@ exports.handler = async function (event) {
       body: aiText,
     };
   } catch (err) {
-    console.error('Soil Processing Error:', err);
+    rror('Soil Processing Error:', err);
     return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
   }
 };

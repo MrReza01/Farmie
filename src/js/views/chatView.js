@@ -331,7 +331,7 @@ class ChatView {
       if (this._plantingHandler) {
         this._plantingHandler(this._currentThreadId);
       } else {
-        console.error('Controller handler missing!');
+        rror('Controller handler missing!');
       }
     });
 

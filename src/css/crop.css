@@ -3,7 +3,6 @@
   display: flex;
   flex-direction: column;
   flex-grow: 1;
-
   margin-bottom: auto;
   width: calc(100% + (var(--spacing-md) * 2));
   margin-left: calc(var(--spacing-md) * -1);
@@ -15,8 +14,8 @@
   align-items: center;
   gap: 1.6rem;
   padding: 1.2rem var(--spacing-md);
-  background-color: rgba(0, 0, 0, 0.002);
-  border-bottom: 1px solid rgba(0, 0, 0, 0.05);
+  background-color: rgb(0 0 0 / 0.2%);
+  border-bottom: 1px solid rgb(0 0 0 / 5%);
   cursor: pointer;
   transition: all 0.2s ease;
   border-radius: 0;
@@ -24,7 +23,7 @@
 
 .crop-card:hover,
 .crop-card:active {
-  background-color: rgba(0, 0, 0, 0.02);
+  background-color: rgb(0 0 0 / 2%);
 }
 
 .crop-card__image-container {
@@ -59,13 +58,14 @@
 /* --- THE RIGHT SIDE: CHAT DETAILS --- */
 .crop-card__content {
   display: flex;
+
   /* flex-direction: column; */
   justify-content: space-between;
   align-items: center; /* NEW: Forces flex items to the left */
   text-align: left; /* NEW: Forces text to the left */
+
   /* flex-grow: 1; */
   min-width: 0;
-
   position: relative;
 }
 
@@ -73,7 +73,6 @@
   display: flex;
   flex-direction: column;
   align-items: flex-start; /* Keeps the status tag pinned to the left */
-
   flex: 1; /* Forces this column to take up all available left-side space */
   padding-right: 15rem;
 }
@@ -82,7 +81,7 @@
   font-size: 1.6rem;
   font-weight: 600;
   color: var(--color-text);
-  margin: 0 0 0.4rem 0;
+  margin: 0 0 0.4rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis; /* Adds the "..." if the location is too long */
@@ -119,9 +118,8 @@
   align-items: center;
   gap: 0.5rem;
   white-space: nowrap;
-  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  box-shadow: 0 2px 4px rgb(0 0 0 / 10%);
   animation: pulseWarning 2s infinite;
-
   flex-shrink: 0;
 }
 
@@ -151,11 +149,10 @@
   background-color: var(--color-surface);
   border: 1px solid #e9ecef;
   border-radius: 0.8rem;
-  box-shadow: 0 0.5rem 1.5rem rgba(0, 0, 0, 0.1);
+  box-shadow: 0 0.5rem 1.5rem rgb(0 0 0 / 10%);
   padding: 0.5rem;
   z-index: 20;
   min-width: 14rem;
-
   opacity: 0;
   visibility: hidden;
   transform: translateY(-0.5rem);
@@ -209,7 +206,7 @@
   color: var(--color-text);
 }
 
-@media (min-width: 768px) {
+@media (width >= 768px) {
   /* 1. When active, make the body a flex container to put App and Chat side-by-side */
   body.split-screen-active {
     display: flex;
@@ -251,9 +248,7 @@
     bottom: 8rem !important;
     right: 2rem !important;
     left: auto !important; /* Overrides any previous positioning */
-    z-index: 1000;
-    right: auto;
-    left: 310px; /* 380px width - 50px fab - 20px margin */
+    z-index: 1000; /* 380px width - 50px fab - 20px margin */
   }
 
   /* 5. The Chat Shell takes over the entire right side */
@@ -269,7 +264,7 @@
   }
 }
 
-@media (min-width: 768px) {
+@media (width >= 768px) {
   /* ... your other desktop css ... */
 
   /* 1. NEW: By default on desktop, the chat container is completely hidden */
@@ -379,7 +374,7 @@
   font-size: 1.6rem;
   font-weight: 600;
   color: var(--color-text);
-  margin: 0 0 0.2rem 0;
+  margin: 0 0 0.2rem;
   text-transform: capitalize;
 }
 
@@ -412,7 +407,7 @@
   border-radius: 1.2rem;
   padding: 1.6rem;
   width: 26rem;
-  box-shadow: 0 1rem 3rem rgba(0, 0, 0, 0.1);
+  box-shadow: 0 1rem 3rem rgb(0 0 0 / 10%);
   z-index: 100;
 
   /* Hidden by default */
@@ -429,7 +424,7 @@
 }
 
 .calendar-popup h3 {
-  margin: 0 0 1.2rem 0;
+  margin: 0 0 1.2rem;
   font-size: 1.4rem;
   color: var(--color-text);
   border-bottom: 1px solid #e9ecef;
@@ -522,6 +517,7 @@
 .typing-dots span:nth-child(1) {
   animation-delay: -0.32s;
 }
+
 .typing-dots span:nth-child(2) {
   animation-delay: -0.16s;
 }
@@ -532,6 +528,7 @@
   100% {
     transform: scale(0);
   }
+
   40% {
     transform: scale(1);
   }
@@ -653,7 +650,7 @@
 }
 
 /* --- 5. DESKTOP SPLIT-SCREEN ADJUSTMENTS --- */
-@media (min-width: 768px) {
+@media (width >= 768px) {
   body.split-screen-active .btn-thread-back {
     display: none;
   }
@@ -715,7 +712,7 @@
   left: 0;
   width: 100%;
   height: 100%;
-  background-color: rgba(0, 0, 0, 0.6);
+  background-color: rgb(0 0 0 / 60%);
   z-index: 3000;
   display: flex;
   justify-content: center;
@@ -739,7 +736,7 @@
   border-radius: 1.6rem;
   padding: 2.4rem;
   text-align: center;
-  box-shadow: 0 2rem 4rem rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2rem 4rem rgb(0 0 0 / 20%);
 
   /* Pop-out animation */
   transform: scale(0.9);
@@ -760,7 +757,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 1.6rem auto;
+  margin: 0 auto 1.6rem;
 }
 
 .confirm-modal__title {
@@ -811,7 +808,7 @@
   border-radius: 1.6rem;
   padding: 3.2rem 2.4rem; /* More breathing room */
   text-align: center;
-  box-shadow: 0 2rem 4rem rgba(0, 0, 0, 0.2);
+  box-shadow: 0 2rem 4rem rgb(0 0 0 / 20%);
   transform: scale(0.9);
   transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
@@ -830,7 +827,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
-  margin: 0 auto 2rem auto;
+  margin: 0 auto 2rem;
 }
 
 .delete-modal__title {
@@ -883,4 +880,5 @@
 .btn-delete-confirm:hover {
   background-color: #b71c1c;
 }
+
 /* Forces the chat container to disappear when switching to other tabs */

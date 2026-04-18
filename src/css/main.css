@@ -1,7 +1,7 @@
-@import './base.css';
-@import './style.css';
-@import './crop.css';
-@import './soil.css';
-@import './soilTest.css';
-@import './scan.css';
-@import './market.css';
+@import url('./base.css');
+@import url('./style.css');
+@import url('./crop.css');
+@import url('./soil.css');
+@import url('./soilTest.css');
+@import url('./scan.css');
+@import url('./market.css');

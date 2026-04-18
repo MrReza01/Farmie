@@ -54,8 +54,9 @@
   font-weight: 600;
   border-radius: 5rem; /* Pill shape */
   cursor: pointer;
+
   /* Shadow uses the rgb equivalent of #2d6a4f */
-  box-shadow: 0 0.4rem 1.2rem rgba(45, 106, 79, 0.2);
+  box-shadow: 0 0.4rem 1.2rem rgb(45 106 79 / 20%);
   transition: all 0.2s ease;
 }
 
@@ -80,7 +81,8 @@
   bottom: 0; /* Locks it to the bottom of the view */
   margin-top: auto; /* Pushes it to the bottom even if the list is empty */
   padding: 1.5rem 0;
-  background-color: var(--color-surface, #ffffff);
+  background-color: var(--color-surface, #fff);
+
   /* border-top: 1px solid #dee2e6;  */
   z-index: 10; /* Ensures it stays above the scrolling cards */
   display: flex;
@@ -93,7 +95,7 @@
   max-width: 350px;
 }
 
-@media (min-width: 768px) {
+@media (width >= 768px) {
   .view-soil {
     max-width: 72rem;
     margin: 0 auto;
@@ -110,7 +112,7 @@
   left: 0;
   width: 100%;
   height: 100dvh;
-  background-color: var(--color-surface, #ffffff);
+  background-color: var(--color-surface, #fff);
   z-index: 2000; /* High enough to cover everything */
   display: flex;
   flex-direction: column;
@@ -128,6 +130,7 @@
   from {
     transform: translateY(100%);
   }
+
   to {
     transform: translateY(0);
   }
@@ -215,6 +218,7 @@
 }
 
 /* --- LOCATION LINK --- */
+
 /* --- LOCATION LINK --- */
 .method-location-link {
   background: none;
@@ -239,7 +243,7 @@
   pointer-events: none;
 }
 
-@media (min-width: 768px) {
+@media (width >= 768px) {
   /* Constrain the main content and footer, and center them perfectly */
   .method-modal__content,
   .method-modal__footer {
@@ -255,7 +259,7 @@
    ========================================= */
 
 .soil-results {
-  background-color: var(--color-surface, #ffffff);
+  background-color: var(--color-surface, #fff);
   border: 1px solid #dee2e6;
   border-radius: 1.2rem;
   padding: 2rem;
@@ -294,7 +298,7 @@
   border-radius: 2rem;
   font-size: 1.2rem;
   font-weight: bold;
-  color: #ffffff;
+  color: #fff;
   text-align: center;
   align-self: flex-start;
 }
@@ -303,12 +307,15 @@
 .method-badge--lab-report {
   background-color: #2d6a4f;
 }
+
 .method-badge--basic-kit {
   background-color: #52b788;
 }
+
 .method-badge--diy-test {
   background-color: #e76f51;
 }
+
 .method-badge--questionnaire {
   background-color: #74c69d;
 }
@@ -379,10 +386,12 @@
 .rating-value--good {
   color: var(--color-success, #28a745);
 }
+
 .rating-value--moderate,
 .rating-value--fair {
   color: var(--color-warning, #ffc107);
 }
+
 .rating-value--poor {
   color: var(--color-danger, #dc3545);
 }
@@ -439,7 +448,7 @@
 }
 
 /* --- DESKTOP LAYOUT (1200px+) --- */
-@media (min-width: 768px) {
+@media (width >= 768px) {
   .soil-results__metrics {
     grid-template-columns: repeat(2, 1fr); /* 2x2 Grid setup */
     gap: 1.5rem;
@@ -473,17 +482,18 @@
 
 /* --- THE CARD --- */
 .soil-card {
-  background-color: #ffffff;
+  background-color: #fff;
   border: 1px solid #dee2e6;
   border-radius: 1.6rem;
   padding: 1.6rem;
   cursor: pointer;
+
   /* Strict zero box-shadow rule */
 
   /* The default left border structure */
   border-left-width: 0.4rem;
   border-left-style: solid;
-  margin: 2rem 4rem 2rem 4rem;
+  margin: 2rem 4rem;
 }
 
 /* Method Accent Colors (Left Border) */
@@ -529,7 +539,7 @@
 .soil-card__title {
   font-size: 1.6rem;
   color: #212529;
-  margin: 0 0 0.2rem 0;
+  margin: 0 0 0.2rem;
   font-weight: 600;
 }
 
@@ -566,10 +576,12 @@
   background-color: #e9ecef;
   color: #495057;
 }
+
 .status-pill--success {
   background-color: #d4edda;
   color: #155724;
 }
+
 .status-pill--warning {
   background-color: #fff3cd;
   color: #856404;
@@ -600,7 +612,7 @@
   font-weight: 500;
 }
 
-@media (min-width: 768px) {
+@media (width >= 768px) {
   .soil-threads-list {
     grid-template-columns: repeat(2, 1fr);
   }

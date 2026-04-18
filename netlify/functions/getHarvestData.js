@@ -57,7 +57,7 @@ exports.handler = async function (event) {
       body: data.choices[0].message.content,
     };
   } catch (err) {
-    console.error('Backend Harvest Error:', err);
+    rror('Backend Harvest Error:', err);
     return { statusCode: 500, body: JSON.stringify({ error: err.message }) };
   }
 };
