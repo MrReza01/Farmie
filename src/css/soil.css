@@ -1,10 +1,7 @@
-/* --- SOIL SECTION SHELL --- */
-
 .view--hidden {
   display: none !important;
 }
 
-/* --- EMPTY STATE --- */
 .soil-empty-state {
   display: flex;
   flex-direction: column;
@@ -37,13 +34,12 @@
 .soil-message {
   font-family: var(--font-body);
   font-size: 1.6rem;
-  color: #6c757d; /* Standard grey for description text */
+  color: #6c757d;
   max-width: 32rem;
   line-height: 1.6;
-  margin-bottom: var(--spacing-xl); /* Pushes the button down */
+  margin-bottom: var(--spacing-xl);
 }
 
-/* --- START SOIL TEST BUTTON --- */
 .btn-start-soil {
   font-family: var(--font-display);
   background-color: var(--color-primary);
@@ -52,10 +48,9 @@
   padding: var(--spacing-md) var(--spacing-lg);
   font-size: 1.6rem;
   font-weight: 600;
-  border-radius: 5rem; /* Pill shape */
+  border-radius: 5rem;
   cursor: pointer;
 
-  /* Shadow uses the rgb equivalent of #2d6a4f */
   box-shadow: 0 0.4rem 1.2rem rgb(45 106 79 / 20%);
   transition: all 0.2s ease;
 }
@@ -69,7 +64,6 @@
 }
 
 .view-soil {
-  /* Ensure the main container can push the action area to the bottom */
   display: flex;
   flex-direction: column;
   height: 100%;
@@ -78,18 +72,16 @@
 
 .soil-action-area {
   position: sticky;
-  bottom: 0; /* Locks it to the bottom of the view */
-  margin-top: auto; /* Pushes it to the bottom even if the list is empty */
+  bottom: 0;
+  margin-top: auto;
   padding: 1.5rem 0;
   background-color: var(--color-surface, #fff);
 
-  /* border-top: 1px solid #dee2e6;  */
-  z-index: 10; /* Ensures it stays above the scrolling cards */
+  z-index: 10;
   display: flex;
   justify-content: center;
 }
 
-/* Ensure the button takes up the full width for easy tapping */
 .soil-action-area .btn-start-soil {
   width: 100%;
   max-width: 350px;
@@ -113,11 +105,10 @@
   width: 100%;
   height: 100dvh;
   background-color: var(--color-surface, #fff);
-  z-index: 2000; /* High enough to cover everything */
+  z-index: 2000;
   display: flex;
   flex-direction: column;
 
-  /* Slide up animation (Strictly no 'transition' used) */
   animation: slideUpModal 0.3s ease-out forwards;
 }
 
@@ -136,7 +127,6 @@
   }
 }
 
-/* --- HEADER --- */
 .method-modal__header {
   padding: 2rem;
   display: flex;
@@ -151,7 +141,6 @@
   color: inherit;
 }
 
-/* --- MAIN CONTENT --- */
 .method-modal__content {
   flex: 1;
   padding: 0 2rem;
@@ -169,7 +158,6 @@
   margin-bottom: 4rem;
 }
 
-/* --- OPTIONS LIST --- */
 .method-options-container {
   display: flex;
   flex-direction: column;
@@ -181,17 +169,16 @@
   display: flex;
   align-items: center;
   width: 100%;
-  min-height: 6rem; /* Taller for a proper card feel */
-  background-color: #f8f9fa; /* Light grey background */
-  border: 2px solid #dee2e6; /* Solid grey border */
-  border-radius: 0.8rem; /* Smooth corners */
+  min-height: 6rem;
+  background-color: #f8f9fa;
+  border: 2px solid #dee2e6;
+  border-radius: 0.8rem;
   text-align: left;
   cursor: pointer;
-  padding: 0 2rem; /* Text padding inside the card */
+  padding: 0 2rem;
   box-sizing: border-box;
 }
 
-/* The circular radio indicator */
 .method-option__indicator {
   display: none;
 }
@@ -201,10 +188,9 @@
   color: #212529;
 }
 
-/* --- SELECTED STATE --- */
 .method-option--selected {
   border-color: var(--color-primary, #2e8b57);
-  background-color: #e8f5e9; /* Very light green tint */
+  background-color: #e8f5e9;
 }
 
 .method-option--selected .method-option__indicator {
@@ -217,9 +203,6 @@
   color: var(--color-primary, #2e8b57);
 }
 
-/* --- LOCATION LINK --- */
-
-/* --- LOCATION LINK --- */
 .method-location-link {
   background: none;
   border: none;
@@ -231,20 +214,17 @@
   text-align: left;
 }
 
-/* --- FOOTER & BUTTON --- */
 .method-modal__footer {
   padding: 2rem;
-  margin-top: auto; /* Pushes the footer to the bottom securely */
+  margin-top: auto;
 }
 
-/* Disabled state for the Continue button */
 .btn-continue-method:disabled {
   opacity: 0.4;
   pointer-events: none;
 }
 
 @media (width >= 768px) {
-  /* Constrain the main content and footer, and center them perfectly */
   .method-modal__content,
   .method-modal__footer {
     max-width: 600px;
@@ -270,7 +250,6 @@
   display: none !important;
 }
 
-/* --- HEADER & BADGES --- */
 .soil-results__header {
   display: flex;
   justify-content: space-between;
@@ -303,7 +282,6 @@
   align-self: flex-start;
 }
 
-/* Specific Badge Color Variations */
 .method-badge--lab-report {
   background-color: #2d6a4f;
 }
@@ -320,7 +298,6 @@
   background-color: #74c69d;
 }
 
-/* Test Again Button */
 .btn-test-again {
   background: none;
   border: 2px solid #ced4da;
@@ -332,7 +309,6 @@
   color: #495057;
 }
 
-/* --- DISCLAIMER --- */
 .soil-results__disclaimer {
   background-color: #fff3cd;
   color: #856404;
@@ -348,10 +324,9 @@
   display: none;
 }
 
-/* --- METRICS ROW --- */
 .soil-results__metrics {
   display: grid;
-  grid-template-columns: 1fr; /* Mobile: Single column */
+  grid-template-columns: 1fr;
   gap: 1.2rem;
   margin-bottom: 2.5rem;
 }
@@ -380,7 +355,6 @@
   color: #212529;
 }
 
-/* Rating Colors (Uses your existing variables) */
 .rating-value--excellent,
 .rating-value--healthy,
 .rating-value--good {
@@ -396,7 +370,6 @@
   color: var(--color-danger, #dc3545);
 }
 
-/* --- SUMMARY & AMENDMENTS --- */
 .results-section-title {
   font-size: 1.8rem;
   margin-bottom: 1.2rem;
@@ -413,11 +386,10 @@
   color: #495057;
 }
 
-/* --- AMENDMENT ROWS --- */
 .amendment-row {
   background-color: #f8f9fa;
   border: 1px solid #dee2e6;
-  border-left: 4px solid var(--color-warning, #ffc107); /* The subtle warning left-border */
+  border-left: 4px solid var(--color-warning, #ffc107);
   border-radius: 0.6rem;
   padding: 1.5rem;
   margin-bottom: 1.2rem;
@@ -447,14 +419,12 @@
   color: #343a40;
 }
 
-/* --- DESKTOP LAYOUT (1200px+) --- */
 @media (width >= 768px) {
   .soil-results__metrics {
-    grid-template-columns: repeat(2, 1fr); /* 2x2 Grid setup */
+    grid-template-columns: repeat(2, 1fr);
     gap: 1.5rem;
   }
 
-  /* Constrain max width of the card on large screens so text is readable */
   .soil-results {
     max-width: 800px;
     margin-left: auto;
@@ -462,25 +432,18 @@
   }
 }
 
-/* =========================================
-   STAGE C4: SOIL THREAD CARDS (DASHBOARD)
-   ========================================= */
-
-/* Hide utility classes */
 .soil-view__empty-state--hidden,
 .soil-threads-list--hidden {
   display: none !important;
 }
 
-/* The List Container */
 .soil-threads-list {
   display: grid;
-  grid-template-columns: 1fr; /* Mobile single column */
+  grid-template-columns: 1fr;
   gap: 1.5rem;
   padding: 1rem 0;
 }
 
-/* --- THE CARD --- */
 .soil-card {
   background-color: #fff;
   border: 1px solid #dee2e6;
@@ -488,29 +451,24 @@
   padding: 1.6rem;
   cursor: pointer;
 
-  /* Strict zero box-shadow rule */
-
-  /* The default left border structure */
   border-left-width: 0.4rem;
   border-left-style: solid;
   margin: 2rem 4rem;
 }
 
-/* Method Accent Colors (Left Border) */
 .soil-card--lab {
   border-left-color: #2d6a4f;
-} /* Lab: Primary Green */
+}
 .soil-card--kit {
   border-left-color: #52b788;
-} /* Kit: Accent Green */
+}
 .soil-card--diy {
   border-left-color: #e76f51;
-} /* DIY: Warm Orange */
+}
 .soil-card--quest {
   border-left-color: #74c69d;
-} /* Quest: Muted Grey-Green */
+}
 
-/* --- CARD HEADER --- */
 .soil-card__header {
   display: flex;
   align-items: center;
@@ -548,7 +506,6 @@
   color: #6c757d;
 }
 
-/* --- CARD BODY & TAGS --- */
 .soil-card__body {
   display: flex;
   flex-direction: column;
@@ -562,7 +519,6 @@
   align-items: center;
 }
 
-/* Reusing your pill style logic, hardcoded here for safety */
 .status-pill {
   font-size: 1.1rem;
   padding: 0.3rem 0.8rem;
@@ -598,7 +554,6 @@
   gap: 0.4rem;
 }
 
-/* --- RESULT SUMMARY (Only visible when completed) --- */
 .soil-card__summary {
   display: flex;
   gap: 1.5rem;

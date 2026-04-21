@@ -128,10 +128,9 @@ class DashboardView {
       if (deleteBtn) {
         const card = e.target.closest('.crop-card');
         if (card) {
-          this.showDeleteModal(card.dataset.id); // This will no longer fail!
+          this.showDeleteModal(card.dataset.id);
         }
 
-        // Hide the dropdown immediately
         document
           .querySelectorAll('.card-menu__dropdown')
           .forEach((d) => d.classList.remove('card-menu__dropdown--active'));
@@ -139,7 +138,6 @@ class DashboardView {
         return;
       }
 
-      // 3. If they click the 3-dot icon, open the menu
       const menuIcon = e.target.closest('.card-menu__icon');
 
       document.querySelectorAll('.card-menu__dropdown').forEach((dropdown) => {

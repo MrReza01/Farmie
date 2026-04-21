@@ -86,7 +86,6 @@ export const getWeatherData = async function (location) {
   try {
     if (!navigator.onLine) throw new Error(`No internet connection!`);
 
-    // Fetch from your secure backend
     const res = await fetch('/.netlify/functions/getWeather', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -354,7 +353,7 @@ export const addCropToDashboard = async function () {
     plantedAt: null,
     harvestAt: null,
     weatherData: { fetchedAt: null, days: [] },
-    bestDays: bestDaysArray, // Injects our dynamically calculated array
+    bestDays: bestDaysArray, // Injects the dynamically calculated array
     plantedOnRecommendedDay: null,
     linkedSoilThreadId: null,
     soilResultsSentToAI: false,
@@ -480,7 +479,9 @@ export const getAIResponse = async function (id, userMessage) {
 export const detectCalendarActivity = function (aiText) {
   const text = aiText.toLowerCase();
   const keywords = [
-    'fertiliser', 'fertilizer', 'irrigation',
+    'fertiliser',
+    'fertilizer',
+    'irrigation',
     'water',
     'pruning',
     'pest',
@@ -614,7 +615,6 @@ export const getHarvestDataFromAI = async function (id) {
   CRITICAL: You must respond in pure JSON format only.
   JSON Format required: { "daysToHarvest": number, "message": "string" }`;
 
-  // 2. Give the AI the data (User)
   const userPrompt = `The user just planted ${crop.crop} in ${crop.location} today (${plantedDate}).
   Did they plant on a recommended weather day? ${crop.plantedOnRecommendedDay ? 'Yes' : 'No'}.
 
@@ -655,7 +655,6 @@ export const getHarvestDataFromAI = async function (id) {
       addedAt: new Date().toISOString(),
     });
 
-    // 3. Save the conversational message
     crop.chatHistory.push({
       role: 'assistant',
       content: aiData.message,

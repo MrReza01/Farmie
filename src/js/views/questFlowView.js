@@ -84,7 +84,7 @@ class QuestFlowView {
 
     const optionsMarkup = currentQ.options
       .map(
-        (opt, index) => `
+        (opt) => `
       <label class="quest-option-card">
         <input type="radio" name="${currentQ.id}" value="${opt.value}" class="quest-radio-input" required>
         <span class="quest-option-label">${opt.label}</span>

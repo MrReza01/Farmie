@@ -58,7 +58,6 @@ class ResultsView {
       setTimeout(() => {
         textEl.textContent = messages[index];
         textEl.classList.remove('loader__text--fade');
-        // Matches the CSS transition duration for smoothness
       }, 300);
     }, 2000);
   }

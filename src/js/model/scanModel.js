@@ -102,14 +102,13 @@ export const addListing = function (listingData) {
   }
 
   const newListing = {
-    // Generates a unique ID using crypto if available, otherwise falls back to timestamp
     id: crypto.randomUUID ? crypto.randomUUID() : Date.now().toString(),
     cropName: listingData.cropName,
     quantity: Number(listingData.quantity),
     unit: listingData.unit,
     price: priceNum,
     location: listingData.location,
-    availability: listingData.availability, // 'now' or 'soon'
+    availability: listingData.availability,
     availableDate:
       listingData.availability === 'soon' ? listingData.availableDate : null,
     discount: discountNum || null,

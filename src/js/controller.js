@@ -445,8 +445,6 @@ const controlCloseLabFlow = function () {
   soilView.toggleDashboardVisibility(true); // Bring the dashboard back
 };
 
-// Handles clicking "Get Recommendations"
-
 // Handles clicking "Back" on the Kit Form
 const controlCloseKitFlow = function () {
   kitFlowView.remove(); // Destroy the form

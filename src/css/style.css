@@ -8,7 +8,7 @@
   width: 100%;
 }
 
-/* =========================================================HEADER ===================================================== */
+/* =========================================HEADER =========================== */
 
 .header {
   background-color: var(--color-background);
@@ -243,7 +243,7 @@ body.is-offline .results-container {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  height: calc(100vh - 60px); /* Assumes your header is roughly 60px tall */
+  height: calc(100vh - 60px);
   padding: 2rem;
   text-align: center;
   background-color: var(--color-white, #fff);
@@ -547,7 +547,6 @@ toast__close:hover {
   transform: scale(0.98);
 }
 
-/* Hidden state — removed by JS when chevron is tapped */
 .btn-add-crop--hidden {
   display: none;
 }
@@ -573,12 +572,6 @@ toast__close:hover {
   outline: 2px solid var(--color-accent);
   outline-offset: 3px;
 }
-
-/* =========================================
-   DATE
-   Targets: <h2 class="summary__date">
-   Shows "Today - DD/MM/YY" or "Monday" etc
-   ========================================= */
 
 .summary__date {
   font-family: var(--font-body);
@@ -640,7 +633,6 @@ toast__close:hover {
   animation: bounce 1.8s infinite ease-in-out;
 }
 
-/* JavaScript adds this class when details are open */
 .btn-toggle-details--expanded i {
   animation: none;
   transform: rotate(180deg);
@@ -836,7 +828,6 @@ toast__close:hover {
   opacity: 0;
 }
 
-/* The three dots */
 .loader__dots {
   display: flex;
   gap: var(--spacing-sm);

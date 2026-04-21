@@ -30,8 +30,8 @@
   width: 5.4rem;
   height: 5.4rem;
   border-radius: 50%;
-  overflow: hidden; /* Ensures the image doesn't break the circle */
-  flex-shrink: 0; /* Prevents the circle from squishing on small screens */
+  overflow: hidden;
+  flex-shrink: 0;
   background-color: #e9ecef;
   margin-left: 1rem;
 }
@@ -39,7 +39,7 @@
 .crop-card__img {
   width: 100%;
   height: 100%;
-  object-fit: cover; /* Centers and scales the Wikipedia image perfectly */
+  object-fit: cover;
 }
 
 .crop-card__fallback-img {
@@ -55,16 +55,13 @@
   font-weight: 700;
 }
 
-/* --- THE RIGHT SIDE: CHAT DETAILS --- */
 .crop-card__content {
   display: flex;
 
-  /* flex-direction: column; */
   justify-content: space-between;
-  align-items: center; /* NEW: Forces flex items to the left */
-  text-align: left; /* NEW: Forces text to the left */
+  align-items: center;
+  text-align: left;
 
-  /* flex-grow: 1; */
   min-width: 0;
   position: relative;
 }
@@ -72,8 +69,8 @@
 .crop-card__info {
   display: flex;
   flex-direction: column;
-  align-items: flex-start; /* Keeps the status tag pinned to the left */
-  flex: 1; /* Forces this column to take up all available left-side space */
+  align-items: flex-start;
+  flex: 1;
   padding-right: 15rem;
 }
 
@@ -84,14 +81,14 @@
   margin: 0 0 0.4rem;
   white-space: nowrap;
   overflow: hidden;
-  text-overflow: ellipsis; /* Adds the "..." if the location is too long */
+  text-overflow: ellipsis;
   text-transform: capitalize;
   width: 100%;
 }
 
 .crop-card__summary {
   font-size: 1.4rem;
-  color: #6c757d; /* Muted gray text, exactly like WhatsApp's message preview */
+  color: #6c757d;
   margin: 0;
   white-space: nowrap;
   overflow: hidden;
@@ -123,18 +120,18 @@
   flex-shrink: 0;
 }
 
-/* ========================================= MENU AND DELETE ICONS =================================================== */
+/* ========================================= MENU AND DELETE ICONS =============================================== */
 .card-menu {
   position: absolute;
-  top: 1.2rem; /* Aligns vertically with the title */
-  right: 1.6rem; /* Pushes it firmly to the right side of the card */
+  top: 1.2rem;
+  right: 1.6rem;
 }
 
 .card-menu__icon {
   font-size: 1.8rem;
   color: #adb5bd;
   cursor: pointer;
-  padding: 0.5rem; /* Makes it easier to tap on mobile */
+  padding: 0.5rem;
   transition: color 0.2s;
 }
 
@@ -185,7 +182,6 @@
   background-color: #ffebee;
 }
 
-/* --- DROPDOWN HEADER & X BUTTON --- */
 .card-menu__dropdown-header {
   display: flex;
   justify-content: flex-end;
@@ -207,33 +203,30 @@
 }
 
 @media (width >= 768px) {
-  /* 1. When active, make the body a flex container to put App and Chat side-by-side */
   body.split-screen-active {
     display: flex;
     flex-direction: row;
-    overflow: hidden; /* Stops double scrollbars */
+    overflow: hidden;
     margin: 0;
     padding: 0;
   }
 
-  /* 2. Turn your entire mobile app into the left sidebar */
   body.split-screen-active .app-container {
     width: 380px;
     min-width: 380px;
     height: 100vh;
     border-right: 1px solid #e9ecef;
     position: relative !important;
-    overflow: hidden !important; /* CRITICAL: Stops the container from scrolling */
+    overflow: hidden !important;
     padding-bottom: 0 !important;
   }
 
   body.split-screen-active .view-dashboard {
     height: 100%;
-    overflow-y: auto !important; /* Lets the crop list scroll */
-    padding-bottom: 8rem !important; /* Ensures the last crop doesn't hide behind the nav */
+    overflow-y: auto !important;
+    padding-bottom: 8rem !important;
   }
 
-  /* 3. Constrain your fixed mobile nav to the sidebar width */
   body.split-screen-active .bottom-nav {
     position: absolute !important;
     bottom: 0 !important;
@@ -242,16 +235,14 @@
     z-index: 999;
   }
 
-  /* 4. Constrain your fixed FAB to the sidebar */
   body.split-screen-active .fab {
     position: absolute !important;
     bottom: 8rem !important;
     right: 2rem !important;
-    left: auto !important; /* Overrides any previous positioning */
-    z-index: 1000; /* 380px width - 50px fab - 20px margin */
+    left: auto !important;
+    z-index: 1000;
   }
 
-  /* 5. The Chat Shell takes over the entire right side */
   body.split-screen-active .chat-container {
     flex: 1;
     height: 100vh;
@@ -265,16 +256,12 @@
 }
 
 @media (width >= 768px) {
-  /* ... your other desktop css ... */
-
-  /* 1. NEW: By default on desktop, the chat container is completely hidden */
   .chat-container {
     display: none;
   }
 
-  /* 2. EXISTING: It ONLY appears when a crop is clicked and this class is added to the body */
   body.split-screen-active .chat-container {
-    display: flex; /* This overrides the 'none' above! */
+    display: flex;
     flex: 1;
     height: 100vh;
     position: static;
@@ -294,25 +281,21 @@
   top: 0;
   left: 0;
   width: 100%;
-  height: 100dvh; /* Uses dynamic viewport height to respect mobile browser bars */
+  height: 100dvh;
   background-color: var(--color-background);
   z-index: 2000;
 
-  /* Flex Architecture */
   display: flex;
   flex-direction: column;
 
-  /* Industry standard: Slide in from the right edge */
   transform: translateX(100%);
   transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
 
-/* Mobile Active State */
 .chat-container--active {
-  transform: translateX(0); /* Snaps it perfectly over the screen */
+  transform: translateX(0);
 }
 
-/* --- 2. THREAD HEADER --- */
 .thread__header {
   display: flex;
   align-items: center;
@@ -328,7 +311,7 @@
   display: flex;
   align-items: center;
   gap: 1.2rem;
-  flex: 1; /* Giving left and right flex:1 keeps the center column perfectly centered */
+  flex: 1;
 }
 
 .thread__header-right {
@@ -340,7 +323,7 @@
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  flex: 2; /* Takes up the most space in the middle */
+  flex: 2;
   text-align: center;
 }
 
@@ -410,7 +393,6 @@
   box-shadow: 0 1rem 3rem rgb(0 0 0 / 10%);
   z-index: 100;
 
-  /* Hidden by default */
   opacity: 0;
   visibility: hidden;
   transform: translateY(-1rem);
@@ -443,7 +425,6 @@
   border-bottom: none;
 }
 
-/* --- 3. THREAD MESSAGES AREA --- */
 .thread__messages {
   flex: 1;
   padding: 2rem;
@@ -454,7 +435,6 @@
   gap: 1.5rem;
 }
 
-/* Message Bubble Base Styles */
 .message {
   max-width: 85%;
   padding: 1.2rem 1.6rem;
@@ -467,15 +447,15 @@
   align-self: flex-start;
   background-color: #e8f5e9;
   color: var(--color-text);
-  border-bottom-left-radius: 0.4rem; /* Gives it a native chat tail */
+  border-bottom-left-radius: 0.4rem;
 }
 
 .message--user {
   align-self: flex-end;
-  background-color: var(--color-surface); /* White */
+  background-color: var(--color-surface);
   color: var(--color-text);
   border: 1px solid #e9ecef;
-  border-bottom-right-radius: 0.4rem; /* Chat tail */
+  border-bottom-right-radius: 0.4rem;
 }
 
 .message--proactive {
@@ -489,9 +469,7 @@
   max-width: 90%;
 }
 
-/* --- TYPING INDICATOR --- */
 .message--typing {
-  /* We use the same base styling as message--ai so it matches Farmie's green bubble */
   align-self: flex-start;
   background-color: #e8f5e9;
   border-bottom-left-radius: 0.4rem;
@@ -508,12 +486,11 @@
 .typing-dots span {
   width: 0.8rem;
   height: 0.8rem;
-  background-color: #1b5e20; /* Dark green to match the text */
+  background-color: #1b5e20;
   border-radius: 50%;
   animation: typingBounce 1.4s infinite ease-in-out both;
 }
 
-/* Delay the animation for the 1st and 2nd dots to create a wave effect */
 .typing-dots span:nth-child(1) {
   animation-delay: -0.32s;
 }
@@ -534,18 +511,17 @@
   }
 }
 
-/* --- CALENDAR PROMPT WIDGET --- */
 .calendar-prompt {
   align-self: flex-start;
   display: flex;
   flex-direction: column;
-  background-color: #fff8e1; /* Soft, warm amber */
+  background-color: #fff8e1;
   border: 1px solid #ffecb3;
   padding: 1.2rem 1.6rem;
   border-radius: 1.2rem;
   max-width: 85%;
   gap: 1.2rem;
-  margin-top: -0.5rem; /* Pulls it slightly closer to the AI bubble above it */
+  margin-top: -0.5rem;
 }
 
 .calendar-prompt__text {
@@ -587,10 +563,9 @@
   border: 1px solid #d7ccc8;
 }
 
-/* --- 4. THREAD INPUT AREA --- */
 .thread__input-bar {
   display: flex;
-  align-items: flex-end; /* Keeps the send button at the bottom if the textarea grows */
+  align-items: flex-end;
   padding: 1.6rem 2rem;
   background-color: var(--color-surface);
   border-top: 1px solid #e9ecef;
@@ -607,8 +582,8 @@
   font-family: inherit;
   outline: none;
   background-color: #f1f3f5;
-  resize: none; /* Stops the user from manually dragging the corner */
-  max-height: 12rem; /* Prevents it from covering the whole screen */
+  resize: none;
+  max-height: 12rem;
   transition:
     border-color 0.2s,
     background-color 0.2s;
@@ -636,7 +611,7 @@
   justify-content: center;
   align-items: center;
   cursor: pointer;
-  flex-shrink: 0; /* Stops the button from shrinking if the text gets long */
+  flex-shrink: 0;
   transition: transform 0.1s;
 }
 
@@ -649,7 +624,6 @@
   cursor: not-allowed;
 }
 
-/* --- 5. DESKTOP SPLIT-SCREEN ADJUSTMENTS --- */
 @media (width >= 768px) {
   body.split-screen-active .btn-thread-back {
     display: none;
@@ -662,7 +636,7 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background-color: #e3f2fd; /* Soft professional blue */
+  background-color: #e3f2fd;
   border: 1px solid #bbdefb;
   color: #1565c0;
   padding: 1rem 1.6rem;
@@ -675,7 +649,7 @@
   display: flex;
   align-items: center;
   gap: 1rem;
-  cursor: pointer; /* Prepares it to be clickable later */
+  cursor: pointer;
 }
 
 .soil-shortcut__icon {
@@ -705,7 +679,6 @@
   opacity: 1;
 }
 
-/* ================================== CONFIRM PLANTING MODAL ========================================= */
 .modal-overlay {
   position: fixed;
   top: 0;
@@ -718,7 +691,6 @@
   justify-content: center;
   align-items: center;
 
-  /* Hidden by default with a smooth fade */
   opacity: 0;
   visibility: hidden;
   transition: all 0.3s ease;
@@ -738,7 +710,6 @@
   text-align: center;
   box-shadow: 0 2rem 4rem rgb(0 0 0 / 20%);
 
-  /* Pop-out animation */
   transform: scale(0.9);
   transition: transform 0.3s cubic-bezier(0.25, 0.8, 0.25, 1);
 }
@@ -806,7 +777,7 @@
   width: 90%;
   max-width: 40rem;
   border-radius: 1.6rem;
-  padding: 3.2rem 2.4rem; /* More breathing room */
+  padding: 3.2rem 2.4rem;
   text-align: center;
   box-shadow: 0 2rem 4rem rgb(0 0 0 / 20%);
   transform: scale(0.9);
@@ -846,14 +817,13 @@
 
 .delete-modal__actions {
   display: flex;
-  gap: 1.6rem; /* Spacing between the two buttons */
+  gap: 1.6rem;
   justify-content: center;
 }
 
-/* Side-by-side button layout */
 .btn-delete-cancel,
 .btn-delete-confirm {
-  flex: 1; /* Makes them equal width */
+  flex: 1;
   padding: 1.4rem;
   border-radius: 3rem;
   font-size: 1.5rem;
@@ -880,5 +850,3 @@
 .btn-delete-confirm:hover {
   background-color: #b71c1c;
 }
-
-/* Forces the chat container to disappear when switching to other tabs */
