@@ -1,108 +1,127 @@
-# 🌿 Farmie - Your Pocket Agronomist
+# 🌿 Farmie AI — Your Pocket Agronomist
 
-Farmie is a world-class agricultural AI assistant designed to empower farmers with data-driven insights. By combining real-time weather data, advanced soil science, and AI-powered computer vision, Farmie helps farmers optimize planting schedules, diagnose crop diseases, and connect with local markets.
+Farmie AI is a precision agriculture web application designed to empower smallholder farmers with data-driven insights. By combining real-time weather data, advanced soil science, AI-powered crop planning, and computer vision, Farmie helps farmers optimise planting schedules, diagnose crop diseases, manage soil health, and connect with local buyers — all from their mobile device.
+
+---
 
 ## 🚀 Key Features
 
 ### 📅 AI Planting Plans
 
-- **Weather-Driven Insights:** Fetches 5-day forecasts via OpenWeather API.
-- **AI Verdicts:** Utilizes Llama-based AI models to analyze weather conditions and provide "Success," "Warning," or "Danger" verdicts for planting.
-- **Smart Scheduling:** Automatically suggests the best days to plant within a 5-day window.
+- Fetches 5-day weather forecasts via the OpenWeather API using a two-step geocoding flow
+- AI analyses weather conditions and generates planting verdicts — Optimal, Warning, or Not Recommended — for each day
+- Automatically identifies the best days to plant within the 5-day window
+- Results presented as a scrollable day-by-day report with colour-coded badges
 
-### 💬 Smart Agricultural Chat
+### 💬 Smart Crop Chat (WhatsApp-Style)
 
-- **Context-Aware Advice:** Chat with "Farmie" for specific crop care tips.
-- **Proactive Reminders:** The AI detects mentions of activities (e.g., "irrigation tomorrow") and prompts users to add them to a **Saved Schedule**.
-- **Lifecycle Tracking:** Transition crops from "Planning" to "Planted" to "Harvesting" with dynamic AI-calculated harvest dates.
+- Each crop plan creates a persistent chat thread with an AI farming advisor
+- Context-aware responses based on the crop, location, and weather data
+- Proactive AI messages triggered by app events — planting confirmations, expiry warnings, soil results, harvest reminders
+- Confirm Planting flow with automatic harvest date calculation
+- Crop threads auto-expire after 5 days if planting is not confirmed
+- Per-thread calendar tracking farm activities, soil tests, and harvest milestones
 
 ### 🧪 Soil Analysis & Health
 
-Comprehensive soil management through four distinct testing methods:
+Four testing methods with AI-generated amendment recommendations:
 
-- **Lab Report:** Input professional chemical analysis data.
-- **Basic Test Kit:** Color-strip based nutrient tracking.
-- **DIY Tests:** Guided manual tests (Jar Test, Vinegar/Baking Soda pH test).
-- **Questionnaire:** Observational estimates for equipment-free analysis.
-- **AI Amendments:** Receive specific organic and conventional amendment recommendations tailored to your soil type.
+- **Lab Report** — Input professional chemical analysis data including pH, NPK, Calcium, Magnesium, Sulphur, EC, and soil texture
+- **Basic Test Kit** — Colour-strip based nutrient input
+- **DIY Tests** — Five guided physical tests: Vinegar/Baking Soda pH test, Jar Texture test, Earthworm Count, Drainage/Percolation test, and Squeeze test
+- **Questionnaire** — Observational estimates for farmers with no equipment
+- Soil results automatically sent to the linked crop chat for AI interpretation
+- Soil test history with pH trend tracking over time
 
-### 🔍 Plant Diagnosis (AI Vision)
+### 🔍 Plant Disease Diagnosis (AI Vision)
 
-- **Disease Identification:** Upload photos of plants to identify pests, diseases, or nutrient deficiencies using Groq Vision models.
-- **Treatment Protocols:** Receive step-by-step organic and conventional treatment steps.
-- **Scan History:** Maintain a local database of previous diagnoses to track farm health over time.
+- Upload a photo of an affected plant for instant AI-powered diagnosis
+- Identifies diseases, pests, and nutrient deficiencies using Groq Vision (Llama-4-Scout)
+- Returns disease name, severity rating, spread risk, plain English explanation, and step-by-step treatment plans
+- Organic and Conventional treatment options presented as an accordion
+- Full diagnosis history saved locally for future reference
 
 ### 🛒 Agricultural Marketplace
 
-- **Farmer View:** Easily list produce with automatic discount calculation and Wikipedia-enriched imagery.
-- **Buyer View:** Searchable local marketplace for buyers to find fresh produce and contact farmers directly.
+- **Farmer View** — Create crop listings with automatic discount calculation and Wikipedia-enriched crop imagery
+- **Buyer View** — Searchable 2x2 grid marketplace for buyers to browse available and upcoming produce
+- Toggle switch switches between Farmer and Buyer perspectives
+- Listings persist in the browser for demo purposes
+
+---
 
 ## 🛠️ Tech Stack
 
-- **Frontend:** Vanilla JavaScript (ES6+), HTML5, CSS3.
-- **Architecture:** Model-View-Controller (MVC).
-- **Backend:** Netlify Functions (Serverless Node.js) for secure API handling.
-- **AI Integration:** Groq API (Llama 3.1 & Llama-4-Scout).
-- **External APIs:** OpenWeather (Weather data), Wikipedia (Dynamic crop imagery).
-- **Persistence:** Browser LocalStorage for offline-first dashboard capabilities.
+Layer  
+ Frontend ========= Vanilla JavaScript (ES6+), HTML5, CSS3
+
+Architecture ========= Model-View-Controller (MVC) with ES6 Modules
+
+Bundler ======== Parcel
+
+Backend ============= Netlify Serverless Functions
+
+AI — Chat & Soil =========== Groq API (Llama 3.1)
+
+AI — Vision/Scan =========== Groq API (Llama-4-Scout)
+
+Weather ========== OpenWeather API (Geocoding + Forecast)
+
+Crop Images ============ Wikipedia REST API
+
+Image Compression ========== browser-image-compression
+
+Persistence ================= Browser LocalStorage
+
+| Deployment ================= Netlify
 
 ## 🏗️ Architecture Overview
 
-The project follows a strict **MVC (Model-View-Controller)** pattern:
+Farmie AI follows a strict **MVC (Model-View-Controller)** pattern with ES6 modules:
 
-1.  **Model (`model.js`, `scanModel.js`):** Manages the application state, data logic, and all API communications.
-2.  **View (`views/`):** Handles DOM manipulation, event listening, and UI rendering. Each component (Chat, Soil, Market, etc.) has its own dedicated View class.
-3.  **Controller (`controller.js`):** The "brain" of the app that handles user input from the Views and updates the Model, and vice versa.
+**Model (`src/js/model/`)**
+Manages all application state, data logic, LocalStorage operations, and API communications. Split into dedicated modules:
+
+- `scanModel.js` — Scan history management
+- `model.js` — Central re-export hub
+
+**View (`src/js/views/`)**
+Handles all DOM manipulation, event listening, and UI rendering. Each section has its own dedicated View file.
+
+**Controller (`src/js/controller.js`)**
+Orchestrates the application — receives events from Views, calls Model functions, and instructs Views to re-render.
+
+**Netlify Functions (`netlify/functions/`)**
+Serverless Node.js functions that act as a secure proxy between the frontend and third-party APIs. API keys never touch the browser.
 
 ## 💻 Getting Started
 
 ### Prerequisites
 
-- A Netlify account (for serverless functions).
-- API Keys for:
-  - Groq
-  - OpenWeather
+- Node.js (v18 or higher)
+- A Netlify account
+- API keys for Groq and OpenWeather
 
-  ```
+### Installation
 
-  ```
+1. Clone the repository and install dependencies:
 
-2.  Install the Netlify CLI:
-    ```bash
-    npm install netlify-cli -g
-    ```
-3.  Create a `.env` file in the root directory:
-    ```env
-    GROQ_API_KEY=your_groq_key
-    OPENWEATHER_API_KEY=your_weather_key
-    ```
-4.  Run the project locally:
-    ```bash
-    netlify dev
-    ```
+git clone https://github.com/your-username/Farmie.git
 
-## 📂 File Structure
+npm install
 
-```text
-src/
-├── js/
-│   ├── model/         # Data handling & API logic
-│   ├── views/         # UI Components & Event Listeners
-│   └── controller.js  # App orchestration
-├── css/               # Modular stylesheets
-└── netlify/
-    └── functions/     # Serverless AI & Weather bridge
-```
+2. Install the Netlify CLI:
 
-## 📜 License
+npm install netlify-cli -g
 
-This project is licensed under the MIT License - see the LICENSE file for details.
+3. Create a .env file in the root directory:
 
----
+GROQ_API_KEY=your_groq_api_key
+OPENWEATHER_API_KEY=your_openweather_api_key
 
-_Built to grow the future, one crop at a time._
+4. Run the project locally:
+   netlify dev
 
-```
+The app will be available at `http://localhost:8888`
 
-
-```
+All third-party API keys are stored as Netlify environment variables and never exposed in client-side code. The browser communicates only with Netlify serverless functions which act as a secure proxy to Groq and OpenWeather.

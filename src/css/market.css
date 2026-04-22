@@ -136,6 +136,8 @@ input:checked + .slider::before {
   gap: var(--spacing-md);
 }
 
+/* ===================== */
+
 .market-form input[type='text'],
 .market-form input[type='number'],
 .market-form input[type='date'],
@@ -144,7 +146,7 @@ input:checked + .slider::before {
   width: 100%;
   height: 4.8rem;
   padding: 0 var(--spacing-md);
-  border: 1.5px solid rgb(27 27 27 / 18%);
+  border: 1.5px solid rgba(27, 27, 27, 0.18);
   border-radius: 1rem;
   background-color: var(--color-background);
   font-family: var(--font-body);
@@ -163,20 +165,22 @@ input:checked + .slider::before {
 .market-form select:focus,
 .market-form textarea:focus {
   border-color: var(--color-primary);
-  box-shadow: 0 0 0 3px rgb(45 106 79 / 12%);
+  box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.12);
 }
 
 .market-form input::placeholder,
 .market-form textarea::placeholder {
-  color: rgb(27 27 27 / 35%);
+  color: rgba(27, 27, 27, 0.35);
 }
 
 .market-form input.input--error,
 .market-form select.input--error,
 .market-form textarea.input--error {
   border-color: var(--color-danger);
-  box-shadow: 0 0 0 3px rgb(217 4 41 / 10%);
+  box-shadow: 0 0 0 3px rgba(217, 4, 41, 0.1);
 }
+
+/* ====================== */
 
 .input-group {
   display: flex;
@@ -770,4 +774,31 @@ input:checked + .slider::before {
   width: 100%;
   height: 100%;
   object-fit: cover;
+}
+
+/* =========================================
+   THE ISOLATION FIX (FOR TEXT INPUTS ONLY) 
+   ========================================= */
+.isolated-text-input {
+  width: 100%;
+  height: 4.8rem;
+  padding: 0 1.5rem;
+  border: 1.5px solid rgba(27, 27, 27, 0.18);
+
+  border-radius: 1rem;
+  background-color: #ffffff;
+  font-family: inherit;
+  font-size: 1.5rem;
+  color: #333333;
+  outline: none;
+  appearance: none;
+}
+
+.isolated-text-input:focus {
+  border-color: var(--color-primary);
+  box-shadow: 0 0 0 3px rgba(45, 106, 79, 0.12);
+}
+
+.isolated-text-input::placeholder {
+  color: #a0a0a0;
 }
